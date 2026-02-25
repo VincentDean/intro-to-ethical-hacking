@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ethical Hacking — Course Home</title>
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=DM+Sans:ital,wght@0,300;0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:       #080e17;
+    --surface:  #0d1820;
+    --card:     #111d29;
+    --border:   #1e3048;
+    --navy:     #0d2137;
+    --slate:    #2a5080;
+    --sky:      #4a9eca;
+    --frost:    #a8d4ec;
+    --white:    #e8f4fc;
+    --dim:      #5a7a96;
+    --accent:   #e84855;
+    --green:    #27c06a;
+    --amber:    #f0a030;
+    --mono:     'Share Tech Mono', monospace;
+    --sans:     'DM Sans', sans-serif;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: var(--sans);
+    background: var(--bg);
+    color: var(--white);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ── GRID BACKGROUND ── */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(74,158,202,0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(74,158,202,0.04) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ── SCAN LINE ANIMATION ── */
+  body::after {
+    content: '';
+    position: fixed;
+    top: -100%;
+    left: 0;
+    right: 0;
+    height: 200%;
+    background: linear-gradient(transparent 49.5%, rgba(74,158,202,0.03) 50%, transparent 50.5%);
+    background-size: 100% 4px;
+    animation: scan 8s linear infinite;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  @keyframes scan {
+    0%   { transform: translateY(0); }
+    100% { transform: translateY(50%); }
+  }
+
+  /* ── HEADER ── */
+  header {
+    position: relative;
+    z-index: 10;
+    padding: 64px 32px 48px;
+    max-width: 960px;
+    margin: 0 auto;
+    text-align: center;
+  }
+
+  .header-eyebrow {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--sky);
+    margin-bottom: 20px;
+    opacity: 0;
+    animation: fadeUp 0.6s ease 0.1s forwards;
+  }
+
+  .header-eyebrow::before,
+  .header-eyebrow::after {
+    content: '──';
+    margin: 0 12px;
+    opacity: 0.4;
+  }
+
+  .header-title {
+    font-family: var(--mono);
+    font-size: clamp(32px, 5vw, 56px);
+    font-weight: 400;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    color: var(--white);
+    margin-bottom: 16px;
+    opacity: 0;
+    animation: fadeUp 0.6s ease 0.25s forwards;
+  }
+
+  .header-title span {
+    color: var(--accent);
+  }
+
+  .header-sub {
+    font-size: 18px;
+    color: var(--dim);
+    font-weight: 300;
+    max-width: 480px;
+    margin: 0 auto 36px;
+    line-height: 1.6;
+    opacity: 0;
+    animation: fadeUp 0.6s ease 0.4s forwards;
+  }
+
+  /* ── STATS ROW ── */
+  .stats-row {
+    display: flex;
+    justify-content: center;
+    gap: 0;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+    max-width: 600px;
+    margin: 0 auto;
+    opacity: 0;
+    animation: fadeUp 0.6s ease 0.55s forwards;
+  }
+
+  .stat {
+    flex: 1;
+    padding: 16px 20px;
+    border-right: 1px solid var(--border);
+    text-align: center;
+  }
+
+  .stat:last-child { border-right: none; }
+
+  .stat-value {
+    font-family: var(--mono);
+    font-size: 22px;
+    color: var(--sky);
+    display: block;
+  }
+
+  .stat-label {
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--dim);
+    margin-top: 3px;
+    display: block;
+  }
+
+  /* ── MAIN ── */
+  main {
+    position: relative;
+    z-index: 10;
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 0 32px 80px;
+  }
+
+  /* ── SECTION LABEL ── */
+  .section-label {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--dim);
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .section-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  /* ── UNIT BLOCKS ── */
+  .units-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 16px;
+    margin-bottom: 56px;
+  }
+
+  .unit-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.4s ease, transform 0.4s ease, border-color 0.2s, box-shadow 0.2s;
+  }
+
+  .unit-card.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .unit-card:hover {
+    border-color: var(--slate);
+    box-shadow: 0 0 24px rgba(74,158,202,0.08);
+  }
+
+  .unit-weeks {
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--sky);
+    margin-bottom: 8px;
+  }
+
+  .unit-title {
+    font-size: 17px;
+    font-weight: 700;
+    color: var(--white);
+    margin-bottom: 6px;
+  }
+
+  .unit-desc {
+    font-size: 15px;
+    color: var(--dim);
+    line-height: 1.5;
+  }
+
+  /* ── LESSONS TABLE ── */
+  .lessons-section {
+    margin-bottom: 56px;
+  }
+
+  .lesson-row {
+    display: grid;
+    grid-template-columns: 90px 1fr auto;
+    align-items: center;
+    gap: 16px;
+    padding: 14px 18px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    margin-bottom: 8px;
+    background: var(--card);
+    text-decoration: none;
+    color: inherit;
+    transition: border-color 0.2s, background 0.2s, transform 0.15s;
+    opacity: 0;
+    transform: translateX(-12px);
+  }
+
+  .lesson-row.visible {
+    opacity: 1;
+    transform: translateX(0);
+  }
+
+  .lesson-row:hover {
+    border-color: var(--sky);
+    background: #142030;
+    transform: translateX(4px);
+  }
+
+  .lesson-row.locked {
+    opacity: 0.4;
+    pointer-events: none;
+    cursor: default;
+  }
+
+  .lesson-week {
+    font-family: var(--mono);
+    font-size: 14px;
+    color: var(--sky);
+    white-space: nowrap;
+  }
+
+  .lesson-info {}
+
+  .lesson-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--white);
+    margin-bottom: 2px;
+  }
+
+  .lesson-meta {
+    font-size: 14px;
+    color: var(--dim);
+  }
+
+  .lesson-status {
+    font-family: var(--mono);
+    font-size: 11px;
+    padding: 4px 10px;
+    border-radius: 20px;
+    white-space: nowrap;
+    letter-spacing: 0.05em;
+  }
+
+  .status-live {
+    background: rgba(39,192,106,0.12);
+    color: var(--green);
+    border: 1px solid rgba(39,192,106,0.3);
+  }
+
+  .status-soon {
+    background: rgba(240,160,48,0.10);
+    color: var(--amber);
+    border: 1px solid rgba(240,160,48,0.25);
+  }
+
+  .status-locked {
+    background: rgba(90,122,150,0.1);
+    color: var(--dim);
+    border: 1px solid var(--border);
+  }
+
+  /* ── TEAMS ── */
+  .teams-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin-bottom: 56px;
+  }
+
+  .team-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px 16px;
+    text-align: center;
+    opacity: 0;
+    transform: translateY(16px);
+    transition: opacity 0.4s ease, transform 0.4s ease, border-color 0.2s;
+  }
+
+  .team-card.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .team-card:hover {
+    border-color: var(--slate);
+  }
+
+  .team-sigil {
+    font-family: var(--mono);
+    font-size: 28px;
+    margin-bottom: 10px;
+    display: block;
+    filter: drop-shadow(0 0 8px currentColor);
+  }
+
+  .team-ghost  .team-sigil { color: #9ab0c8; }
+  .team-shadow .team-sigil { color: #7a6fa5; }
+  .team-fantom .team-sigil { color: #4a9eca; }
+  .team-cipher .team-sigil { color: #27c06a; }
+
+  .team-name {
+    font-family: var(--mono);
+    font-size: 15px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--white);
+  }
+
+  /* ── FOOTER ── */
+  footer {
+    position: relative;
+    z-index: 10;
+    text-align: center;
+    padding: 24px 32px 40px;
+    border-top: 1px solid var(--border);
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--dim);
+    letter-spacing: 0.1em;
+  }
+
+  footer span { color: var(--sky); }
+
+  /* ── ANIMATIONS ── */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(14px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 600px) {
+    header { padding: 40px 20px 32px; }
+    main   { padding: 0 20px 60px; }
+    .teams-grid { grid-template-columns: repeat(2, 1fr); }
+    .lesson-row { grid-template-columns: 70px 1fr; }
+    .lesson-status { display: none; }
+    .stats-row { flex-wrap: wrap; }
+  }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+  <div class="header-eyebrow">Ethical Hacking</div>
+  <h1 class="header-title">Course <span>Home</span></h1>
+  <p class="header-sub">An 18-week practitioner course in authorized security testing, network analysis, and professional reporting.</p>
+
+  <div class="stats-row">
+    <div class="stat">
+      <span class="stat-value">18</span>
+      <span class="stat-label">Weeks</span>
+    </div>
+    <div class="stat">
+      <span class="stat-value">80</span>
+      <span class="stat-label">Min / Day</span>
+    </div>
+    <div class="stat">
+      <span class="stat-value">4</span>
+      <span class="stat-label">Teams</span>
+    </div>
+    <div class="stat">
+      <span class="stat-value">Kali</span>
+      <span class="stat-label">Platform</span>
+    </div>
+  </div>
+</header>
+
+<main>
+
+  <!-- UNITS -->
+  <div class="section-label">Course Units</div>
+  <div class="units-grid">
+    <div class="unit-card">
+      <div class="unit-weeks">Week 0</div>
+      <div class="unit-title">Lab Setup & Foundations</div>
+      <div class="unit-desc">Kali Linux orientation, CLI fundamentals, ethics agreement, and air-gap verification.</div>
+    </div>
+    <div class="unit-card">
+      <div class="unit-weeks">Weeks 1–3</div>
+      <div class="unit-title">Network Discovery</div>
+      <div class="unit-desc">Host identification, port scanning, service enumeration, and live traffic capture.</div>
+    </div>
+    <div class="unit-card">
+      <div class="unit-weeks">Weeks 4–6</div>
+      <div class="unit-title">Vulnerability Analysis</div>
+      <div class="unit-desc">Cross-platform risk identification, impact ranking, and professional reporting.</div>
+    </div>
+    <div class="unit-card">
+      <div class="unit-weeks">Weeks 7–9</div>
+      <div class="unit-title">Controlled Exploitation</div>
+      <div class="unit-desc">Validating vulnerabilities in approved lab systems. Midterm practical exam.</div>
+    </div>
+    <div class="unit-card">
+      <div class="unit-weeks">Weeks 10–12</div>
+      <div class="unit-title">Advanced System Analysis</div>
+      <div class="unit-desc">Deeper cross-platform behavior analysis and comparative enterprise reporting.</div>
+    </div>
+    <div class="unit-card">
+      <div class="unit-weeks">Weeks 13–15</div>
+      <div class="unit-title">Incident Response & Forensics</div>
+      <div class="unit-desc">Log analysis, timeline reconstruction, and evidence handling.</div>
+    </div>
+    <div class="unit-card">
+      <div class="unit-weeks">Weeks 16–18</div>
+      <div class="unit-title">Capstone & CTF</div>
+      <div class="unit-desc">Full enterprise penetration test simulation and final Capture-the-Flag competition.</div>
+    </div>
+  </div>
+
+  <!-- LESSON PLANS -->
+  <div class="section-label">Lesson Plans</div>
+  <div class="lessons-section">
+
+    <a class="lesson-row" href="week3_lesson_plan.html">
+      <div class="lesson-week">Week 3</div>
+      <div class="lesson-info">
+        <div class="lesson-title">Network Scanning &amp; Enumeration Basics</div>
+        <div class="lesson-meta">Nmap · Wireshark · Port scanning · Traffic capture</div>
+      </div>
+      <div class="lesson-status status-live">Live</div>
+    </a>
+
+    <div class="lesson-row locked">
+      <div class="lesson-week">Week 4</div>
+      <div class="lesson-info">
+        <div class="lesson-title">Vulnerability Analysis — Introduction</div>
+        <div class="lesson-meta">Coming soon</div>
+      </div>
+      <div class="lesson-status status-locked">Locked</div>
+    </div>
+
+    <div class="lesson-row locked">
+      <div class="lesson-week">Week 5</div>
+      <div class="lesson-info">
+        <div class="lesson-title">Cross-Platform Risk Identification</div>
+        <div class="lesson-meta">Coming soon</div>
+      </div>
+      <div class="lesson-status status-locked">Locked</div>
+    </div>
+
+    <div class="lesson-row locked">
+      <div class="lesson-week">Week 6</div>
+      <div class="lesson-info">
+        <div class="lesson-title">Risk Prioritization &amp; Reporting</div>
+        <div class="lesson-meta">Coming soon</div>
+      </div>
+      <div class="lesson-status status-locked">Locked</div>
+    </div>
+
+  </div>
+
+  <!-- TEAMS -->
+  <div class="section-label">Teams</div>
+  <div class="teams-grid">
+    <div class="team-card team-ghost">
+      <span class="team-sigil">◈</span>
+      <div class="team-name">Ghost</div>
+    </div>
+    <div class="team-card team-shadow">
+      <span class="team-sigil">◉</span>
+      <div class="team-name">Elite</div>
+    </div>
+    <div class="team-card team-fantom">
+      <span class="team-sigil">◆</span>
+      <div class="team-name">Fantom</div>
+    </div>
+    <div class="team-card team-cipher">
+      <span class="team-sigil">⬡</span>
+      <div class="team-name">Cipher</div>
+    </div>
+  </div>
+
+</main>
+
+<footer>
+  <span>Ethical Hacking</span> &nbsp;·&nbsp; Air-gapped Kali Linux Lab &nbsp;·&nbsp; All activities authorized
+</footer>
+
+<script>
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach((entry, i) => {
+      if (entry.isIntersecting) {
+        setTimeout(() => entry.target.classList.add('visible'), i * 60);
+      }
+    });
+  }, { threshold: 0.08 });
+
+  document.querySelectorAll('.unit-card, .team-card, .lesson-row').forEach(el => observer.observe(el));
+</script>
+
+</body>
+</html>
