@@ -1,0 +1,961 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nmap Quiz — Week 3</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy:    #0d1b2a;
+    --ink:     #1c2e40;
+    --steel:   #2e4d6e;
+    --slate:   #4a6fa5;
+    --sky:     #7eb8d4;
+    --frost:   #d0e8f2;
+    --paper:   #f4f7fa;
+    --white:   #ffffff;
+    --accent:  #e84855;
+    --green:   #2a9d50;
+    --green-bg:#e8f8ee;
+    --amber:   #e8a020;
+    --amber-bg:#fff5e6;
+    --mono:    'IBM Plex Mono', monospace;
+    --sans:    'IBM Plex Sans', sans-serif;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: var(--sans);
+    background: var(--paper);
+    color: var(--ink);
+    min-height: 100vh;
+  }
+
+  /* ── PROGRESS BAR ── */
+  .progress-bar {
+    position: fixed;
+    top: 0; left: 0;
+    height: 3px;
+    background: var(--accent);
+    z-index: 999;
+    transition: width 0.3s ease;
+  }
+
+  /* ── HEADER ── */
+  header {
+    background: var(--navy);
+    color: var(--white);
+    border-bottom: 3px solid var(--accent);
+    box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+  }
+
+  .header-inner {
+    max-width: 820px;
+    margin: 0 auto;
+    padding: 14px 32px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    flex-wrap: wrap;
+  }
+
+  .header-back {
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--sky);
+    text-decoration: none;
+    border: 1px solid var(--steel);
+    padding: 4px 10px;
+    border-radius: 3px;
+    white-space: nowrap;
+    transition: border-color 0.15s, color 0.15s;
+  }
+
+  .header-back:hover { border-color: var(--sky); color: var(--white); }
+
+  .header-title {
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    flex: 1;
+  }
+
+  .header-badge {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--sky);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .header-badge::before {
+    content: '';
+    display: inline-block;
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--sky);
+    opacity: 0.7;
+  }
+
+  /* ── MAIN ── */
+  main {
+    max-width: 820px;
+    margin: 0 auto;
+    padding: 40px 32px 80px;
+  }
+
+  /* ── INTRO SCREEN ── */
+  #screen-intro {
+    text-align: center;
+    padding: 24px 0;
+  }
+
+  .intro-icon {
+    font-family: var(--mono);
+    font-size: 48px;
+    color: var(--sky);
+    display: block;
+    margin-bottom: 20px;
+    line-height: 1;
+  }
+
+  .intro-title {
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--navy);
+    letter-spacing: -0.02em;
+    margin-bottom: 10px;
+  }
+
+  .intro-sub {
+    font-size: 15px;
+    color: var(--slate);
+    line-height: 1.6;
+    max-width: 480px;
+    margin: 0 auto 28px;
+  }
+
+  .intro-meta {
+    display: flex;
+    justify-content: center;
+    gap: 0;
+    border: 1px solid #dce8f0;
+    border-radius: 10px;
+    overflow: hidden;
+    max-width: 400px;
+    margin: 0 auto 32px;
+    background: var(--white);
+  }
+
+  .intro-stat {
+    flex: 1;
+    padding: 14px 16px;
+    border-right: 1px solid #dce8f0;
+    text-align: center;
+  }
+
+  .intro-stat:last-child { border-right: none; }
+
+  .intro-stat-val {
+    font-family: var(--mono);
+    font-size: 20px;
+    color: var(--navy);
+    display: block;
+    font-weight: 600;
+  }
+
+  .intro-stat-lbl {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--slate);
+    display: block;
+    margin-top: 2px;
+  }
+
+  /* ── BUTTONS ── */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-family: var(--mono);
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    padding: 12px 28px;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+    transition: background 0.15s, transform 0.1s;
+    text-decoration: none;
+  }
+
+  .btn:active { transform: scale(0.97); }
+
+  .btn-primary {
+    background: var(--navy);
+    color: var(--sky);
+  }
+
+  .btn-primary:hover { background: var(--steel); }
+
+  .btn-outline {
+    background: transparent;
+    color: var(--slate);
+    border: 1px solid #dce8f0;
+  }
+
+  .btn-outline:hover { border-color: var(--slate); color: var(--ink); }
+
+  /* ── QUIZ SCREEN ── */
+  #screen-quiz { display: none; }
+
+  .quiz-progress-row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 24px;
+  }
+
+  .quiz-counter {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--slate);
+    white-space: nowrap;
+  }
+
+  .quiz-bar-track {
+    flex: 1;
+    height: 6px;
+    background: var(--frost);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+
+  .quiz-bar-fill {
+    height: 100%;
+    background: var(--slate);
+    border-radius: 3px;
+    transition: width 0.35s ease;
+  }
+
+  .quiz-score-live {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--green);
+    white-space: nowrap;
+  }
+
+  /* ── QUESTION CARD ── */
+  .question-card {
+    background: var(--white);
+    border: 1px solid #dce8f0;
+    border-radius: 12px;
+    overflow: hidden;
+  }
+
+  .question-header {
+    background: var(--navy);
+    padding: 20px 24px;
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+  }
+
+  .question-num {
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--sky);
+    background: rgba(126,184,212,0.15);
+    border: 1px solid rgba(126,184,212,0.3);
+    padding: 3px 10px;
+    border-radius: 20px;
+    white-space: nowrap;
+    margin-top: 2px;
+    flex-shrink: 0;
+  }
+
+  .question-text {
+    font-size: 17px;
+    font-weight: 600;
+    color: var(--white);
+    line-height: 1.45;
+  }
+
+  .question-text code {
+    font-family: var(--mono);
+    font-size: 14px;
+    background: rgba(126,184,212,0.2);
+    color: var(--sky);
+    padding: 2px 7px;
+    border-radius: 4px;
+  }
+
+  /* ── ANSWER OPTIONS ── */
+  .answers-list {
+    padding: 20px 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .answer-btn {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    padding: 14px 18px;
+    border: 1.5px solid #dce8f0;
+    border-radius: 8px;
+    background: var(--paper);
+    cursor: pointer;
+    text-align: left;
+    width: 100%;
+    font-family: var(--sans);
+    font-size: 14px;
+    color: var(--ink);
+    line-height: 1.45;
+    transition: border-color 0.15s, background 0.15s;
+  }
+
+  .answer-btn:hover:not(:disabled) {
+    border-color: var(--slate);
+    background: var(--white);
+  }
+
+  .answer-btn:disabled { cursor: default; }
+
+  .answer-letter {
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--slate);
+    background: var(--frost);
+    width: 24px; height: 24px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    transition: background 0.15s, color 0.15s;
+  }
+
+  .answer-btn code {
+    font-family: var(--mono);
+    font-size: 12px;
+    background: var(--navy);
+    color: var(--sky);
+    padding: 1px 6px;
+    border-radius: 3px;
+  }
+
+  /* States after answering */
+  .answer-btn.correct {
+    border-color: var(--green);
+    background: var(--green-bg);
+  }
+
+  .answer-btn.correct .answer-letter {
+    background: var(--green);
+    color: var(--white);
+  }
+
+  .answer-btn.wrong {
+    border-color: var(--accent);
+    background: #fef0f1;
+  }
+
+  .answer-btn.wrong .answer-letter {
+    background: var(--accent);
+    color: var(--white);
+  }
+
+  .answer-btn.dimmed {
+    opacity: 0.4;
+  }
+
+  /* ── FEEDBACK ── */
+  .feedback-box {
+    margin: 0 24px 20px;
+    padding: 14px 18px;
+    border-radius: 8px;
+    font-size: 14px;
+    line-height: 1.5;
+    display: none;
+    gap: 12px;
+    align-items: flex-start;
+  }
+
+  .feedback-box.show { display: flex; }
+
+  .feedback-correct { background: var(--green-bg); border-left: 4px solid var(--green); }
+  .feedback-wrong   { background: #fef0f1;         border-left: 4px solid var(--accent); }
+
+  .feedback-icon { font-size: 18px; flex-shrink: 0; }
+
+  .feedback-box strong {
+    display: block;
+    font-weight: 700;
+    margin-bottom: 3px;
+    color: var(--ink);
+  }
+
+  .feedback-box p { margin: 0; color: var(--steel); font-size: 13px; }
+
+  .feedback-box code {
+    font-family: var(--mono);
+    font-size: 11px;
+    background: var(--navy);
+    color: var(--sky);
+    padding: 2px 6px;
+    border-radius: 3px;
+  }
+
+  /* ── NEXT BUTTON ROW ── */
+  .quiz-actions {
+    padding: 0 24px 24px;
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+  }
+
+  /* ── RESULTS SCREEN ── */
+  #screen-results {
+    display: none;
+    text-align: center;
+    padding: 12px 0;
+  }
+
+  .results-badge {
+    width: 100px; height: 100px;
+    border-radius: 50%;
+    background: var(--navy);
+    color: var(--sky);
+    font-family: var(--mono);
+    font-size: 28px;
+    font-weight: 600;
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 20px;
+    border: 3px solid var(--slate);
+  }
+
+  .results-title {
+    font-size: 26px;
+    font-weight: 700;
+    color: var(--navy);
+    letter-spacing: -0.02em;
+    margin-bottom: 8px;
+  }
+
+  .results-sub {
+    font-size: 15px;
+    color: var(--slate);
+    margin-bottom: 28px;
+    line-height: 1.5;
+  }
+
+  /* ── REVIEW LIST ── */
+  .review-list {
+    text-align: left;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 32px;
+  }
+
+  .review-item {
+    background: var(--white);
+    border: 1px solid #dce8f0;
+    border-radius: 8px;
+    padding: 14px 16px;
+    display: grid;
+    grid-template-columns: 24px 1fr;
+    gap: 12px;
+    align-items: flex-start;
+  }
+
+  .review-item.ri-correct { border-left: 4px solid var(--green); }
+  .review-item.ri-wrong   { border-left: 4px solid var(--accent); }
+
+  .review-icon { font-size: 16px; margin-top: 1px; }
+
+  .review-q {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--ink);
+    margin-bottom: 4px;
+    line-height: 1.4;
+  }
+
+  .review-q code {
+    font-family: var(--mono);
+    font-size: 11px;
+    background: var(--navy);
+    color: var(--sky);
+    padding: 1px 5px;
+    border-radius: 3px;
+  }
+
+  .review-answer {
+    font-size: 12px;
+    color: var(--slate);
+    line-height: 1.4;
+  }
+
+  .review-answer .correct-ans { color: var(--green); font-weight: 600; }
+  .review-answer .your-ans    { color: var(--accent); }
+
+  .review-answer code {
+    font-family: var(--mono);
+    font-size: 11px;
+    background: var(--navy);
+    color: var(--sky);
+    padding: 1px 5px;
+    border-radius: 3px;
+  }
+
+  .results-actions {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 600px) {
+    main { padding: 24px 16px 60px; }
+    .header-inner { padding: 12px 16px; }
+    .question-header { padding: 16px 16px; }
+    .answers-list { padding: 16px 16px; }
+    .feedback-box { margin: 0 16px 16px; }
+    .quiz-actions { padding: 0 16px 16px; }
+    .review-item { grid-template-columns: 20px 1fr; gap: 8px; }
+    .intro-meta { max-width: 100%; }
+    .header-badge { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="progress-bar" id="progressBar"></div>
+
+<header>
+  <div class="header-inner">
+    <a class="header-back" href="week_3.html">← Week 3</a>
+    <div class="header-title">Nmap Quiz</div>
+    <span class="header-badge">Network Scanning &amp; Enumeration</span>
+  </div>
+</header>
+
+<main>
+
+  <!-- ── INTRO SCREEN ── -->
+  <div id="screen-intro">
+    <span class="intro-icon">&gt;_</span>
+    <h1 class="intro-title">Nmap Knowledge Check</h1>
+    <p class="intro-sub">Test what you've learned about network scanning, port states, and Nmap commands from Week 3.</p>
+
+    <div class="intro-meta">
+      <div class="intro-stat">
+        <span class="intro-stat-val">10</span>
+        <span class="intro-stat-lbl">Questions</span>
+      </div>
+      <div class="intro-stat">
+        <span class="intro-stat-val">4</span>
+        <span class="intro-stat-lbl">Choices each</span>
+      </div>
+      <div class="intro-stat">
+        <span class="intro-stat-val">~5</span>
+        <span class="intro-stat-lbl">Minutes</span>
+      </div>
+    </div>
+
+    <button class="btn btn-primary" id="startBtn">Start Quiz &nbsp;›</button>
+  </div>
+
+  <!-- ── QUIZ SCREEN ── -->
+  <div id="screen-quiz">
+
+    <div class="quiz-progress-row">
+      <span class="quiz-counter" id="quizCounter">Question 1 of 10</span>
+      <div class="quiz-bar-track">
+        <div class="quiz-bar-fill" id="quizBarFill" style="width:0%"></div>
+      </div>
+      <span class="quiz-score-live" id="quizScoreLive">0 correct</span>
+    </div>
+
+    <div class="question-card" id="questionCard">
+
+      <div class="question-header">
+        <span class="question-num" id="questionNum">Q1</span>
+        <div class="question-text" id="questionText"></div>
+      </div>
+
+      <div class="answers-list" id="answersList"></div>
+
+      <div class="feedback-box" id="feedbackBox">
+        <span class="feedback-icon" id="feedbackIcon"></span>
+        <div>
+          <strong id="feedbackTitle"></strong>
+          <p id="feedbackBody"></p>
+        </div>
+      </div>
+
+      <div class="quiz-actions">
+        <button class="btn btn-primary" id="nextBtn" style="display:none">Next &nbsp;›</button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ── RESULTS SCREEN ── -->
+  <div id="screen-results">
+    <div class="results-badge" id="resultsBadge"></div>
+    <h2 class="results-title" id="resultsTitle"></h2>
+    <p class="results-sub" id="resultsSub"></p>
+
+    <div class="review-list" id="reviewList"></div>
+
+    <div class="results-actions">
+      <button class="btn btn-primary" id="retryBtn">Try Again</button>
+      <a class="btn btn-outline" href="week_3.html">Back to Week 3</a>
+    </div>
+  </div>
+
+</main>
+
+<script>
+const QUESTIONS = [
+  {
+    text: "Which Nmap flag performs a <strong>host discovery scan</strong> (ping sweep) without scanning ports?",
+    answers: [
+      { label: "<code>nmap -sn 192.168.x.0/24</code>", correct: true },
+      { label: "<code>nmap -sV 192.168.x.0/24</code>", correct: false },
+      { label: "<code>nmap -O 192.168.x.0/24</code>", correct: false },
+      { label: "<code>nmap -p- 192.168.x.0/24</code>", correct: false },
+    ],
+    feedback: "The <code>-sn</code> flag (\"skip port scan\") tells Nmap to find which hosts are online without scanning any ports — great for a quick network inventory.",
+    feedbackOk: "Correct! <code>-sn</code> is the ping-sweep / host-discovery flag."
+  },
+  {
+    text: "What does Nmap mean when it reports a port as <strong>open</strong>?",
+    answers: [
+      { label: "An application is actively accepting connections on that port.", correct: true },
+      { label: "The port exists but no service is running.", correct: false },
+      { label: "A firewall is blocking the port.", correct: false },
+      { label: "The port responded with a RST packet.", correct: false },
+    ],
+    feedback: "An <em>open</em> port means an application is listening and ready to accept connections. A <em>closed</em> port is reachable but has no listener. A <em>filtered</em> port is blocked by a firewall.",
+    feedbackOk: "Correct! Open = a service is actively listening on that port."
+  },
+  {
+    text: "You run <code>nmap 192.168.1.50</code> with no extra flags. Which ports does Nmap scan by default?",
+    answers: [
+      { label: "The 1,000 most commonly used TCP ports.", correct: true },
+      { label: "All 65,535 TCP ports.", correct: false },
+      { label: "Ports 1–1024 only.", correct: false },
+      { label: "Only UDP ports.", correct: false },
+    ],
+    feedback: "By default Nmap scans the top 1,000 most common TCP ports. To scan all ports use <code>-p-</code>, and to specify a range use <code>-p 1-1024</code>.",
+    feedbackOk: "Correct! No flags = top 1,000 TCP ports."
+  },
+  {
+    text: "A port scan shows port 22 is open on the Raspberry Pi. Which service is <em>most likely</em> running there?",
+    answers: [
+      { label: "SSH (Secure Shell)", correct: true },
+      { label: "HTTP (web server)", correct: false },
+      { label: "FTP (file transfer)", correct: false },
+      { label: "DNS (name resolution)", correct: false },
+    ],
+    feedback: "Port 22 is the well-known port for <strong>SSH</strong>. HTTP uses port 80 (or 443 for HTTPS), FTP uses port 21, and DNS uses port 53.",
+    feedbackOk: "Correct! Port 22 = SSH."
+  },
+  {
+    text: "What is the key difference between <code>nmap -sn</code> and a regular <code>ping</code>?",
+    answers: [
+      { label: "nmap -sn can discover multiple hosts on a subnet at once; ping tests one host at a time.", correct: true },
+      { label: "ping scans all ports; nmap -sn only tests port 80.", correct: false },
+      { label: "nmap -sn requires root; ping never does.", correct: false },
+      { label: "There is no difference — they send identical packets.", correct: false },
+    ],
+    feedback: "<code>ping</code> is point-to-point (one target at a time). <code>nmap -sn</code> accepts CIDR ranges like <code>192.168.1.0/24</code> and sweeps the entire subnet, reporting all live hosts at once.",
+    feedbackOk: "Correct! nmap -sn sweeps a whole subnet in one command."
+  },
+  {
+    text: "Which Nmap flag adds <strong>service version detection</strong> to a scan?",
+    answers: [
+      { label: "<code>-sV</code>", correct: true },
+      { label: "<code>-sn</code>", correct: false },
+      { label: "<code>-O</code>", correct: false },
+      { label: "<code>-A</code>", correct: false },
+    ],
+    feedback: "<code>-sV</code> probes open ports to determine the software name and version (e.g., <em>OpenSSH 9.2</em>). <code>-O</code> enables OS detection, and <code>-A</code> enables both plus script scanning and traceroute.",
+    feedbackOk: "Correct! <code>-sV</code> = service/version detection."
+  },
+  {
+    text: "What port state does Nmap report when a <strong>firewall drops</strong> the probe packet with no reply?",
+    answers: [
+      { label: "filtered", correct: true },
+      { label: "open", correct: false },
+      { label: "closed", correct: false },
+      { label: "unresponsive", correct: false },
+    ],
+    feedback: "<em>Filtered</em> means Nmap cannot determine whether the port is open or closed because packet filtering is blocking the probe. A <em>closed</em> port actively replies with a TCP RST.",
+    feedbackOk: "Correct! No reply from a firewall drop = filtered."
+  },
+  {
+    text: "In the Nmap output below, which field tells you the <em>name of the service</em> on each port?<br><br><code>80/tcp  open  http<br>22/tcp  open  ssh</code>",
+    answers: [
+      { label: "The third column (e.g., http, ssh).", correct: true },
+      { label: "The first column (e.g., 80/tcp).", correct: false },
+      { label: "The second column (open).", correct: false },
+      { label: "The port number alone identifies the service.", correct: false },
+    ],
+    feedback: "Nmap output columns are: <strong>PORT | STATE | SERVICE</strong>. The third column gives the service name based on the well-known port database (<code>/etc/services</code>).",
+    feedbackOk: "Correct! Third column = service name."
+  },
+  {
+    text: "You want to scan <em>only</em> port 80 on a host. Which command is correct?",
+    answers: [
+      { label: "<code>nmap -p 80 192.168.1.50</code>", correct: true },
+      { label: "<code>nmap --port=80 192.168.1.50</code>", correct: false },
+      { label: "<code>nmap -s80 192.168.1.50</code>", correct: false },
+      { label: "<code>nmap 192.168.1.50:80</code>", correct: false },
+    ],
+    feedback: "The <code>-p</code> flag specifies which port(s) to scan. You can give a single port (<code>-p 80</code>), a range (<code>-p 1-1024</code>), or a comma-separated list (<code>-p 22,80,443</code>).",
+    feedbackOk: "Correct! <code>-p 80</code> limits the scan to port 80."
+  },
+  {
+    text: "When you run an Nmap scan while Wireshark is capturing, what kind of packets does Wireshark show for a default TCP port scan?",
+    answers: [
+      { label: "TCP SYN packets sent to each target port.", correct: true },
+      { label: "ICMP echo (ping) packets only.", correct: false },
+      { label: "UDP datagrams on all ports.", correct: false },
+      { label: "ARP requests for every IP on the subnet.", correct: false },
+    ],
+    feedback: "Nmap's default scan (<code>-sS</code> when run as root, <code>-sT</code> otherwise) sends <strong>TCP SYN</strong> packets to each target port. You'll see these clearly in Wireshark — they're different from the ICMP packets a plain <code>ping</code> produces.",
+    feedbackOk: "Correct! Default TCP scan = SYN packets visible in Wireshark."
+  }
+];
+
+// ── State ──
+let currentQ   = 0;
+let score      = 0;
+let answered   = false;
+let userPicks  = [];   // stores { chosen: idx, correct: bool } per question
+
+// ── Element refs ──
+const screenIntro   = document.getElementById('screen-intro');
+const screenQuiz    = document.getElementById('screen-quiz');
+const screenResults = document.getElementById('screen-results');
+
+const startBtn    = document.getElementById('startBtn');
+const nextBtn     = document.getElementById('nextBtn');
+const retryBtn    = document.getElementById('retryBtn');
+
+const quizCounter    = document.getElementById('quizCounter');
+const quizBarFill    = document.getElementById('quizBarFill');
+const quizScoreLive  = document.getElementById('quizScoreLive');
+const questionNum    = document.getElementById('questionNum');
+const questionText   = document.getElementById('questionText');
+const answersList    = document.getElementById('answersList');
+const feedbackBox    = document.getElementById('feedbackBox');
+const feedbackIcon   = document.getElementById('feedbackIcon');
+const feedbackTitle  = document.getElementById('feedbackTitle');
+const feedbackBody   = document.getElementById('feedbackBody');
+const resultsBadge   = document.getElementById('resultsBadge');
+const resultsTitle   = document.getElementById('resultsTitle');
+const resultsSub     = document.getElementById('resultsSub');
+const reviewList     = document.getElementById('reviewList');
+const progressBar    = document.getElementById('progressBar');
+
+// ── Helpers ──
+function shuffleArray(arr) {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+const LETTERS = ['A', 'B', 'C', 'D'];
+
+// ── Start quiz ──
+startBtn.addEventListener('click', () => {
+  currentQ  = 0;
+  score     = 0;
+  userPicks = [];
+  screenIntro.style.display   = 'none';
+  screenResults.style.display = 'none';
+  screenQuiz.style.display    = 'block';
+  renderQuestion();
+});
+
+// ── Render a question ──
+function renderQuestion() {
+  answered = false;
+  const q   = QUESTIONS[currentQ];
+  const total = QUESTIONS.length;
+
+  // Progress
+  quizCounter.textContent   = `Question ${currentQ + 1} of ${total}`;
+  quizBarFill.style.width   = `${(currentQ / total) * 100}%`;
+  quizScoreLive.textContent = `${score} correct`;
+  progressBar.style.width   = `${(currentQ / total) * 100}%`;
+
+  questionNum.textContent  = `Q${currentQ + 1}`;
+  questionText.innerHTML   = q.text;
+
+  // Reset feedback
+  feedbackBox.className = 'feedback-box';
+  feedbackBox.style.display = 'none';
+  nextBtn.style.display = 'none';
+
+  // Build answer buttons (shuffle order)
+  answersList.innerHTML = '';
+  const order = shuffleArray([...Array(q.answers.length).keys()]);
+  order.forEach((origIdx, pos) => {
+    const ans = q.answers[origIdx];
+    const btn = document.createElement('button');
+    btn.className   = 'answer-btn';
+    btn.dataset.orig = origIdx;
+    btn.innerHTML   = `
+      <span class="answer-letter">${LETTERS[pos]}</span>
+      <span>${ans.label}</span>
+    `;
+    btn.addEventListener('click', () => handleAnswer(btn, origIdx));
+    answersList.appendChild(btn);
+  });
+}
+
+// ── Handle an answer click ──
+function handleAnswer(clickedBtn, origIdx) {
+  if (answered) return;
+  answered = true;
+
+  const q       = QUESTIONS[currentQ];
+  const isRight = q.answers[origIdx].correct;
+
+  if (isRight) score++;
+
+  // Find the correct original index
+  const correctOrigIdx = q.answers.findIndex(a => a.correct);
+
+  // Style all buttons
+  document.querySelectorAll('.answer-btn').forEach(btn => {
+    btn.disabled = true;
+    const bOrig = parseInt(btn.dataset.orig);
+    if (bOrig === correctOrigIdx) {
+      btn.classList.add('correct');
+    } else if (btn === clickedBtn && !isRight) {
+      btn.classList.add('wrong');
+    } else {
+      btn.classList.add('dimmed');
+    }
+  });
+
+  // Feedback
+  feedbackBox.style.display = '';
+  if (isRight) {
+    feedbackBox.className  = 'feedback-box feedback-correct show';
+    feedbackIcon.textContent = '✓';
+    feedbackTitle.textContent = 'Correct!';
+    feedbackBody.innerHTML = q.feedbackOk || q.feedback;
+  } else {
+    feedbackBox.className  = 'feedback-box feedback-wrong show';
+    feedbackIcon.textContent = '✗';
+    feedbackTitle.textContent = 'Not quite.';
+    feedbackBody.innerHTML = q.feedback;
+  }
+
+  // Store pick
+  userPicks.push({ origIdx, correct: isRight });
+
+  // Show next / finish button
+  nextBtn.style.display = 'inline-flex';
+  nextBtn.textContent   = currentQ < QUESTIONS.length - 1 ? 'Next ›' : 'See Results ›';
+  quizScoreLive.textContent = `${score} correct`;
+}
+
+// ── Next question ──
+nextBtn.addEventListener('click', () => {
+  currentQ++;
+  if (currentQ < QUESTIONS.length) {
+    renderQuestion();
+  } else {
+    showResults();
+  }
+});
+
+// ── Show results ──
+function showResults() {
+  screenQuiz.style.display    = 'none';
+  screenResults.style.display = 'block';
+  progressBar.style.width     = '100%';
+
+  const total = QUESTIONS.length;
+  const pct   = Math.round((score / total) * 100);
+
+  resultsBadge.textContent = `${score}/${total}`;
+
+  if (pct >= 80) {
+    resultsTitle.textContent = 'Great work!';
+    resultsSub.textContent   = `You scored ${score} out of ${total} (${pct}%). You've got a solid grasp of Nmap basics.`;
+  } else if (pct >= 50) {
+    resultsTitle.textContent = 'Good effort!';
+    resultsSub.textContent   = `You scored ${score} out of ${total} (${pct}%). Review the explanations below and try again.`;
+  } else {
+    resultsTitle.textContent = 'Keep practicing!';
+    resultsSub.textContent   = `You scored ${score} out of ${total} (${pct}%). Head back to the Week 3 lesson and try again.`;
+  }
+
+  // Build review
+  reviewList.innerHTML = '';
+  QUESTIONS.forEach((q, i) => {
+    const pick    = userPicks[i];
+    const correct = pick.correct;
+    const correctAns = q.answers.find(a => a.correct);
+    const chosenAns  = q.answers[pick.origIdx];
+
+    const item = document.createElement('div');
+    item.className = `review-item ${correct ? 'ri-correct' : 'ri-wrong'}`;
+
+    let answerHTML = '';
+    if (correct) {
+      answerHTML = `<span class="correct-ans">&#10003; ${correctAns.label}</span>`;
+    } else {
+      answerHTML = `<span class="your-ans">&#10007; You chose: ${chosenAns.label}</span><br>
+                   <span class="correct-ans" style="margin-top:3px;display:inline-block">&#10003; Correct: ${correctAns.label}</span>`;
+    }
+
+    item.innerHTML = `
+      <span class="review-icon">${correct ? '✓' : '✗'}</span>
+      <div>
+        <div class="review-q">${q.text}</div>
+        <div class="review-answer">${answerHTML}</div>
+      </div>
+    `;
+    reviewList.appendChild(item);
+  });
+}
+
+// ── Retry ──
+retryBtn.addEventListener('click', () => {
+  currentQ  = 0;
+  score     = 0;
+  userPicks = [];
+  screenResults.style.display = 'none';
+  screenQuiz.style.display    = 'block';
+  progressBar.style.width     = '0%';
+  renderQuestion();
+});
+</script>
+
+</body>
+</html>
