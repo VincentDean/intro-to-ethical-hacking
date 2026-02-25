@@ -101,6 +101,26 @@
     opacity: 0.7;
   }
 
+  .header-back {
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--sky);
+    text-decoration: none;
+    border: 1px solid var(--steel);
+    padding: 4px 10px;
+    border-radius: 3px;
+    white-space: nowrap;
+    transition: border-color 0.15s, color 0.15s;
+  }
+
+  .header-back:hover {
+    border-color: var(--sky);
+    color: var(--white);
+  }
+
   /* ── NAV SIDEBAR ── */
   .layout {
     max-width: 1100px;
@@ -756,6 +776,7 @@
 
 <header>
   <div class="header-inner">
+    <a class="header-back" href="index.html">← Home</a>
     <div class="header-week">Week 03</div>
     <div class="header-title">Network Scanning &amp; Enumeration Basics</div>
     <div class="header-meta">
@@ -772,6 +793,8 @@
   <aside class="sidebar">
     <div class="nav-label">Contents</div>
     <ul class="nav-list" id="navList">
+      <li><a href="index.html"><span class="nav-day">⌂</span> Home</a></li>
+      <div class="nav-divider"></div>
       <li><a href="#objectives"><span class="nav-day">OBJ</span> Objectives</a></li>
       <div class="nav-divider"></div>
       <li><a href="#day1"><span class="nav-day">D1</span> Who's on the Network?</a></li>
