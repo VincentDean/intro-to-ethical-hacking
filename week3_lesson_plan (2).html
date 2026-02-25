@@ -1,0 +1,1202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Week 3 — Network Scanning & Enumeration</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy:    #0d1b2a;
+    --ink:     #1c2e40;
+    --steel:   #2e4d6e;
+    --slate:   #4a6fa5;
+    --sky:     #7eb8d4;
+    --frost:   #d0e8f2;
+    --paper:   #f4f7fa;
+    --white:   #ffffff;
+    --accent:  #e84855;
+    --green:   #2a9d50;
+    --amber:   #e8a020;
+    --mono:    'IBM Plex Mono', monospace;
+    --sans:    'IBM Plex Sans', sans-serif;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: var(--sans);
+    background: var(--paper);
+    color: var(--ink);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ── HEADER ── */
+  header {
+    background: var(--navy);
+    color: var(--white);
+    padding: 0;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    border-bottom: 3px solid var(--accent);
+    box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+  }
+
+  .header-inner {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 14px 32px;
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    flex-wrap: wrap;
+  }
+
+  .header-week {
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--sky);
+    border: 1px solid var(--steel);
+    padding: 4px 10px;
+    border-radius: 3px;
+    white-space: nowrap;
+  }
+
+  .header-title {
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    flex: 1;
+  }
+
+  .header-meta {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+
+  .meta-chip {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--sky);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .meta-chip::before {
+    content: '';
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--sky);
+    opacity: 0.7;
+  }
+
+  /* ── NAV SIDEBAR ── */
+  .layout {
+    max-width: 1100px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 220px 1fr;
+    gap: 0;
+    padding: 0 24px;
+    align-items: start;
+  }
+
+  .sidebar {
+    position: sticky;
+    top: 73px;
+    padding: 32px 0 32px 0;
+    padding-right: 24px;
+  }
+
+  .nav-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--slate);
+    margin-bottom: 12px;
+    padding-left: 12px;
+  }
+
+  .nav-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .nav-list a {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 12px;
+    border-radius: 6px;
+    text-decoration: none;
+    font-size: 13px;
+    color: var(--steel);
+    transition: all 0.15s ease;
+    border-left: 3px solid transparent;
+    font-weight: 600;
+  }
+
+  .nav-list a:hover,
+  .nav-list a.active {
+    background: var(--frost);
+    color: var(--ink);
+    border-left-color: var(--slate);
+  }
+
+  .nav-list a .nav-day {
+    font-family: var(--mono);
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--slate);
+    min-width: 28px;
+  }
+
+  .nav-divider {
+    height: 1px;
+    background: var(--frost);
+    margin: 8px 12px;
+  }
+
+  /* ── MAIN CONTENT ── */
+  main {
+    padding: 32px 0 64px 24px;
+    border-left: 1px solid #dce8f0;
+    min-width: 0;
+  }
+
+  /* ── SECTION CARDS ── */
+  .section {
+    margin-bottom: 48px;
+    opacity: 0;
+    transform: translateY(16px);
+    transition: opacity 0.4s ease, transform 0.4s ease;
+  }
+
+  .section.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 20px;
+    padding-bottom: 12px;
+    border-bottom: 2px solid var(--frost);
+  }
+
+  .section-icon {
+    width: 40px;
+    height: 40px;
+    background: var(--navy);
+    color: var(--sky);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--mono);
+    font-size: 13px;
+    font-weight: 600;
+    flex-shrink: 0;
+  }
+
+  .section-title {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--navy);
+    letter-spacing: -0.02em;
+    line-height: 1.2;
+  }
+
+  .section-subtitle {
+    font-size: 13px;
+    color: var(--slate);
+    font-style: italic;
+    margin-top: 2px;
+  }
+
+  /* ── DAY CARDS ── */
+  .day-card {
+    background: var(--white);
+    border: 1px solid #dce8f0;
+    border-radius: 10px;
+    overflow: hidden;
+    margin-bottom: 20px;
+    transition: box-shadow 0.2s ease;
+  }
+
+  .day-card:hover {
+    box-shadow: 0 4px 20px rgba(46, 77, 110, 0.12);
+  }
+
+  .day-header {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    cursor: pointer;
+    user-select: none;
+  }
+
+  .day-number {
+    background: var(--navy);
+    color: var(--sky);
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 14px 16px;
+    writing-mode: horizontal-tb;
+    min-width: 80px;
+    text-align: center;
+    flex-shrink: 0;
+  }
+
+  .day-title-block {
+    flex: 1;
+    padding: 14px 20px;
+  }
+
+  .day-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--navy);
+    letter-spacing: -0.01em;
+  }
+
+  .day-focus {
+    font-size: 12px;
+    color: var(--slate);
+    font-style: italic;
+    margin-top: 2px;
+  }
+
+  .day-toggle {
+    padding: 14px 20px;
+    color: var(--slate);
+    font-size: 18px;
+    transition: transform 0.25s ease;
+    flex-shrink: 0;
+  }
+
+  .day-card.open .day-toggle {
+    transform: rotate(180deg);
+  }
+
+  .day-body {
+    display: none;
+    padding: 0 20px 20px;
+    border-top: 1px solid var(--frost);
+  }
+
+  .day-card.open .day-body {
+    display: block;
+  }
+
+  /* ── TIME BLOCKS ── */
+  .time-block {
+    margin-top: 16px;
+  }
+
+  .time-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--slate);
+    margin-bottom: 8px;
+  }
+
+  .time-badge {
+    background: var(--frost);
+    color: var(--steel);
+    padding: 2px 8px;
+    border-radius: 20px;
+    font-size: 10px;
+  }
+
+  .step-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding-left: 0;
+  }
+
+  .step-list li {
+    display: flex;
+    gap: 10px;
+    font-size: 14px;
+    line-height: 1.5;
+    color: var(--ink);
+    padding: 6px 10px;
+    border-radius: 5px;
+    transition: background 0.15s;
+  }
+
+  .step-list li:hover {
+    background: var(--paper);
+  }
+
+  .step-list li::before {
+    content: '›';
+    color: var(--slate);
+    font-weight: 700;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+
+  .step-list li.sub {
+    padding-left: 28px;
+    font-size: 13px;
+    color: var(--steel);
+  }
+
+  .step-list li.sub::before {
+    content: '·';
+    color: var(--sky);
+  }
+
+  /* ── OBJECTIVES ── */
+  .obj-list {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    list-style: none;
+  }
+
+  .obj-item {
+    background: var(--white);
+    border: 1px solid #dce8f0;
+    border-left: 4px solid var(--slate);
+    border-radius: 0 8px 8px 0;
+    padding: 12px 16px;
+    font-size: 14px;
+    line-height: 1.45;
+    color: var(--ink);
+    transition: border-left-color 0.2s, box-shadow 0.2s;
+  }
+
+  .obj-item:hover {
+    border-left-color: var(--accent);
+    box-shadow: 0 2px 12px rgba(0,0,0,0.07);
+  }
+
+  /* ── TABLES ── */
+  .data-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    background: var(--white);
+    border: 1px solid #dce8f0;
+    border-radius: 8px;
+    overflow: hidden;
+  }
+
+  .data-table thead tr {
+    background: var(--navy);
+    color: var(--sky);
+  }
+
+  .data-table th {
+    padding: 10px 14px;
+    text-align: left;
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .data-table td {
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--frost);
+    color: var(--ink);
+    vertical-align: top;
+    line-height: 1.4;
+  }
+
+  .data-table tr:last-child td {
+    border-bottom: none;
+  }
+
+  .data-table tbody tr:hover td {
+    background: var(--paper);
+  }
+
+  .data-table.template td {
+    color: var(--slate);
+    font-style: italic;
+    font-size: 12px;
+  }
+
+  .data-table.template td.label-cell {
+    font-style: normal;
+    font-weight: 600;
+    color: var(--ink);
+  }
+
+  /* code inline */
+  code {
+    font-family: var(--mono);
+    font-size: 12px;
+    background: var(--navy);
+    color: var(--sky);
+    padding: 2px 7px;
+    border-radius: 4px;
+  }
+
+  /* ── NOTICE BOXES ── */
+  .notice {
+    display: flex;
+    gap: 14px;
+    padding: 14px 16px;
+    border-radius: 8px;
+    margin-bottom: 12px;
+    font-size: 14px;
+    line-height: 1.5;
+  }
+
+  .notice-warn  { background: #fff5e6; border-left: 4px solid var(--amber); }
+  .notice-info  { background: #e8f4fd; border-left: 4px solid var(--slate); }
+  .notice-ok    { background: #e8f8ee; border-left: 4px solid var(--green); }
+
+  .notice-icon {
+    font-size: 18px;
+    flex-shrink: 0;
+    line-height: 1.4;
+  }
+
+  .notice strong {
+    display: block;
+    font-size: 13px;
+    font-weight: 700;
+    margin-bottom: 3px;
+    color: var(--ink);
+  }
+
+  .notice p {
+    margin: 0;
+    color: var(--steel);
+    font-size: 13px;
+  }
+
+  /* ── DELIVERABLES ── */
+  .deliverable-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .deliverable-item {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    background: var(--white);
+    border: 1px solid #dce8f0;
+    border-radius: 8px;
+    padding: 12px 16px;
+    transition: box-shadow 0.15s;
+  }
+
+  .deliverable-item:hover {
+    box-shadow: 0 2px 12px rgba(0,0,0,0.07);
+  }
+
+  .deliverable-num {
+    width: 30px;
+    height: 30px;
+    background: var(--navy);
+    color: var(--sky);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--mono);
+    font-size: 12px;
+    font-weight: 600;
+    flex-shrink: 0;
+  }
+
+  .deliverable-name {
+    font-weight: 700;
+    font-size: 14px;
+    color: var(--ink);
+  }
+
+  .deliverable-desc {
+    font-size: 12px;
+    color: var(--slate);
+    margin-top: 2px;
+  }
+
+  /* ── REFLECTION ── */
+  .reflection-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .reflection-item {
+    background: var(--white);
+    border: 1px solid #dce8f0;
+    border-radius: 8px;
+    padding: 14px 16px 14px 50px;
+    font-size: 14px;
+    color: var(--ink);
+    line-height: 1.5;
+    position: relative;
+  }
+
+  .reflection-item::before {
+    content: attr(data-q);
+    position: absolute;
+    left: 14px;
+    top: 14px;
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--slate);
+    background: var(--frost);
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* ── TOOLS GRID ── */
+  .tools-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 12px;
+  }
+
+  .tool-card {
+    background: var(--white);
+    border: 1px solid #dce8f0;
+    border-radius: 8px;
+    padding: 14px;
+    transition: box-shadow 0.2s;
+  }
+
+  .tool-card:hover {
+    box-shadow: 0 4px 16px rgba(46, 77, 110, 0.12);
+  }
+
+  .tool-name {
+    font-family: var(--mono);
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--navy);
+    margin-bottom: 4px;
+  }
+
+  .tool-desc {
+    font-size: 12px;
+    color: var(--slate);
+    line-height: 1.4;
+    margin-bottom: 8px;
+  }
+
+  .tool-cmd {
+    font-family: var(--mono);
+    font-size: 11px;
+    background: var(--navy);
+    color: var(--sky);
+    padding: 5px 8px;
+    border-radius: 4px;
+    word-break: break-all;
+  }
+
+  /* ── PRINT BUTTON ── */
+  .print-btn {
+    position: fixed;
+    bottom: 28px;
+    right: 28px;
+    background: var(--navy);
+    color: var(--sky);
+    border: none;
+    border-radius: 50px;
+    padding: 12px 22px;
+    font-family: var(--mono);
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    cursor: pointer;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.25);
+    transition: background 0.2s, transform 0.15s;
+    z-index: 200;
+  }
+
+  .print-btn:hover {
+    background: var(--steel);
+    transform: translateY(-2px);
+  }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 768px) {
+    .layout { grid-template-columns: 1fr; padding: 0 16px; }
+    .sidebar { display: none; }
+    main { border-left: none; padding-left: 0; }
+    .obj-list { grid-template-columns: 1fr; }
+    .header-meta { display: none; }
+    .tools-grid { grid-template-columns: 1fr 1fr; }
+  }
+
+  @media print {
+    header { position: static; }
+    .sidebar, .print-btn { display: none; }
+    .layout { grid-template-columns: 1fr; }
+    main { border-left: none; }
+    .section { opacity: 1; transform: none; }
+    .day-body { display: block !important; }
+    .day-card { break-inside: avoid; }
+  }
+
+  /* ── SCROLL INDICATOR ── */
+  .progress-bar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 3px;
+    background: var(--accent);
+    z-index: 999;
+    transition: width 0.1s linear;
+  }
+</style>
+</head>
+<body>
+
+<div class="progress-bar" id="progressBar"></div>
+
+<header>
+  <div class="header-inner">
+    <div class="header-week">Week 03</div>
+    <div class="header-title">Network Scanning &amp; Enumeration Basics</div>
+    <div class="header-meta">
+      <span class="meta-chip">Unit: Network Discovery</span>
+      <span class="meta-chip">80 min × 5 days</span>
+      <span class="meta-chip">PC ↔ Raspberry Pi</span>
+    </div>
+  </div>
+</header>
+
+<div class="layout">
+
+  <!-- SIDEBAR NAV -->
+  <aside class="sidebar">
+    <div class="nav-label">Contents</div>
+    <ul class="nav-list" id="navList">
+      <li><a href="#objectives"><span class="nav-day">OBJ</span> Objectives</a></li>
+      <div class="nav-divider"></div>
+      <li><a href="#day1"><span class="nav-day">D1</span> Who's on the Network?</a></li>
+      <li><a href="#day2"><span class="nav-day">D2</span> What Ports Are Open?</a></li>
+      <li><a href="#day3"><span class="nav-day">D3</span> Watching Traffic</a></li>
+      <li><a href="#day4"><span class="nav-day">D4</span> Scan &amp; Capture Together</a></li>
+      <li><a href="#day5"><span class="nav-day">D5</span> Report &amp; Reflection</a></li>
+      <div class="nav-divider"></div>
+      <li><a href="#deliverables"><span class="nav-day">DEL</span> Deliverables</a></li>
+      <li><a href="#tools"><span class="nav-day">REF</span> Tools Reference</a></li>
+
+    </ul>
+  </aside>
+
+  <!-- MAIN -->
+  <main>
+
+    <!-- OBJECTIVES -->
+    <section class="section" id="objectives">
+      <div class="section-header">
+        <div class="section-icon">OBJ</div>
+        <div>
+          <div class="section-title">Week 3 Objectives</div>
+          <div class="section-subtitle">What students will be able to do by Friday</div>
+        </div>
+      </div>
+      <ul class="obj-list">
+        <li class="obj-item">Use <strong>Nmap</strong> to discover hosts and scan for open ports on the local network</li>
+        <li class="obj-item">Use <strong>Wireshark</strong> to capture and read live traffic between the PC and the Pi</li>
+        <li class="obj-item">Identify what is being sent across the network and on which ports</li>
+        <li class="obj-item">Produce a <strong>Network Scan Report</strong> documenting their findings</li>
+      </ul>
+    </section>
+
+    <!-- DAY 1 -->
+    <section class="section" id="day1">
+      <div class="section-header">
+        <div class="section-icon">D1</div>
+        <div>
+          <div class="section-title">Day 1 — Who's on the Network?</div>
+          <div class="section-subtitle">Understand the two-device setup and run a first Nmap scan</div>
+        </div>
+      </div>
+
+      <div class="day-card open">
+        <div class="day-header" onclick="toggleDay(this)">
+          <div class="day-number">Full Plan</div>
+          <div class="day-title-block">
+            <div class="day-title">80-minute session breakdown</div>
+          </div>
+          <div class="day-toggle">▾</div>
+        </div>
+        <div class="day-body">
+
+          <div class="time-block">
+            <div class="time-label">Intro <span class="time-badge">15 min</span></div>
+            <ul class="step-list">
+              <li>Introduce the lab: a PC and a Raspberry Pi connected on an air-gapped network</li>
+              <li class="sub">Draw on the board: [PC] ←→ [Raspberry Pi]</li>
+              <li>Review: What is an IP address? Run <code>ip a</code> on each device to find their addresses</li>
+            </ul>
+          </div>
+
+          <div class="time-block">
+            <div class="time-label">Instructor Demo <span class="time-badge">20 min</span></div>
+            <ul class="step-list">
+              <li>Ping the Pi from the PC to confirm the connection: <code>ping 192.168.x.x</code></li>
+              <li>Run a host discovery scan: <code>nmap -sn 192.168.x.0/24</code></li>
+              <li>Show what a live host response looks like vs. no response</li>
+            </ul>
+          </div>
+
+          <div class="time-block">
+            <div class="time-label">Scanner Pair Practice <span class="time-badge">35 min</span></div>
+            <ul class="step-list">
+              <li>Run <code>ping</code> from the PC to the Pi</li>
+              <li>Run <code>nmap -sn 192.168.x.0/24</code> and record the results</li>
+              <li>Answer: <em>How many hosts did you find? What are their IP addresses?</em></li>
+              <li>Writer pair begins documenting findings while Scanner pair runs tools</li>
+            </ul>
+          </div>
+
+          <div class="time-block">
+            <div class="time-label">Wrap-Up <span class="time-badge">10 min</span></div>
+            <ul class="step-list">
+              <li>Teams share their host counts and IPs</li>
+              <li>Discuss: <em>What does it mean that this network is air-gapped?</em></li>
+            </ul>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- DAY 2 -->
+    <section class="section" id="day2">
+      <div class="section-header">
+        <div class="section-icon">D2</div>
+        <div>
+          <div class="section-title">Day 2 — What Ports Are Open?</div>
+          <div class="section-subtitle">Use Nmap to find open ports on both devices</div>
+        </div>
+      </div>
+
+      <div class="day-card">
+        <div class="day-header" onclick="toggleDay(this)">
+          <div class="day-number">Full Plan</div>
+          <div class="day-title-block">
+            <div class="day-title">80-minute session breakdown</div>
+          </div>
+          <div class="day-toggle">▾</div>
+        </div>
+        <div class="day-body">
+
+          <div class="time-block">
+            <div class="time-label">Review <span class="time-badge">10 min</span></div>
+            <ul class="step-list">
+              <li>Recap: We found two hosts. Today we look deeper — what services are running?</li>
+              <li>Analogy: Ports are like doors on a building. Open ports = unlocked doors.</li>
+            </ul>
+          </div>
+
+          <div class="time-block">
+            <div class="time-label">Instructor Demo <span class="time-badge">20 min</span></div>
+            <ul class="step-list">
+              <li>Run a port scan against the Pi: <code>nmap 192.168.x.x</code></li>
+              <li>Walk through the output: port number, state (open/closed), service name</li>
+              <li>Repeat the same scan against the PC — compare results</li>
+            </ul>
+          </div>
+
+          <div class="time-block">
+            <div class="time-label">Scanner Pair Practice <span class="time-badge">40 min</span></div>
+            <ul class="step-list">
+              <li>Scan both devices and record every open port found</li>
+              <li>Fill in the Port Scan Table (see Deliverables section)</li>
+              <li>Writer pair drafts notes while scan runs</li>
+              <li>Answer: <em>Which device has more open ports? Why might that be?</em></li>
+            </ul>
+          </div>
+
+          <div class="time-block">
+            <div class="time-label">Wrap-Up <span class="time-badge">10 min</span></div>
+            <ul class="step-list">
+              <li>Teams compare port counts</li>
+              <li>Preview Day 3: <em>Now let's watch the actual traffic moving across the wire</em></li>
+            </ul>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- DAY 3 -->
+    <section class="section" id="day3">
+      <div class="section-header">
+        <div class="section-icon">D3</div>
+        <div>
+          <div class="section-title">Day 3 — Watching Traffic with Wireshark</div>
+          <div class="section-subtitle">Capture live packets between the PC and the Pi</div>
+        </div>
+      </div>
+
+      <div class="day-card">
+        <div class="day-header" onclick="toggleDay(this)">
+          <div class="day-number">Full Plan</div>
+          <div class="day-title-block">
+            <div class="day-title">80-minute session breakdown</div>
+          </div>
+          <div class="day-toggle">▾</div>
+        </div>
+        <div class="day-body">
+
+          <div class="time-block">
+            <div class="time-label">Intro to Wireshark <span class="time-badge">20 min</span></div>
+            <ul class="step-list">
+              <li>Instructor opens Wireshark and explains the three key panels:</li>
+              <li class="sub">Interface list — pick the right network adapter</li>
+              <li class="sub">Packet list — one row per packet</li>
+              <li class="sub">Packet details — what's inside each packet</li>
+              <li>Start a capture, ping the Pi, stop the capture — show the ping packets</li>
+            </ul>
+          </div>
+
+          <div class="time-block">
+            <div class="time-label">Instructor Demo <span class="time-badge">15 min</span></div>
+            <ul class="step-list">
+              <li>Filter by IP: <code>ip.addr == 192.168.x.x</code></li>
+              <li>Point out: source, destination, protocol, length</li>
+              <li>Click a single packet and explain what each field means</li>
+            </ul>
+          </div>
+
+          <div class="time-block">
+            <div class="time-label">Scanner Pair Practice <span class="time-badge">35 min</span></div>
+            <ul class="step-list">
+              <li>Start a Wireshark capture on the PC</li>
+              <li>Ping the Pi while capturing</li>
+              <li>Stop the capture and locate the ICMP (ping) packets</li>
+              <li>Answer: <em>What protocol did ping use? What does the data look like?</em></li>
+              <li>Writer pair labels the screenshot for the report</li>
+            </ul>
+          </div>
+
+          <div class="time-block">
+            <div class="time-label">Wrap-Up <span class="time-badge">10 min</span></div>
+            <ul class="step-list">
+              <li>Share observations as a class</li>
+              <li>Discuss: <em>Why would someone who shouldn't be on a network want to capture traffic?</em></li>
+            </ul>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- DAY 4 -->
+    <section class="section" id="day4">
+      <div class="section-header">
+        <div class="section-icon">D4</div>
+        <div>
+          <div class="section-title">Day 4 — Scan &amp; Capture Together</div>
+          <div class="section-subtitle">Run Nmap while Wireshark is capturing and compare results</div>
+        </div>
+      </div>
+
+      <div class="day-card">
+        <div class="day-header" onclick="toggleDay(this)">
+          <div class="day-number">Full Plan</div>
+          <div class="day-title-block">
+            <div class="day-title">80-minute session breakdown</div>
+          </div>
+          <div class="day-toggle">▾</div>
+        </div>
+        <div class="day-body">
+
+          <div class="time-block">
+            <div class="time-label">Setup <span class="time-badge">10 min</span></div>
+            <ul class="step-list">
+              <li>Scanner pair opens Wireshark and starts a capture on the PC</li>
+              <li>Keep Wireshark running in the background before scanning</li>
+            </ul>
+          </div>
+
+          <div class="time-block">
+            <div class="time-label">Scan While Capturing <span class="time-badge">40 min</span></div>
+            <ul class="step-list">
+              <li>Run <code>nmap 192.168.x.x</code> while Wireshark is still capturing</li>
+              <li>Stop the capture after the scan finishes</li>
+              <li>Filter by the Pi's IP address in Wireshark</li>
+              <li>Answer: <em>Can you see the Nmap scan packets? What do they look like?</em></li>
+              <li>Compare: <em>How is scan traffic different from a regular ping?</em></li>
+            </ul>
+          </div>
+
+          <div class="time-block">
+            <div class="time-label">Document Findings <span class="time-badge">20 min</span></div>
+            <ul class="step-list">
+              <li>Update the Port Scan Table with any new information</li>
+              <li>Writer pair adds a section to the report: <em>"When we ran a scan, Wireshark showed…"</em></li>
+            </ul>
+          </div>
+
+          <div class="time-block">
+            <div class="time-label">Wrap-Up <span class="time-badge">10 min</span></div>
+            <ul class="step-list">
+              <li>Class discussion: <em>What are we actually seeing when we scan a network?</em></li>
+            </ul>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- DAY 5 -->
+    <section class="section" id="day5">
+      <div class="section-header">
+        <div class="section-icon">D5</div>
+        <div>
+          <div class="section-title">Day 5 — Report &amp; Reflection</div>
+          <div class="section-subtitle">Finalize findings and submit the week's report</div>
+        </div>
+      </div>
+
+      <div class="day-card">
+        <div class="day-header" onclick="toggleDay(this)">
+          <div class="day-number">Full Plan</div>
+          <div class="day-title-block">
+            <div class="day-title">80-minute session breakdown</div>
+          </div>
+          <div class="day-toggle">▾</div>
+        </div>
+        <div class="day-body">
+
+          <div class="time-block">
+            <div class="time-label">Finish Report <span class="time-badge">30 min</span></div>
+            <ul class="step-list">
+              <li>Complete the Port Scan Table for both devices</li>
+              <li>Write 2–3 sentences describing what the Wireshark capture showed</li>
+              <li>Answer the reflection questions below</li>
+            </ul>
+          </div>
+
+          <div class="time-block">
+            <div class="time-label">Share Out <span class="time-badge">30 min</span></div>
+            <ul class="step-list">
+              <li>Each team shares one finding — a port, a packet, or something unexpected</li>
+              <li>Instructor wrap-up: <em>"You just did what network analysts do. Scan, capture, document."</em></li>
+            </ul>
+          </div>
+
+          <div class="time-block">
+            <div class="time-label">Preview Week 4 <span class="time-badge">10 min</span></div>
+            <ul class="step-list">
+              <li>We now know what's running and what traffic looks like. Next week: <em>What could go wrong?</em></li>
+            </ul>
+          </div>
+
+          <div class="time-block">
+            <div class="time-label">Individual Reflection <span class="time-badge">10 min</span></div>
+            <p style="font-size:13px;color:var(--slate);margin-bottom:10px;">Students write 3–5 sentences responding to these questions:</p>
+            <div class="reflection-list">
+              <div class="reflection-item" data-q="1">What did nmap tell you that ping couldn't?</div>
+              <div class="reflection-item" data-q="2">What surprised you when you looked at traffic in Wireshark?</div>
+              <div class="reflection-item" data-q="3">Why does it matter to know what ports are open on a device?</div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- DELIVERABLES -->
+    <section class="section" id="deliverables">
+      <div class="section-header">
+        <div class="section-icon">DEL</div>
+        <div>
+          <div class="section-title">Week 3 Deliverables</div>
+          <div class="section-subtitle">Submit all three by end of Day 5</div>
+        </div>
+      </div>
+
+      <div class="deliverable-list" style="margin-bottom: 28px;">
+        <div class="deliverable-item">
+          <div class="deliverable-num">1</div>
+          <div>
+            <div class="deliverable-name">Port Scan Table</div>
+            <div class="deliverable-desc">Both devices — port, state, service. Filled in completely.</div>
+          </div>
+        </div>
+        <div class="deliverable-item">
+          <div class="deliverable-num">2</div>
+          <div>
+            <div class="deliverable-name">Wireshark Screenshot</div>
+            <div class="deliverable-desc">Screenshot of captured ping or scan traffic, labeled with annotations.</div>
+          </div>
+        </div>
+        <div class="deliverable-item">
+          <div class="deliverable-num">3</div>
+          <div>
+            <div class="deliverable-name">Individual Reflection</div>
+            <div class="deliverable-desc">3–5 sentences answering the three reflection questions. Handwritten or typed.</div>
+          </div>
+        </div>
+      </div>
+
+      <div style="font-family: var(--mono); font-size: 11px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--slate); margin-bottom: 10px;">Port Scan Table Template</div>
+      <table class="data-table template">
+        <thead>
+          <tr>
+            <th>Device</th>
+            <th>IP Address</th>
+            <th>Port</th>
+            <th>State</th>
+            <th>Service</th>
+            <th>Notes</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td class="label-cell">PC</td><td>___</td><td>___</td><td>___</td><td>___</td><td>___</td></tr>
+          <tr><td class="label-cell">PC</td><td>___</td><td>___</td><td>___</td><td>___</td><td>___</td></tr>
+          <tr><td class="label-cell">Raspberry Pi</td><td>___</td><td>___</td><td>___</td><td>___</td><td>___</td></tr>
+          <tr><td class="label-cell">Raspberry Pi</td><td>___</td><td>___</td><td>___</td><td>___</td><td>___</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- TOOLS REFERENCE -->
+    <section class="section" id="tools">
+      <div class="section-header">
+        <div class="section-icon">REF</div>
+        <div>
+          <div class="section-title">Tools Reference</div>
+          <div class="section-subtitle">Quick-reference for all commands used this week</div>
+        </div>
+      </div>
+
+      <div class="tools-grid">
+        <div class="tool-card">
+          <div class="tool-name">ping</div>
+          <div class="tool-desc">Test if a host is reachable</div>
+          <div class="tool-cmd">ping 192.168.x.x</div>
+        </div>
+        <div class="tool-card">
+          <div class="tool-name">ip a</div>
+          <div class="tool-desc">Show your device's IP address</div>
+          <div class="tool-cmd">ip a</div>
+        </div>
+        <div class="tool-card">
+          <div class="tool-name">nmap — host discovery</div>
+          <div class="tool-desc">Find live hosts on the network</div>
+          <div class="tool-cmd">nmap -sn 192.168.x.0/24</div>
+        </div>
+        <div class="tool-card">
+          <div class="tool-name">nmap — port scan</div>
+          <div class="tool-desc">Find open ports on a host</div>
+          <div class="tool-cmd">nmap 192.168.x.x</div>
+        </div>
+        <div class="tool-card">
+          <div class="tool-name">Wireshark</div>
+          <div class="tool-desc">Capture and read live network traffic</div>
+          <div class="tool-cmd">GUI → interface → Start</div>
+        </div>
+        <div class="tool-card">
+          <div class="tool-name">Wireshark filter</div>
+          <div class="tool-desc">Filter traffic by IP address</div>
+          <div class="tool-cmd">ip.addr == 192.168.x.x</div>
+        </div>
+      </div>
+    </section>
+
+
+
+  </main>
+</div>
+
+<button class="print-btn" onclick="window.print()">⎙ Print / Save PDF</button>
+
+<script>
+  // Toggle day cards
+  function toggleDay(header) {
+    const card = header.closest('.day-card');
+    card.classList.toggle('open');
+  }
+
+  // Scroll progress bar
+  window.addEventListener('scroll', () => {
+    const scrollTop = window.scrollY;
+    const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+    const pct = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
+    document.getElementById('progressBar').style.width = pct + '%';
+  });
+
+  // Intersection observer for section fade-in
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+      }
+    });
+  }, { threshold: 0.08 });
+
+  document.querySelectorAll('.section').forEach(s => observer.observe(s));
+
+  // Active nav highlight on scroll
+  const sections = document.querySelectorAll('section[id]');
+  const navLinks = document.querySelectorAll('.nav-list a');
+
+  window.addEventListener('scroll', () => {
+    let current = '';
+    sections.forEach(sec => {
+      if (window.scrollY >= sec.offsetTop - 120) {
+        current = sec.id;
+      }
+    });
+    navLinks.forEach(link => {
+      link.classList.remove('active');
+      if (link.getAttribute('href') === '#' + current) {
+        link.classList.add('active');
+      }
+    });
+  }, { passive: true });
+
+  // Expand all days on print
+  window.addEventListener('beforeprint', () => {
+    document.querySelectorAll('.day-card').forEach(c => c.classList.add('open'));
+  });
+</script>
+
+</body>
+</html>
