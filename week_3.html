@@ -655,6 +655,63 @@
     transform: translateY(-2px);
   }
 
+  /* ── QUIZ CTA ── */
+  .quiz-cta {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    background: var(--navy);
+    border: 1px solid #dce8f0;
+    border-radius: 10px;
+    padding: 24px 28px;
+    text-decoration: none;
+    transition: box-shadow 0.2s, transform 0.15s;
+    color: inherit;
+  }
+
+  .quiz-cta:hover {
+    box-shadow: 0 6px 24px rgba(46,77,110,0.18);
+    transform: translateY(-2px);
+  }
+
+  .quiz-cta-icon {
+    font-family: var(--mono);
+    font-size: 28px;
+    color: var(--sky);
+    flex-shrink: 0;
+    width: 52px;
+    height: 52px;
+    background: rgba(126,184,212,0.12);
+    border: 1px solid rgba(126,184,212,0.25);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .quiz-cta-body { flex: 1; }
+
+  .quiz-cta-title {
+    font-size: 17px;
+    font-weight: 700;
+    color: var(--white);
+    margin-bottom: 4px;
+  }
+
+  .quiz-cta-desc {
+    font-size: 13px;
+    color: var(--sky);
+    line-height: 1.45;
+    opacity: 0.85;
+  }
+
+  .quiz-cta-arrow {
+    font-size: 22px;
+    color: var(--sky);
+    flex-shrink: 0;
+    opacity: 0.7;
+  }
+
   /* ── RESPONSIVE ── */
   @media (max-width: 768px) {
     .layout { grid-template-columns: 1fr; padding: 0 16px; }
@@ -720,7 +777,7 @@
       <li><a href="#deliverables"><span class="nav-day">DEL</span> Deliverables</a></li>
       <li><a href="#tools"><span class="nav-day">REF</span> Tools Reference</a></li>
       <div class="nav-divider"></div>
-      <li><a href="nmap_quiz.html"><span class="nav-day">QZ</span> Nmap Quiz</a></li>
+      <li><a href="#quiz"><span class="nav-day">QZ</span> Nmap Quiz</a></li>
 
     </ul>
   </aside>
@@ -1142,7 +1199,25 @@
       </div>
     </section>
 
+    <!-- QUIZ CTA -->
+    <section class="section" id="quiz">
+      <div class="section-header">
+        <div class="section-icon">QZ</div>
+        <div>
+          <div class="section-title">Knowledge Check</div>
+          <div class="section-subtitle">Test what you learned this week</div>
+        </div>
+      </div>
 
+      <a class="quiz-cta" href="nmap_quiz.html">
+        <div class="quiz-cta-icon">&gt;_</div>
+        <div class="quiz-cta-body">
+          <div class="quiz-cta-title">Nmap Quiz — 10 Questions</div>
+          <div class="quiz-cta-desc">Host discovery · Port states · Common flags · Scan output · Wireshark comparison</div>
+        </div>
+        <div class="quiz-cta-arrow">›</div>
+      </a>
+    </section>
 
   </main>
 </div>
