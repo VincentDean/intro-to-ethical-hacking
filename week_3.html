@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -18,8 +18,19 @@
     --accent:  #e84855;
     --green:   #2a9d50;
     --amber:   #e8a020;
+    --border:  var(--border);
     --mono:    'IBM Plex Mono', monospace;
     --sans:    'IBM Plex Sans', sans-serif;
+  }
+
+  /* ── DARK THEME ── */
+  html[data-theme="dark"] {
+    --paper:  #080e17;
+    --white:  #111d29;
+    --ink:    #c8dfe8;
+    --frost:  #1e3048;
+    --steel:  #7ab8d4;
+    --border: #1e3048;
   }
 
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -32,6 +43,52 @@
     color: var(--ink);
     min-height: 100vh;
     overflow-x: hidden;
+    transition: background 0.3s, color 0.3s;
+  }
+
+  /* ── GRID BACKGROUND ── */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(74,158,202,0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(74,158,202,0.04) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+    transition: opacity 0.3s;
+  }
+
+  html[data-theme="light"] body::before {
+    background-image:
+      linear-gradient(rgba(13,27,42,0.05) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(13,27,42,0.05) 1px, transparent 1px);
+  }
+
+  /* ── SCAN LINE ANIMATION ── */
+  body::after {
+    content: '';
+    position: fixed;
+    top: -100%;
+    left: 0;
+    right: 0;
+    height: 200%;
+    background: linear-gradient(transparent 49.5%, rgba(74,158,202,0.03) 50%, transparent 50.5%);
+    background-size: 100% 4px;
+    animation: scan 8s linear infinite;
+    pointer-events: none;
+    z-index: 0;
+    transition: opacity 0.3s;
+  }
+
+  html[data-theme="light"] body::after {
+    opacity: 0;
+  }
+
+  @keyframes scan {
+    0%   { transform: translateY(0); }
+    100% { transform: translateY(50%); }
   }
 
   /* ── HEADER ── */
@@ -130,6 +187,8 @@
     gap: 0;
     padding: 0 24px;
     align-items: start;
+    position: relative;
+    z-index: 1;
   }
 
   .sidebar {
@@ -195,7 +254,7 @@
   /* ── MAIN CONTENT ── */
   main {
     padding: 32px 0 64px 24px;
-    border-left: 1px solid #dce8f0;
+    border-left: 1px solid var(--border);
     min-width: 0;
   }
 
@@ -254,7 +313,7 @@
   /* ── DAY CARDS ── */
   .day-card {
     background: var(--white);
-    border: 1px solid #dce8f0;
+    border: 1px solid var(--border);
     border-radius: 10px;
     overflow: hidden;
     margin-bottom: 20px;
@@ -407,7 +466,7 @@
 
   .obj-item {
     background: var(--white);
-    border: 1px solid #dce8f0;
+    border: 1px solid var(--border);
     border-left: 4px solid var(--slate);
     border-radius: 0 8px 8px 0;
     padding: 12px 16px;
@@ -428,7 +487,7 @@
     border-collapse: collapse;
     font-size: 13px;
     background: var(--white);
-    border: 1px solid #dce8f0;
+    border: 1px solid var(--border);
     border-radius: 8px;
     overflow: hidden;
   }
@@ -533,7 +592,7 @@
     align-items: center;
     gap: 14px;
     background: var(--white);
-    border: 1px solid #dce8f0;
+    border: 1px solid var(--border);
     border-radius: 8px;
     padding: 12px 16px;
     transition: box-shadow 0.15s;
@@ -579,7 +638,7 @@
 
   .reflection-item {
     background: var(--white);
-    border: 1px solid #dce8f0;
+    border: 1px solid var(--border);
     border-radius: 8px;
     padding: 14px 16px 14px 50px;
     font-size: 14px;
@@ -615,7 +674,7 @@
 
   .tool-card {
     background: var(--white);
-    border: 1px solid #dce8f0;
+    border: 1px solid var(--border);
     border-radius: 8px;
     padding: 14px;
     transition: box-shadow 0.2s;
@@ -687,7 +746,7 @@
     align-items: center;
     gap: 20px;
     background: var(--navy);
-    border: 1px solid #dce8f0;
+    border: 1px solid var(--border);
     border-radius: 10px;
     padding: 24px 28px;
     text-decoration: none;
@@ -738,6 +797,31 @@
     opacity: 0.7;
   }
 
+  /* ── THEME TOGGLE ── */
+  .theme-toggle {
+    position: fixed;
+    top: 20px;
+    right: 24px;
+    z-index: 1000;
+    background: var(--white);
+    border: 1px solid var(--border);
+    color: var(--sky);
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 17px;
+    transition: background 0.2s, border-color 0.2s;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.25);
+  }
+
+  .theme-toggle:hover {
+    border-color: var(--sky);
+  }
+
   /* ── RESPONSIVE ── */
   @media (max-width: 768px) {
     .layout { grid-template-columns: 1fr; padding: 0 16px; }
@@ -750,7 +834,7 @@
 
   @media print {
     header { position: static; }
-    .sidebar, .print-btn { display: none; }
+    .sidebar, .print-btn, .theme-toggle { display: none; }
     .layout { grid-template-columns: 1fr; }
     main { border-left: none; }
     .section { opacity: 1; transform: none; }
@@ -771,6 +855,8 @@
 </style>
 </head>
 <body>
+
+<button class="theme-toggle" id="themeToggle" aria-label="Toggle light/dark mode">☀</button>
 
 <div class="progress-bar" id="progressBar"></div>
 
@@ -1266,6 +1352,19 @@
   // Expand all days on print
   window.addEventListener('beforeprint', () => {
     document.querySelectorAll('.day-card').forEach(c => c.classList.add('open'));
+  });
+
+  // Theme toggle (shared key with index.html)
+  const themeToggle = document.getElementById('themeToggle');
+  const storedTheme = localStorage.getItem('indexTheme') || 'dark';
+  document.documentElement.setAttribute('data-theme', storedTheme);
+  themeToggle.textContent = storedTheme === 'dark' ? '☀' : '☽';
+
+  themeToggle.addEventListener('click', () => {
+    const next = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', next);
+    localStorage.setItem('indexTheme', next);
+    themeToggle.textContent = next === 'dark' ? '☀' : '☽';
   });
 </script>
 
