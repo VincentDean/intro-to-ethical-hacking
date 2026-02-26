@@ -427,10 +427,9 @@
 
   /* ── THEME TOGGLE ── */
   .theme-toggle {
-    position: fixed;
-    top: 20px;
-    right: 24px;
-    z-index: 1000;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     background: var(--card);
     border: 1px solid var(--border);
     color: var(--sky);
@@ -438,12 +437,10 @@
     height: 38px;
     border-radius: 50%;
     cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
     font-size: 17px;
     transition: background 0.2s, border-color 0.2s;
     box-shadow: 0 2px 10px rgba(0,0,0,0.25);
+    margin: 0 auto 24px;
   }
 
   .theme-toggle:hover {
@@ -463,10 +460,9 @@
 </head>
 <body>
 
-<button class="theme-toggle" id="themeToggle" aria-label="Toggle light/dark mode">☀</button>
-
 <!-- HEADER -->
 <header>
+  <button class="theme-toggle" id="themeToggle" aria-label="Toggle light/dark mode">☀</button>
   <div class="header-eyebrow">Cybersecurity Fundamentals</div>
   <h1 class="header-title">Ethical <span>Hacking</span></h1>
   <p class="header-sub">An 18-week practitioner course in authorized security testing, network analysis, and professional reporting.</p>
