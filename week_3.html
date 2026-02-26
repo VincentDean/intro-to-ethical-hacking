@@ -887,6 +887,7 @@
       <div class="nav-divider"></div>
       <li><a href="#deliverables"><span class="nav-day">DEL</span> Deliverables</a></li>
       <li><a href="#tools"><span class="nav-day">REF</span> Tools Reference</a></li>
+      <li><a href="#wireless"><span class="nav-day">WN</span> Wireless Network Basics</a></li>
       <li><a href="#" onclick="window.print(); return false;"><span class="nav-day">PDF</span> Download PDF</a></li>
 
     </ul>
@@ -1290,6 +1291,241 @@
           <div class="tool-name">Wireshark filter</div>
           <div class="tool-desc">Filter traffic by IP address</div>
           <div class="tool-cmd">ip.addr == 192.168.x.x</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- WIRELESS NETWORK BASICS -->
+    <section class="section" id="wireless">
+      <div class="day-card">
+        <div class="day-header" onclick="toggleDay(this)">
+          <div class="day-number">WN</div>
+          <div class="day-title-block">
+            <div class="day-title">Wireless Network Basics</div>
+            <div class="day-focus">Wireless Network Primer — Intro to Ethical Hacking Reference Guide</div>
+          </div>
+          <div class="day-toggle">▾</div>
+        </div>
+        <div class="day-body">
+
+          <div class="notice notice-info" style="margin-top:16px;">
+            <div class="notice-icon">ℹ</div>
+            <div><strong>Understanding networks is step one.</strong><p>You can't attack what you don't understand.</p></div>
+          </div>
+
+          <!-- 1. How Wireless Networks Work -->
+          <div class="time-block">
+            <div class="time-label">1. How Wireless Networks Work</div>
+            <p style="font-size:13px;color:var(--slate);margin-bottom:10px;">Wireless networks transmit data using radio frequency (RF) signals — electromagnetic waves propagating through air instead of copper or fiber. Understanding the physics and logical structure beneath a Wi-Fi connection is foundational to both defending and assessing those networks.</p>
+            <p style="font-size:13px;font-weight:600;color:var(--ink);margin:10px 0 6px;">The RF Signal Journey</p>
+            <p style="font-size:13px;color:var(--slate);margin-bottom:8px;">When a device sends data wirelessly, it follows this path:</p>
+            <ul class="step-list">
+              <li>Data is broken into frames at the data link layer (Layer 2).</li>
+              <li>Frames are modulated onto a carrier RF signal at a specific frequency.</li>
+              <li>The signal radiates outward from the antenna — available to any receiver in range, friend or foe.</li>
+              <li>A receiver demodulates the signal, extracts the frame, and passes it up the OSI stack.</li>
+            </ul>
+            <p style="font-size:13px;color:var(--slate);margin:8px 0 14px;">This broadcast nature is why wireless security matters: unlike wired networks, the medium is inherently shared and visible.</p>
+            <p style="font-size:13px;font-weight:600;color:var(--ink);margin:10px 0 8px;">The 802.11 Standard Family</p>
+            <p style="font-size:13px;color:var(--slate);margin-bottom:8px;">All modern Wi-Fi is governed by IEEE 802.11 standards. Key versions:</p>
+            <table class="data-table" style="margin-bottom:10px;">
+              <thead>
+                <tr>
+                  <th>Standard</th>
+                  <th>Frequency / Bandwidth</th>
+                  <th>Max Throughput</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><td>802.11b</td><td>2.4 GHz / 22 MHz</td><td>11 Mbps</td></tr>
+                <tr><td>802.11g</td><td>2.4 GHz / 20 MHz</td><td>54 Mbps</td></tr>
+                <tr><td>802.11n (Wi-Fi 4)</td><td>2.4 &amp; 5 GHz / 20–40 MHz</td><td>600 Mbps</td></tr>
+                <tr><td>802.11ac (Wi-Fi 5)</td><td>5 GHz / up to 160 MHz</td><td>3.5 Gbps</td></tr>
+                <tr><td>802.11ax (Wi-Fi 6/6E)</td><td>2.4, 5, 6 GHz / up to 160 MHz</td><td>9.6 Gbps</td></tr>
+              </tbody>
+            </table>
+            <p style="font-size:13px;color:var(--slate);">From an attacker's perspective, older standards mean weaker encryption options and more vulnerable devices still on the network.</p>
+          </div>
+
+          <!-- 2. Key Network Components -->
+          <div class="time-block">
+            <div class="time-label">2. Key Network Components</div>
+            <p style="font-size:13px;color:var(--slate);margin-bottom:10px;">Before running any recon tool, know what you're looking at when results come back.</p>
+            <p style="font-size:13px;font-weight:600;color:var(--ink);margin:10px 0 6px;">Access Points (APs) and Routers</p>
+            <p style="font-size:13px;color:var(--slate);margin-bottom:8px;">The access point is the bridge between the wireless medium and the wired network. A home router combines an AP, switch, and router into one device. Enterprise environments separate these roles.</p>
+            <ul class="step-list">
+              <li><strong>BSSID:</strong> The MAC address of the AP radio — unique hardware identifier, used in packet captures.</li>
+              <li><strong>SSID:</strong> The human-readable network name. Can be hidden (but discoverable via probe requests).</li>
+              <li><strong>Channel:</strong> The sub-frequency band the AP broadcasts on.</li>
+            </ul>
+            <p style="font-size:13px;font-weight:600;color:var(--ink);margin:14px 0 6px;">Wireless NICs and Monitor Mode</p>
+            <p style="font-size:13px;color:var(--slate);margin-bottom:8px;">Your laptop's wireless card has two relevant operating modes:</p>
+            <ul class="step-list">
+              <li><strong>Managed mode</strong> — normal client mode; card only processes frames addressed to it.</li>
+              <li><strong>Monitor mode</strong> — the card captures all 802.11 frames in range, regardless of destination. Required for passive reconnaissance with tools like Wireshark or airodump-ng.</li>
+            </ul>
+            <p style="font-size:13px;color:var(--slate);margin:8px 0 14px;">Not all cards support monitor mode. External USB adapters (e.g., Alfa AWUS036ACH) are commonly used in labs.</p>
+            <p style="font-size:13px;font-weight:600;color:var(--ink);margin:10px 0 6px;">Client Devices and Probe Requests</p>
+            <p style="font-size:13px;color:var(--slate);margin-bottom:8px;">Every wireless client broadcasts probe request frames searching for known SSIDs. These leak:</p>
+            <ul class="step-list">
+              <li>The device's MAC address (historically permanent; modern OS use randomized MACs).</li>
+              <li>SSIDs of networks the device has connected to before.</li>
+            </ul>
+            <p style="font-size:13px;color:var(--slate);margin-top:8px;">This is passive intelligence — no interaction needed, just listen.</p>
+          </div>
+
+          <!-- 3. Network Design & Architecture -->
+          <div class="time-block">
+            <div class="time-label">3. Network Design &amp; Architecture</div>
+            <p style="font-size:13px;color:var(--slate);margin-bottom:10px;">How a network is laid out determines both its performance and its attack surface. Ethical hackers map this architecture during reconnaissance.</p>
+            <p style="font-size:13px;font-weight:600;color:var(--ink);margin:10px 0 8px;">Common Wireless Topologies</p>
+            <ul class="step-list">
+              <li><strong>Infrastructure Mode</strong> — Single AP + multiple clients. Most common. AP controls channel access.</li>
+              <li><strong>Ad-hoc / IBSS Mode</strong> — Peer-to-peer, no AP. Rare in production; used in some IoT deployments.</li>
+              <li><strong>Mesh Networks</strong> — Multiple APs interconnect wirelessly, each backhauling to another. Expands coverage; increases complexity.</li>
+              <li><strong>Enterprise / Controller-Based</strong> — Centralized Wireless LAN Controllers (WLCs) manage dozens of APs. Richer logging and policy.</li>
+            </ul>
+            <p style="font-size:13px;font-weight:600;color:var(--ink);margin:14px 0 8px;">Network Segmentation and VLANs</p>
+            <p style="font-size:13px;color:var(--slate);margin-bottom:8px;">Well-designed networks separate traffic types using VLANs (Virtual LANs) mapped to SSIDs:</p>
+            <table class="data-table" style="margin-bottom:10px;">
+              <thead>
+                <tr>
+                  <th>SSID / VLAN</th>
+                  <th>Purpose &amp; Trust Level</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><td>CorpNet</td><td>Employee devices — high trust, full internal access</td></tr>
+                <tr><td>Guest</td><td>Visitor internet only — isolated from internal resources</td></tr>
+                <tr><td>IoT / OT</td><td>Cameras, sensors — zero trust, no lateral movement</td></tr>
+                <tr><td>BYOD</td><td>Personal devices — limited access, MDM-enrolled</td></tr>
+              </tbody>
+            </table>
+            <p style="font-size:13px;color:var(--slate);margin-bottom:14px;">Misconfigured VLAN separation is a common finding in real assessments — a guest network that can reach internal file shares, for example.</p>
+            <p style="font-size:13px;font-weight:600;color:var(--ink);margin:10px 0 6px;">Channel Planning and Co-Channel Interference</p>
+            <p style="font-size:13px;color:var(--slate);">The 2.4 GHz band has only 3 non-overlapping channels (1, 6, 11). Dense deployments with poor channel planning produce overlapping signals — degraded performance and more noise for passive capture. The 5 GHz band offers 24+ non-overlapping channels, reducing congestion.</p>
+          </div>
+
+          <!-- 4. Wireless Security Protocols -->
+          <div class="time-block">
+            <div class="time-label">4. Wireless Security Protocols</div>
+            <p style="font-size:13px;color:var(--slate);margin-bottom:10px;">Security on a wireless network is only as strong as its authentication and encryption choices. As a hacker, you're looking for outdated or misconfigured protocols.</p>
+            <p style="font-size:13px;font-weight:600;color:var(--ink);margin:10px 0 8px;">Protocol Timeline</p>
+            <table class="data-table" style="margin-bottom:14px;">
+              <thead>
+                <tr>
+                  <th>Protocol</th>
+                  <th>Encryption</th>
+                  <th>Status / Risk</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><td>WEP (1997)</td><td>RC4 (broken)</td><td>CRITICAL — crack in minutes</td></tr>
+                <tr><td>WPA (2003)</td><td>TKIP + RC4</td><td>DEPRECATED — avoid</td></tr>
+                <tr><td>WPA2 Personal</td><td>AES-CCMP</td><td>Vulnerable to PMKID/4-way handshake capture</td></tr>
+                <tr><td>WPA2 Enterprise</td><td>AES-CCMP + 802.1X</td><td>Stronger — requires RADIUS server</td></tr>
+                <tr><td>WPA3 Personal</td><td>SAE (Dragonfly)</td><td>Resistant to offline dictionary attacks</td></tr>
+                <tr><td>WPA3 Enterprise</td><td>192-bit GCMP</td><td>Current best practice</td></tr>
+              </tbody>
+            </table>
+            <p style="font-size:13px;font-weight:600;color:var(--ink);margin:10px 0 6px;">The 4-Way Handshake</p>
+            <p style="font-size:13px;color:var(--slate);margin-bottom:8px;">When a WPA2 client authenticates, it performs a 4-way handshake to derive the Pairwise Transient Key (PTK). Capturing this handshake is the first step in an offline password crack:</p>
+            <ul class="step-list">
+              <li>Attacker puts card in monitor mode and runs <code>airodump-ng</code> to capture traffic.</li>
+              <li>A deauthentication attack (<code>aireplay-ng -0</code>) forces a client to reconnect, triggering the handshake.</li>
+              <li>The captured <code>.cap</code> file is fed to <code>hashcat</code> or <code>aircrack-ng</code> with a wordlist.</li>
+            </ul>
+            <p style="font-size:13px;color:var(--slate);margin:8px 0 14px;">The underlying password is never transmitted — the handshake only proves knowledge of it. This means a strong, random passphrase is the primary defense.</p>
+            <p style="font-size:13px;font-weight:600;color:var(--ink);margin:10px 0 6px;">Open Networks and Evil Twin Attacks</p>
+            <p style="font-size:13px;color:var(--slate);margin-bottom:14px;">Open networks (no encryption) transmit all data in plaintext — any monitor-mode device in range reads it. The Evil Twin attack creates a rogue AP with a matching SSID to intercept traffic or harvest credentials via a captive portal. Detection involves comparing BSSIDs for the same SSID.</p>
+            <p style="font-size:13px;font-weight:600;color:var(--ink);margin:10px 0 6px;">Lab Connection: What You've Already Used</p>
+            <ul class="step-list">
+              <li><code>airodump-ng</code> — passive beacon/client capture (recon phase)</li>
+              <li><code>Wireshark</code> in monitor mode — full packet inspection of unencrypted frames</li>
+              <li><code>nmap</code> — once you're on the network, mapping hosts and services</li>
+              <li>The 4-way handshake capture — foundation for WPA2 password testing</li>
+            </ul>
+          </div>
+
+          <!-- 5. Wireless Reconnaissance & Assessment Concepts -->
+          <div class="time-block">
+            <div class="time-label">5. Wireless Reconnaissance &amp; Assessment Concepts</div>
+            <p style="font-size:13px;color:var(--slate);margin-bottom:10px;">The goal of wireless recon is to map the environment before touching anything. Passive recon leaves no logs.</p>
+            <p style="font-size:13px;font-weight:600;color:var(--ink);margin:10px 0 6px;">Passive vs. Active Recon</p>
+            <p style="font-size:13px;color:var(--slate);margin-bottom:8px;">Passive recon involves only listening — no packets sent. Active recon involves sending probes or injecting frames, which may appear in logs.</p>
+            <table class="data-table" style="margin-bottom:14px;">
+              <thead>
+                <tr>
+                  <th>Technique</th>
+                  <th>Tool</th>
+                  <th>What It Reveals</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><td>Beacon capture</td><td><code>airodump-ng</code></td><td>SSIDs, BSSIDs, channels, encryption type</td></tr>
+                <tr><td>Probe request sniff</td><td><code>Wireshark</code></td><td>Client device history, MAC addresses</td></tr>
+                <tr><td>PMKID capture</td><td><code>hcxdumptool</code></td><td>Hash for offline WPA2 cracking — no deauth needed</td></tr>
+                <tr><td>Deauth + handshake</td><td><code>aireplay-ng</code></td><td>WPA2 handshake for offline cracking (active)</td></tr>
+                <tr><td>Evil Twin / Rogue AP</td><td><code>hostapd / airbase-ng</code></td><td>Credential harvesting, MitM (active)</td></tr>
+              </tbody>
+            </table>
+            <p style="font-size:13px;font-weight:600;color:var(--ink);margin:10px 0 8px;">What to Document in a Wireless Assessment</p>
+            <ul class="step-list">
+              <li>All detected SSIDs, associated BSSIDs, channels, and encryption protocols.</li>
+              <li>Signal strength and approximate physical range — relevant to rogue AP placement.</li>
+              <li>Clients and their MAC addresses / probe histories.</li>
+              <li>Any open or WEP networks — immediate critical findings.</li>
+              <li>Enterprise vs. Personal authentication — scope of credential attack surface.</li>
+            </ul>
+          </div>
+
+          <!-- 6. Wireless Hardening -->
+          <div class="time-block">
+            <div class="time-label">6. Wireless Hardening (Know the Defense)</div>
+            <p style="font-size:13px;color:var(--slate);margin-bottom:10px;">Ethical hackers understand both sides. Knowing hardening practices tells you what a prepared target looks like — and where shortcuts may have been taken.</p>
+            <ul class="step-list">
+              <li>Use WPA3 where supported. WPA2-Enterprise for organizational deployments.</li>
+              <li>Strong, random PSKs — minimum 20 characters, no dictionary words.</li>
+              <li>Separate SSIDs/VLANs for guests, IoT, and corporate devices.</li>
+              <li>Disable WPS (Wi-Fi Protected Setup) — brute-forceable PIN attack vector.</li>
+              <li>802.1X / RADIUS authentication eliminates shared PSKs entirely.</li>
+              <li>Wireless Intrusion Detection Systems (WIDS) flag rogue APs and deauth floods.</li>
+              <li>Regular audits using the same tools attackers use — know your footprint.</li>
+            </ul>
+          </div>
+
+          <!-- Glossary -->
+          <div class="time-block">
+            <div class="time-label">Quick Reference Glossary</div>
+            <table class="data-table" style="margin-bottom:14px;">
+              <thead>
+                <tr>
+                  <th>Term</th>
+                  <th>Definition</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><td>SSID</td><td>Service Set Identifier — the human-readable wireless network name</td></tr>
+                <tr><td>BSSID</td><td>Basic Service Set Identifier — MAC address of the AP radio</td></tr>
+                <tr><td>Channel</td><td>Sub-frequency band within the 2.4/5/6 GHz spectrum</td></tr>
+                <tr><td>Beacon Frame</td><td>Broadcast frame AP sends every ~100ms advertising its presence</td></tr>
+                <tr><td>Probe Request</td><td>Frame sent by clients searching for known networks</td></tr>
+                <tr><td>Monitor Mode</td><td>NIC mode capturing all frames regardless of destination</td></tr>
+                <tr><td>PTK</td><td>Pairwise Transient Key — session encryption key derived in 4-way handshake</td></tr>
+                <tr><td>PMKID</td><td>Identifier in RSN IE — allows handshake capture without client deauth</td></tr>
+                <tr><td>Evil Twin</td><td>Rogue AP mimicking a legitimate SSID to intercept traffic</td></tr>
+                <tr><td>WPS</td><td>Wi-Fi Protected Setup — PIN-based pairing; brute-force vulnerable</td></tr>
+                <tr><td>RADIUS / 802.1X</td><td>Enterprise auth framework — per-user credentials instead of shared PSK</td></tr>
+                <tr><td>VLAN</td><td>Virtual LAN — logical network segmentation at Layer 2</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="notice notice-warn">
+            <div class="notice-icon">⚠</div>
+            <div><strong>Authorized Use Only — For Academic and Lab Purposes</strong><p>All techniques described in this document are to be applied only in authorized, air-gapped lab environments. Unauthorized access to computer networks is a federal crime under the Computer Fraud and Abuse Act (CFAA). Intro to Ethical Hacking Curriculum</p></div>
+          </div>
+
         </div>
       </div>
     </section>
