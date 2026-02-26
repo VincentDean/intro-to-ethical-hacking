@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -24,6 +24,20 @@
     --sans:     'DM Sans', sans-serif;
   }
 
+  /* ── LIGHT THEME ── */
+  html[data-theme="light"] {
+    --bg:      #f0f6fc;
+    --surface: #e4eef8;
+    --card:    #ffffff;
+    --border:  #c4d8ec;
+    --sky:     #1e6fa0;
+    --frost:   #7ab8d8;
+    --white:   #0d1b2a;
+    --dim:     #4a6882;
+    --green:   #1a8a48;
+    --amber:   #b87018;
+  }
+
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   html { scroll-behavior: smooth; }
 
@@ -33,6 +47,7 @@
     color: var(--white);
     min-height: 100vh;
     overflow-x: hidden;
+    transition: background 0.3s, color 0.3s;
   }
 
   /* ── GRID BACKGROUND ── */
@@ -46,6 +61,13 @@
     background-size: 40px 40px;
     pointer-events: none;
     z-index: 0;
+    transition: opacity 0.3s;
+  }
+
+  html[data-theme="light"] body::before {
+    background-image:
+      linear-gradient(rgba(13,27,42,0.05) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(13,27,42,0.05) 1px, transparent 1px);
   }
 
   /* ── SCAN LINE ANIMATION ── */
@@ -61,6 +83,11 @@
     animation: scan 8s linear infinite;
     pointer-events: none;
     z-index: 0;
+    transition: opacity 0.3s;
+  }
+
+  html[data-theme="light"] body::after {
+    opacity: 0;
   }
 
   @keyframes scan {
@@ -270,7 +297,7 @@
 
   .lesson-row:hover {
     border-color: var(--sky);
-    background: #142030;
+    background: var(--surface);
     transform: translateX(4px);
   }
 
@@ -398,6 +425,31 @@
     to   { opacity: 1; transform: translateY(0); }
   }
 
+  /* ── THEME TOGGLE ── */
+  .theme-toggle {
+    position: fixed;
+    top: 20px;
+    right: 24px;
+    z-index: 1000;
+    background: var(--card);
+    border: 1px solid var(--border);
+    color: var(--sky);
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 17px;
+    transition: background 0.2s, border-color 0.2s;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.25);
+  }
+
+  .theme-toggle:hover {
+    border-color: var(--sky);
+  }
+
   /* ── RESPONSIVE ── */
   @media (max-width: 600px) {
     header { padding: 40px 20px 32px; }
@@ -410,6 +462,8 @@
 </style>
 </head>
 <body>
+
+<button class="theme-toggle" id="themeToggle" aria-label="Toggle light/dark mode">☀</button>
 
 <!-- HEADER -->
 <header>
@@ -567,6 +621,19 @@
   }, { threshold: 0.08 });
 
   document.querySelectorAll('.unit-card, .team-card, .lesson-row').forEach(el => observer.observe(el));
+
+  // Theme toggle
+  const toggle = document.getElementById('themeToggle');
+  const stored = localStorage.getItem('indexTheme') || 'dark';
+  document.documentElement.setAttribute('data-theme', stored);
+  toggle.textContent = stored === 'dark' ? '☀' : '☽';
+
+  toggle.addEventListener('click', () => {
+    const next = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', next);
+    localStorage.setItem('indexTheme', next);
+    toggle.textContent = next === 'dark' ? '☀' : '☽';
+  });
 </script>
 
 </body>
