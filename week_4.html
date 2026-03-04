@@ -1,0 +1,1301 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Week 4 — Kali Linux Boot &amp; Exploration Challenge</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy:    #0d1b2a;
+    --ink:     #1c2e40;
+    --steel:   #2e4d6e;
+    --slate:   #4a6fa5;
+    --sky:     #7eb8d4;
+    --frost:   #d0e8f2;
+    --paper:   #f4f7fa;
+    --white:   #ffffff;
+    --accent:  #e84855;
+    --green:   #2a9d50;
+    --amber:   #e8a020;
+    --mono:    'IBM Plex Mono', monospace;
+    --sans:    'IBM Plex Sans', sans-serif;
+  }
+
+  html[data-theme="dark"] {
+    --paper:  #080e17;
+    --white:  #111d29;
+    --ink:    #c8dfe8;
+    --frost:  #1e3048;
+    --steel:  #7ab8d4;
+    --border: #1e3048;
+  }
+
+  html[data-theme="light"] {
+    --border: #c5d8e8;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: var(--sans);
+    background: var(--paper);
+    color: var(--ink);
+    min-height: 100vh;
+    overflow-x: hidden;
+    transition: background 0.3s, color 0.3s;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(74,158,202,0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(74,158,202,0.04) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+    transition: opacity 0.3s;
+  }
+
+  html[data-theme="light"] body::before {
+    background-image:
+      linear-gradient(rgba(13,27,42,0.05) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(13,27,42,0.05) 1px, transparent 1px);
+  }
+
+  body::after {
+    content: '';
+    position: fixed;
+    top: -100%;
+    left: 0;
+    right: 0;
+    height: 200%;
+    background: linear-gradient(transparent 49.5%, rgba(74,158,202,0.03) 50%, transparent 50.5%);
+    background-size: 100% 4px;
+    animation: scan 8s linear infinite;
+    pointer-events: none;
+    z-index: 0;
+    transition: opacity 0.3s;
+  }
+
+  html[data-theme="light"] body::after { opacity: 0; }
+
+  @keyframes scan {
+    0%   { transform: translateY(0); }
+    100% { transform: translateY(50%); }
+  }
+
+  /* ── HEADER ── */
+  header {
+    background: var(--navy);
+    color: #d0e8f2;
+    padding: 0;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    border-bottom: 3px solid var(--accent);
+    box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+  }
+
+  .progress-bar-wrap {
+    position: absolute;
+    bottom: -3px;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: transparent;
+    z-index: 101;
+  }
+
+  #progressBar {
+    height: 100%;
+    width: 0%;
+    background: var(--sky);
+    transition: width 0.1s linear;
+  }
+
+  .header-inner {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 14px 32px;
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    flex-wrap: wrap;
+  }
+
+  .header-week {
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--sky);
+    border: 1px solid var(--steel);
+    padding: 4px 10px;
+    border-radius: 3px;
+    white-space: nowrap;
+  }
+
+  .header-title {
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    flex: 1;
+  }
+
+  .header-meta {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+
+  .meta-chip {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--sky);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .meta-chip::before {
+    content: '';
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--sky);
+    opacity: 0.7;
+  }
+
+  .header-back {
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--sky);
+    text-decoration: none;
+    border: 1px solid var(--steel);
+    padding: 4px 10px;
+    border-radius: 3px;
+    white-space: nowrap;
+    transition: border-color 0.15s, color 0.15s;
+  }
+
+  .header-back:hover { border-color: var(--sky); color: var(--white); }
+
+  button#themeToggle {
+    font-family: var(--mono);
+    font-size: 14px;
+    background: none;
+    border: 1px solid var(--steel);
+    color: var(--sky);
+    padding: 4px 9px;
+    border-radius: 3px;
+    cursor: pointer;
+    transition: border-color 0.15s;
+  }
+
+  button#themeToggle:hover { border-color: var(--sky); }
+
+  /* ── LAYOUT ── */
+  .layout {
+    display: grid;
+    grid-template-columns: 220px 1fr;
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 32px 32px 64px;
+    gap: 40px;
+    position: relative;
+    z-index: 1;
+  }
+
+  @media (max-width: 768px) {
+    .layout { grid-template-columns: 1fr; }
+    .sidebar { display: none; }
+  }
+
+  /* ── SIDEBAR ── */
+  .sidebar {
+    position: sticky;
+    top: 72px;
+    height: fit-content;
+  }
+
+  .nav-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--slate);
+    margin-bottom: 12px;
+  }
+
+  .nav-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .nav-list a {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--slate);
+    text-decoration: none;
+    display: block;
+    padding: 6px 10px;
+    border-left: 2px solid transparent;
+    border-radius: 0 3px 3px 0;
+    transition: color 0.15s, border-color 0.15s, background 0.15s;
+  }
+
+  .nav-list a:hover,
+  .nav-list a.active {
+    color: var(--sky);
+    border-left-color: var(--sky);
+    background: rgba(126,184,212,0.06);
+  }
+
+  .nav-list .nav-sub {
+    padding-left: 20px;
+    font-size: 11px;
+  }
+
+  /* ── MAIN ── */
+  main { min-width: 0; }
+
+  .section {
+    margin-bottom: 48px;
+    opacity: 0;
+    transform: translateY(18px);
+    transition: opacity 0.5s ease, transform 0.5s ease;
+  }
+
+  .section.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .section-header {
+    display: flex;
+    align-items: baseline;
+    gap: 14px;
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .section-num {
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--accent);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  .section-title {
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: var(--ink);
+  }
+
+  /* ── MISSION BLOCK ── */
+  .mission-block {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--sky);
+    border-radius: 6px;
+    padding: 20px 24px;
+    margin-bottom: 20px;
+  }
+
+  .mission-block p {
+    font-size: 14px;
+    color: var(--slate);
+    line-height: 1.7;
+  }
+
+  /* ── ALERT / NOTICE ── */
+  .notice {
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+    padding: 16px 20px;
+    border-radius: 6px;
+    margin: 20px 0;
+    font-size: 13px;
+    line-height: 1.6;
+  }
+
+  .notice-icon {
+    font-size: 16px;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+
+  .notice-warn {
+    background: rgba(232,160,32,0.1);
+    border: 1px solid rgba(232,160,32,0.3);
+    color: var(--ink);
+  }
+
+  .notice-warn .notice-icon { color: var(--amber); }
+
+  .notice-danger {
+    background: rgba(232,72,85,0.08);
+    border: 1px solid rgba(232,72,85,0.3);
+    color: var(--ink);
+  }
+
+  .notice-danger .notice-icon { color: var(--accent); }
+
+  .notice-info {
+    background: rgba(126,184,212,0.08);
+    border: 1px solid rgba(126,184,212,0.2);
+    color: var(--ink);
+  }
+
+  .notice-info .notice-icon { color: var(--sky); }
+
+  .notice-green {
+    background: rgba(42,157,80,0.08);
+    border: 1px solid rgba(42,157,80,0.25);
+    color: var(--ink);
+  }
+
+  .notice-green .notice-icon { color: var(--green); }
+
+  /* ── ROLE CARDS ── */
+  .role-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin: 16px 0;
+  }
+
+  @media (max-width: 520px) { .role-grid { grid-template-columns: 1fr; } }
+
+  .role-card {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 18px 20px;
+  }
+
+  .role-card .role-title {
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--sky);
+    margin-bottom: 6px;
+  }
+
+  .role-card .role-desc {
+    font-size: 13px;
+    color: var(--slate);
+    line-height: 1.6;
+  }
+
+  /* ── STEP LIST ── */
+  .step-list {
+    list-style: none;
+    margin: 10px 0;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .step-list li {
+    font-size: 13px;
+    color: var(--slate);
+    padding-left: 20px;
+    position: relative;
+    line-height: 1.6;
+  }
+
+  .step-list li::before {
+    content: '›';
+    position: absolute;
+    left: 4px;
+    color: var(--sky);
+    font-weight: 700;
+  }
+
+  /* ── NUMBERED STEPS ── */
+  .numbered-steps {
+    counter-reset: step-counter;
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin: 12px 0;
+  }
+
+  .numbered-steps li {
+    counter-increment: step-counter;
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+    font-size: 13px;
+    color: var(--slate);
+    line-height: 1.6;
+  }
+
+  .numbered-steps li::before {
+    content: counter(step-counter);
+    font-family: var(--mono);
+    font-size: 10px;
+    font-weight: 600;
+    background: var(--navy);
+    border: 1px solid var(--steel);
+    color: var(--sky);
+    min-width: 22px;
+    height: 22px;
+    border-radius: 3px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+
+  /* ── CODE / TERMINAL ── */
+  code {
+    font-family: var(--mono);
+    font-size: 12px;
+    background: rgba(126,184,212,0.1);
+    border: 1px solid rgba(126,184,212,0.2);
+    color: var(--sky);
+    padding: 1px 6px;
+    border-radius: 3px;
+  }
+
+  .terminal-block {
+    background: #060d14;
+    border: 1px solid var(--border);
+    border-top: 3px solid var(--accent);
+    border-radius: 6px;
+    padding: 20px 24px;
+    margin: 14px 0;
+    position: relative;
+    overflow: hidden;
+  }
+
+  html[data-theme="light"] .terminal-block {
+    background: #1a2535;
+  }
+
+  .terminal-block::before {
+    content: 'TERMINAL';
+    font-family: var(--mono);
+    font-size: 9px;
+    font-weight: 600;
+    letter-spacing: 0.2em;
+    color: var(--accent);
+    position: absolute;
+    top: 8px;
+    right: 14px;
+    opacity: 0.7;
+  }
+
+  .terminal-block code {
+    display: block;
+    background: none;
+    border: none;
+    color: #7eb8d4;
+    font-size: 14px;
+    padding: 0;
+    margin-bottom: 4px;
+    line-height: 1.8;
+  }
+
+  .terminal-block code.prompt::before {
+    content: '$ ';
+    color: var(--green);
+    font-weight: 600;
+  }
+
+  /* ── TROUBLE TABLE ── */
+  .trouble-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    margin: 16px 0;
+  }
+
+  .trouble-table th {
+    font-family: var(--mono);
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--sky);
+    padding: 10px 14px;
+    background: var(--white);
+    border: 1px solid var(--border);
+    text-align: left;
+  }
+
+  .trouble-table td {
+    padding: 10px 14px;
+    border: 1px solid var(--border);
+    color: var(--slate);
+    vertical-align: top;
+    line-height: 1.6;
+  }
+
+  .trouble-table tr:nth-child(even) td {
+    background: rgba(126,184,212,0.03);
+  }
+
+  .trouble-table td.problem {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--amber);
+    white-space: nowrap;
+  }
+
+  /* ── TOOL TABLE ── */
+  .data-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    margin: 16px 0;
+  }
+
+  .data-table th {
+    font-family: var(--mono);
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--sky);
+    padding: 10px 14px;
+    background: var(--white);
+    border: 1px solid var(--border);
+    text-align: left;
+  }
+
+  .data-table td {
+    padding: 10px 14px;
+    border: 1px solid var(--border);
+    color: var(--slate);
+    line-height: 1.6;
+    vertical-align: top;
+  }
+
+  .data-table tr:nth-child(even) td {
+    background: rgba(126,184,212,0.03);
+  }
+
+  .data-table td.tool-name {
+    font-family: var(--mono);
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--sky);
+    white-space: nowrap;
+  }
+
+  .data-table td.blank-field {
+    color: var(--steel);
+    font-style: italic;
+    font-size: 12px;
+  }
+
+  /* ── TIME BLOCK (part sections) ── */
+  .time-block {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 20px 24px;
+    margin-bottom: 16px;
+  }
+
+  .time-label {
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--sky);
+    margin-bottom: 14px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  /* ── COMMAND RESULT BOX ── */
+  .cmd-result-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    margin: 14px 0;
+  }
+
+  .cmd-result-row {
+    display: grid;
+    grid-template-columns: 160px 1fr;
+    gap: 0;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    overflow: hidden;
+  }
+
+  @media (max-width: 520px) {
+    .cmd-result-row { grid-template-columns: 1fr; }
+  }
+
+  .cmd-result-label {
+    background: var(--navy);
+    border-right: 1px solid var(--border);
+    padding: 14px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .cmd-result-label code {
+    font-size: 14px;
+    background: none;
+    border: none;
+    padding: 0;
+    color: var(--sky);
+  }
+
+  .cmd-result-label span {
+    font-size: 11px;
+    color: var(--slate);
+    font-family: var(--mono);
+  }
+
+  .cmd-result-value {
+    background: var(--white);
+    padding: 14px 16px;
+    font-size: 13px;
+    color: var(--slate);
+    display: flex;
+    align-items: center;
+  }
+
+  .cmd-result-value em {
+    font-style: italic;
+    font-size: 12px;
+    opacity: 0.6;
+  }
+
+  /* ── DELIVERABLE BOX ── */
+  .deliverable-list {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin: 14px 0;
+  }
+
+  @media (max-width: 520px) {
+    .deliverable-list { grid-template-columns: 1fr; }
+  }
+
+  .deliverable-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    padding: 10px 14px;
+    font-size: 13px;
+    color: var(--slate);
+  }
+
+  .deliverable-item::before {
+    content: '';
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--green);
+    flex-shrink: 0;
+  }
+
+  /* ── OPTIONAL CHALLENGE ── */
+  .optional-block {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-top: 3px solid var(--amber);
+    border-radius: 6px;
+    padding: 20px 24px;
+    margin-top: 20px;
+  }
+
+  .optional-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--amber);
+    margin-bottom: 12px;
+  }
+
+  /* ── REFLECTION ── */
+  .reflection-list {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    margin: 14px 0;
+  }
+
+  .reflection-item {
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    overflow: hidden;
+  }
+
+  .reflection-q {
+    background: var(--navy);
+    padding: 12px 16px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--frost);
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+  }
+
+  .reflection-q .q-num {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--sky);
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+
+  .reflection-a {
+    background: var(--white);
+    padding: 12px 16px;
+    min-height: 48px;
+    font-size: 13px;
+    color: var(--steel);
+    font-style: italic;
+  }
+
+  /* ── TEAM TAG ── */
+  .team-badge {
+    display: inline-flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin: 10px 0;
+  }
+
+  .badge {
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 4px 10px;
+    border-radius: 3px;
+    border: 1px solid;
+  }
+
+  .badge-ghost  { color: #a0c4d4; border-color: #a0c4d4; }
+  .badge-shadow { color: #b0a0d4; border-color: #b0a0d4; }
+  .badge-fantom { color: #d4c0a0; border-color: #d4c0a0; }
+  .badge-cipher { color: #a0d4b0; border-color: #a0d4b0; }
+
+  /* ── FOOTER ── */
+  footer {
+    background: var(--navy);
+    color: var(--slate);
+    text-align: center;
+    padding: 20px 32px;
+    font-family: var(--mono);
+    font-size: 11px;
+    border-top: 1px solid var(--border);
+    position: relative;
+    z-index: 1;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <div class="header-week">Week 4</div>
+    <div class="header-title">Kali Linux Boot &amp; Exploration Challenge</div>
+    <div class="header-meta">
+      <span class="meta-chip">Ethical Hacking</span>
+      <span class="meta-chip">Team Challenge</span>
+      <span class="meta-chip">80 min</span>
+    </div>
+    <a href="#" class="header-back">← Back</a>
+    <button id="themeToggle">☀</button>
+  </div>
+  <div class="progress-bar-wrap">
+    <div id="progressBar"></div>
+  </div>
+</header>
+
+<div class="layout">
+
+  <!-- ── SIDEBAR ── -->
+  <aside class="sidebar">
+    <div class="nav-label">On This Page</div>
+    <ul class="nav-list">
+      <li><a href="#mission">Mission</a></li>
+      <li><a href="#team-setup">Team Setup</a></li>
+      <li><a href="#part1">Part 1 — Boot</a></li>
+      <li><a href="#part2">Part 2 — Explore Interface</a></li>
+      <li><a href="#part3">Part 3 — Tool Discovery</a></li>
+      <li><a href="#part4">Part 4 — Terminal Commands</a></li>
+      <li><a href="#part5">Part 5 — Tool Exploration</a></li>
+      <li><a href="#part6">Part 6 — Reflection</a></li>
+      <li><a href="#deliverable">Deliverable</a></li>
+      <li><a href="#optional">Optional Challenge</a></li>
+    </ul>
+  </aside>
+
+  <!-- ── MAIN CONTENT ── -->
+  <main>
+
+    <!-- MISSION -->
+    <section id="mission" class="section">
+      <div class="section-header">
+        <span class="section-num">Overview</span>
+        <h2 class="section-title">Mission</h2>
+      </div>
+      <div class="mission-block">
+        <p>Your team must boot a laptop using <strong>Kali Linux Live Mode</strong> and explore the cybersecurity tools inside the operating system.</p>
+        <p style="margin-top:10px;">Real cybersecurity analysts often spend time configuring systems and solving technical problems before they even begin security testing. This challenge simulates that experience.</p>
+      </div>
+      <div class="notice notice-danger">
+        <div class="notice-icon">⛔</div>
+        <div><strong>Critical Rule — Do NOT Install Kali Linux.</strong><br>You must select <code>Kali Live</code> only. Do not choose any install option.</div>
+      </div>
+      <div class="notice notice-info">
+        <div class="notice-icon">◈</div>
+        <div><strong>Downtown Donuts Context</strong><br>You are acting as a security consultant for Downtown Donuts. Before any active testing begins, your team must verify that your tooling environment boots and operates correctly. This is standard pre-engagement procedure.</div>
+      </div>
+    </section>
+
+    <!-- TEAM SETUP -->
+    <section id="team-setup" class="section">
+      <div class="section-header">
+        <span class="section-num">Setup</span>
+        <h2 class="section-title">Team Setup</h2>
+      </div>
+      <p style="font-size:13px;color:var(--slate);margin-bottom:16px;">Work in your assigned teams. Check your team badge below.</p>
+      <div class="team-badge">
+        <span class="badge badge-ghost">Ghost</span>
+        <span class="badge badge-shadow">Shadow</span>
+        <span class="badge badge-fantom">Fantom</span>
+        <span class="badge badge-cipher">Cipher</span>
+      </div>
+      <div class="role-grid" style="margin-top:18px;">
+        <div class="role-card">
+          <div class="role-title">Driver</div>
+          <div class="role-desc">Controls the keyboard and mouse. Executes commands. Stays focused on the screen.</div>
+        </div>
+        <div class="role-card">
+          <div class="role-title">Navigator</div>
+          <div class="role-desc">Reads instructions aloud. Suggests next steps. Watches for errors the Driver may miss.</div>
+        </div>
+      </div>
+      <div class="notice notice-warn" style="margin-top:16px;">
+        <div class="notice-icon">⏱</div>
+        <div><strong>Switch roles every 10 minutes.</strong> Both teammates should drive and navigate at least once during the session.</div>
+      </div>
+    </section>
+
+    <!-- PART 1 -->
+    <section id="part1" class="section">
+      <div class="section-header">
+        <span class="section-num">Part 1</span>
+        <h2 class="section-title">Boot the System</h2>
+      </div>
+
+      <div class="time-block">
+        <div class="time-label">Boot Procedure</div>
+        <ol class="numbered-steps">
+          <li>Insert the Kali USB drive into the laptop.</li>
+          <li>Restart the laptop.</li>
+          <li>While the system is starting up, press <code>F12</code> to open the Boot Menu.</li>
+          <li>Select the USB device from the boot list.</li>
+          <li>Choose <code>Kali Live</code> — do <strong>not</strong> select any install option.</li>
+          <li>Wait for Kali to finish loading before proceeding.</li>
+        </ol>
+      </div>
+
+      <div class="time-block">
+        <div class="time-label">If It Doesn't Work — Troubleshooting Guide</div>
+        <p style="font-size:13px;color:var(--slate);margin-bottom:14px;">Technical problems are expected. They are part of the challenge. Try to solve them using the guide below before asking for help.</p>
+        <table class="trouble-table">
+          <thead>
+            <tr>
+              <th>Problem</th>
+              <th>Possible Fix</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="problem">Windows loads instead of Kali</td>
+              <td>Restart → press <code>F12</code> again → select USB boot from the menu.</td>
+            </tr>
+            <tr>
+              <td class="problem">USB device does not appear</td>
+              <td>Restart → enter BIOS/Boot Menu → verify USB boot is enabled.</td>
+            </tr>
+            <tr>
+              <td class="problem">Secure Boot error</td>
+              <td>Enter BIOS settings → locate Secure Boot → set to Disabled → save and restart.</td>
+            </tr>
+            <tr>
+              <td class="problem">Boot menu shows but Kali won't start</td>
+              <td>Try a different USB port → restart and attempt again.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="time-block">
+        <div class="time-label">Document Your Troubleshooting</div>
+        <p style="font-size:13px;color:var(--slate);margin-bottom:12px;">This documentation is part of your deliverable. Record each issue as you work through it.</p>
+        <ul class="step-list">
+          <li>What problem occurred</li>
+          <li>What solution you tried</li>
+          <li>What finally worked</li>
+        </ul>
+        <div class="notice notice-info" style="margin-top:14px;">
+          <div class="notice-icon">◈</div>
+          <div>SOC analysts write incident notes in real time — not after. Document as you go, not at the end.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- PART 2 -->
+    <section id="part2" class="section">
+      <div class="section-header">
+        <span class="section-num">Part 2</span>
+        <h2 class="section-title">Explore the Kali Interface</h2>
+      </div>
+
+      <div class="time-block">
+        <div class="time-label">Locate These System Tools</div>
+        <p style="font-size:13px;color:var(--slate);margin-bottom:14px;">Once Kali loads, explore the desktop interface. Find each item and write down where you found it.</p>
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Item to Find</th>
+              <th>Where You Found It</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="tool-name">Terminal</td>
+              <td class="blank-field">Record location here</td>
+            </tr>
+            <tr>
+              <td class="tool-name">File Manager</td>
+              <td class="blank-field">Record location here</td>
+            </tr>
+            <tr>
+              <td class="tool-name">Settings</td>
+              <td class="blank-field">Record location here</td>
+            </tr>
+            <tr>
+              <td class="tool-name">Applications Menu</td>
+              <td class="blank-field">Record location here</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- PART 3 -->
+    <section id="part3" class="section">
+      <div class="section-header">
+        <span class="section-num">Part 3</span>
+        <h2 class="section-title">Cybersecurity Tool Discovery</h2>
+      </div>
+
+      <div class="time-block">
+        <div class="time-label">Find These Five Tools</div>
+        <p style="font-size:13px;color:var(--slate);margin-bottom:6px;">Kali contains hundreds of security tools. Find each one below, then write what you think it does.</p>
+        <div class="notice notice-info" style="margin-bottom:14px;">
+          <div class="notice-icon">◈</div>
+          <div>Hint: Most tools are under <strong>Applications → Security</strong> categories in the menu.</div>
+        </div>
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Tool</th>
+              <th>What It Likely Does</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="tool-name">Nmap</td>
+              <td class="blank-field">Write your answer here</td>
+            </tr>
+            <tr>
+              <td class="tool-name">Wireshark</td>
+              <td class="blank-field">Write your answer here</td>
+            </tr>
+            <tr>
+              <td class="tool-name">Metasploit</td>
+              <td class="blank-field">Write your answer here</td>
+            </tr>
+            <tr>
+              <td class="tool-name">Burp Suite</td>
+              <td class="blank-field">Write your answer here</td>
+            </tr>
+            <tr>
+              <td class="tool-name">John the Ripper</td>
+              <td class="blank-field">Write your answer here</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- PART 4 -->
+    <section id="part4" class="section">
+      <div class="section-header">
+        <span class="section-num">Part 4</span>
+        <h2 class="section-title">Terminal Commands</h2>
+      </div>
+
+      <div class="time-block">
+        <div class="time-label">Open the Terminal and Type These Commands</div>
+        <div class="terminal-block">
+          <code class="prompt">whoami</code>
+          <code class="prompt">pwd</code>
+          <code class="prompt">ifconfig</code>
+        </div>
+        <p style="font-size:13px;color:var(--slate);margin-bottom:14px;">Run each command and record the output in the table below.</p>
+        <div class="cmd-result-grid">
+          <div class="cmd-result-row">
+            <div class="cmd-result-label">
+              <code>whoami</code>
+              <span>What username appears?</span>
+            </div>
+            <div class="cmd-result-value"><em>Record output here</em></div>
+          </div>
+          <div class="cmd-result-row">
+            <div class="cmd-result-label">
+              <code>pwd</code>
+              <span>What directory are you in?</span>
+            </div>
+            <div class="cmd-result-value"><em>Record output here</em></div>
+          </div>
+          <div class="cmd-result-row">
+            <div class="cmd-result-label">
+              <code>ifconfig</code>
+              <span>Network interface names?</span>
+            </div>
+            <div class="cmd-result-value"><em>Record output here</em></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- PART 5 -->
+    <section id="part5" class="section">
+      <div class="section-header">
+        <span class="section-num">Part 5</span>
+        <h2 class="section-title">Tool Exploration</h2>
+      </div>
+
+      <div class="time-block">
+        <div class="time-label">Choose Two Tools from the Applications Menu</div>
+        <p style="font-size:13px;color:var(--slate);margin-bottom:14px;">Pick any two cybersecurity tools that look interesting to your team. Fill in all three columns for each.</p>
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Tool Name</th>
+              <th>Category It Appears Under</th>
+              <th>What You Think It Does</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="blank-field">Tool 1</td>
+              <td class="blank-field">Category</td>
+              <td class="blank-field">Description</td>
+            </tr>
+            <tr>
+              <td class="blank-field">Tool 2</td>
+              <td class="blank-field">Category</td>
+              <td class="blank-field">Description</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- PART 6 -->
+    <section id="part6" class="section">
+      <div class="section-header">
+        <span class="section-num">Part 6</span>
+        <h2 class="section-title">Reflection</h2>
+      </div>
+
+      <div class="time-block">
+        <div class="time-label">Team Discussion — Write Short Answers</div>
+        <p style="font-size:13px;color:var(--slate);margin-bottom:16px;">Discuss each question with your team. Write a short answer together.</p>
+        <div class="reflection-list">
+          <div class="reflection-item">
+            <div class="reflection-q">
+              <span class="q-num">Q1</span>
+              What was the hardest part of booting Kali?
+            </div>
+            <div class="reflection-a">Write your team's answer here.</div>
+          </div>
+          <div class="reflection-item">
+            <div class="reflection-q">
+              <span class="q-num">Q2</span>
+              What problem did your team solve, and how?
+            </div>
+            <div class="reflection-a">Write your team's answer here.</div>
+          </div>
+          <div class="reflection-item">
+            <div class="reflection-q">
+              <span class="q-num">Q3</span>
+              Why might cybersecurity professionals need to understand operating systems deeply?
+            </div>
+            <div class="reflection-a">Write your team's answer here.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- DELIVERABLE -->
+    <section id="deliverable" class="section">
+      <div class="section-header">
+        <span class="section-num">Submit</span>
+        <h2 class="section-title">Deliverable — Kali Boot Log</h2>
+      </div>
+
+      <div class="time-block">
+        <div class="time-label">Your submission must include all of the following</div>
+        <div class="deliverable-list">
+          <div class="deliverable-item">Boot steps used</div>
+          <div class="deliverable-item">Problems encountered</div>
+          <div class="deliverable-item">Solutions discovered</div>
+          <div class="deliverable-item">Tools identified (Part 3)</div>
+          <div class="deliverable-item">Terminal command results</div>
+          <div class="deliverable-item">Tool exploration (Part 5)</div>
+          <div class="deliverable-item">Reflection answers</div>
+          <div class="deliverable-item">Team name &amp; roles</div>
+        </div>
+      </div>
+
+      <!-- OPTIONAL CHALLENGE -->
+      <div class="optional-block" id="optional">
+        <div class="optional-label">Optional Challenge — If You Finish Early</div>
+        <p style="font-size:13px;color:var(--slate);margin-bottom:14px;">Explore the Applications menu. Find three additional tools that look interesting. For each one, record the following:</p>
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Tool Name</th>
+              <th>Category</th>
+              <th>What It Might Be Used For</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="blank-field">Tool 1</td>
+              <td class="blank-field">Category</td>
+              <td class="blank-field">Possible cybersecurity use</td>
+            </tr>
+            <tr>
+              <td class="blank-field">Tool 2</td>
+              <td class="blank-field">Category</td>
+              <td class="blank-field">Possible cybersecurity use</td>
+            </tr>
+            <tr>
+              <td class="blank-field">Tool 3</td>
+              <td class="blank-field">Category</td>
+              <td class="blank-field">Possible cybersecurity use</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- LEGAL NOTICE -->
+    <div class="notice notice-warn">
+      <div class="notice-icon">⚠</div>
+      <div><strong>Authorized Use Only — For Academic and Lab Purposes</strong>
+      <p style="margin-top:4px;">All techniques described in this document are to be applied only in authorized, air-gapped lab environments. Unauthorized access to computer networks is a federal crime under the Computer Fraud and Abuse Act (CFAA). Intro to Ethical Hacking Curriculum — Downtown Donuts Scenario.</p></div>
+    </div>
+
+  </main>
+</div>
+
+<footer>
+  Intro to Ethical Hacking · Week 4 · Kali Linux Boot &amp; Exploration Challenge · Downtown Donuts Security Engagement
+</footer>
+
+<script>
+  // Scroll progress bar
+  window.addEventListener('scroll', () => {
+    const scrollTop = window.scrollY;
+    const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+    const pct = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
+    document.getElementById('progressBar').style.width = pct + '%';
+  });
+
+  // Intersection observer for section fade-in
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) entry.target.classList.add('visible');
+    });
+  }, { threshold: 0.08 });
+
+  document.querySelectorAll('.section').forEach(s => observer.observe(s));
+
+  // Active nav highlight on scroll
+  const sections = document.querySelectorAll('section[id]');
+  const navLinks = document.querySelectorAll('.nav-list a');
+
+  window.addEventListener('scroll', () => {
+    let current = '';
+    sections.forEach(sec => {
+      if (window.scrollY >= sec.offsetTop - 120) current = sec.id;
+    });
+    navLinks.forEach(link => {
+      link.classList.remove('active');
+      if (link.getAttribute('href') === '#' + current) link.classList.add('active');
+    });
+  }, { passive: true });
+
+  // Theme toggle
+  const themeToggle = document.getElementById('themeToggle');
+  const storedTheme = localStorage.getItem('indexTheme') || 'dark';
+  document.documentElement.setAttribute('data-theme', storedTheme);
+  themeToggle.textContent = storedTheme === 'dark' ? '☀' : '☽';
+
+  themeToggle.addEventListener('click', () => {
+    const next = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', next);
+    localStorage.setItem('indexTheme', next);
+    themeToggle.textContent = next === 'dark' ? '☀' : '☽';
+  });
+
+  // Expand all on print
+  window.addEventListener('beforeprint', () => {
+    document.querySelectorAll('.section').forEach(s => s.classList.add('visible'));
+  });
+</script>
+</body>
+</html>
