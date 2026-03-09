@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Data Heist — CTF | Ethical Hacking</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:ital,wght@0,300;0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:        #07111a;
+    --surface:   #0d1b27;
+    --card:      #112030;
+    --border:    #1a3048;
+    --navy:      #0d2137;
+    --sky:       #3ab0de;
+    --frost:     #a0cfe8;
+    --white:     #dff0fa;
+    --dim:       #4e7090;
+    --green:     #20c070;
+    --amber:     #f0a030;
+    --red:       #e84040;
+    --mono:      'IBM Plex Mono', monospace;
+    --sans:      'IBM Plex Sans', sans-serif;
+    --radius:    6px;
+    --sidebar-w: 220px;
+  }
+  html[data-theme="light"] {
+    --bg:      #eef5fc; --surface: #e0ecf8; --card: #ffffff;
+    --border:  #b8d0e8; --sky: #1478aa; --frost: #1a3a5c;
+    --white:   #0a1828; --dim: #2a5070; --green: #0e7040;
+    --amber:   #a86010; --red: #c03030;
+  }
+
+  /* ── LIGHT MODE OVERRIDES ───────────────────────────── */
+  html[data-theme="light"] p { color: #1a3a5c; }
+  html[data-theme="light"] .hero-sub { color: #2a5070; }
+
+  html[data-theme="light"] .section-header { background: #1a3a5c; }
+  html[data-theme="light"] .section-title { color: #ffffff; }
+
+  html[data-theme="light"] .steps li { color: #1a3a5c; border-bottom-color: rgba(180,210,235,.6); }
+  html[data-theme="light"] .steps li::before { background: #1a3a5c; }
+  html[data-theme="light"] .bullets li { color: #1a3a5c; border-bottom-color: rgba(180,210,235,.5); }
+
+  html[data-theme="light"] .code-block {
+    background: #1a2c3a; border-color: #b8d0e8;
+    color: #40e090;
+  }
+  html[data-theme="light"] .code-block .comment { color: #7aaccc; }
+  html[data-theme="light"] .code-block .prompt  { color: #7aaccc; }
+  html[data-theme="light"] .code-block .flag    { color: #ff6060; }
+
+  html[data-theme="light"] .callout.hint {
+    background: rgba(14,112,64,.08);
+    border-color: rgba(14,112,64,.3);
+    color: #0a5030;
+  }
+  html[data-theme="light"] .callout.warn {
+    background: rgba(168,96,16,.08);
+    border-color: rgba(168,96,16,.3);
+    color: #7a4000;
+  }
+  html[data-theme="light"] .callout.alert {
+    background: rgba(192,48,48,.08);
+    border-color: rgba(192,48,48,.3);
+    color: #801010;
+  }
+
+  html[data-theme="light"] .response-table th { background: #1a3a5c; color: #a0d4f0; }
+  html[data-theme="light"] .response-table td { border-bottom-color: rgba(180,210,235,.5); }
+  html[data-theme="light"] .response-table td:first-child {
+    background: rgba(180,210,235,.25); color: #1a3a5c;
+  }
+  html[data-theme="light"] .response-table td:last-child { color: #4a7090; }
+  html[data-theme="light"] .answer-line { border-bottom-color: rgba(20,120,170,.35); }
+
+  html[data-theme="light"] .flag-field {
+    background: #1a2c3a; color: #ffffff;
+    border-color: rgba(192,48,48,.5);
+  }
+  html[data-theme="light"] .flag-sub { color: #2a5070; }
+
+  html[data-theme="light"] .brief-card { background: rgba(192,48,48,.05); }
+  html[data-theme="light"] .brief-card p { color: #1a3a5c; }
+
+  html[data-theme="light"] .deliver-card p { color: #0a5030; }
+  html[data-theme="light"] .deliver-card .bullets li { color: #1a3a5c; }
+
+  html[data-theme="light"] .hero { background: linear-gradient(135deg, #dce8f4 0%, #eef5fc 100%); border-color: rgba(192,48,48,.2); }
+  html[data-theme="light"] .hero h1 { color: #0a1828; }
+  html[data-theme="light"] .hero-sub { color: #2a5070; }
+  html[data-theme="light"] .meta-item { color: #4a7090; }
+  html[data-theme="light"] .meta-item span { color: #1478aa; }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: var(--sans); background: var(--bg);
+    color: var(--white); min-height: 100vh; overflow-x: hidden;
+    transition: background .3s, color .3s;
+  }
+  body::before {
+    content: ''; position: fixed; inset: 0; pointer-events: none; z-index: 0;
+    background-image:
+      linear-gradient(rgba(58,176,222,.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(58,176,222,.03) 1px, transparent 1px);
+    background-size: 32px 32px;
+  }
+
+  #progressBar {
+    position: fixed; top: 0; left: 0; height: 3px; width: 0%;
+    background: var(--red); z-index: 1000; transition: width .1s linear;
+    box-shadow: 0 0 8px var(--red);
+  }
+
+  header {
+    position: sticky; top: 0; z-index: 200;
+    background: rgba(7,17,26,.92); backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+    padding: 0 2rem; display: flex; align-items: center;
+    justify-content: space-between; height: 56px;
+  }
+  html[data-theme="light"] header { background: rgba(238,245,252,.92); }
+  .breadcrumb {
+    font-family: var(--mono); font-size: .72rem; color: var(--dim);
+    display: flex; align-items: center; gap: .4rem;
+  }
+  .breadcrumb a { color: var(--dim); text-decoration: none; transition: color .2s; }
+  .breadcrumb a:hover { color: var(--sky); }
+  .breadcrumb .sep { color: var(--border); }
+  .breadcrumb .current { color: var(--red); }
+  .header-right { display: flex; align-items: center; gap: .75rem; }
+  .badge {
+    font-family: var(--mono); font-size: .65rem;
+    padding: .2rem .6rem; border-radius: 3px;
+    border: 1px solid var(--red); color: var(--red);
+    letter-spacing: .05em; text-transform: uppercase;
+  }
+  #themeToggle {
+    background: none; border: 1px solid var(--border); color: var(--dim);
+    cursor: pointer; width: 32px; height: 32px; border-radius: var(--radius);
+    font-size: 1rem; display: flex; align-items: center; justify-content: center;
+    transition: border-color .2s, color .2s;
+  }
+  #themeToggle:hover { border-color: var(--sky); color: var(--sky); }
+
+  .layout {
+    display: flex; align-items: flex-start;
+    max-width: 1200px; margin: 0 auto;
+    padding: 2rem 1.5rem; gap: 2rem; position: relative; z-index: 1;
+  }
+  .sidebar {
+    width: var(--sidebar-w); flex-shrink: 0;
+    position: sticky; top: 72px;
+  }
+  .nav-label {
+    font-family: var(--mono); font-size: .65rem;
+    letter-spacing: .12em; text-transform: uppercase;
+    color: var(--dim); padding: 0 .5rem .6rem;
+    border-bottom: 1px solid var(--border); margin-bottom: .6rem;
+  }
+  .nav-list { list-style: none; }
+  .nav-list li { margin-bottom: .1rem; }
+  .nav-list a {
+    display: block; padding: .42rem .75rem;
+    font-family: var(--mono); font-size: .72rem;
+    color: var(--dim); text-decoration: none;
+    border-left: 2px solid transparent;
+    border-radius: 0 var(--radius) var(--radius) 0;
+    transition: color .2s, border-color .2s, background .2s;
+  }
+  .nav-list a:hover { color: var(--frost); background: rgba(58,176,222,.06); }
+  .nav-list a.active { color: var(--sky); border-left-color: var(--sky); background: rgba(58,176,222,.08); }
+  .nav-divider { height: 1px; background: var(--border); margin: .5rem 0; }
+
+  main { flex: 1; min-width: 0; }
+
+  /* HERO */
+  .hero {
+    background: linear-gradient(135deg, #1a0a0a 0%, #0d1820 60%, var(--navy) 100%);
+    border: 1px solid rgba(232,64,64,.3);
+    border-radius: var(--radius); padding: 2.5rem 2rem 2rem;
+    margin-bottom: 2rem; position: relative; overflow: hidden;
+  }
+  .hero::before {
+    content: ''; position: absolute; top: 0; right: 0;
+    width: 300px; height: 300px;
+    background: radial-gradient(circle, rgba(232,64,64,.1) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .hero-tag {
+    font-family: var(--mono); font-size: .68rem;
+    letter-spacing: .12em; text-transform: uppercase;
+    color: var(--red); margin-bottom: .75rem;
+    display: flex; align-items: center; gap: .5rem;
+  }
+  .hero-tag::before {
+    content: ''; display: inline-block;
+    width: 24px; height: 2px; background: var(--red);
+  }
+  .hero h1 {
+    font-size: 2rem; font-weight: 700; line-height: 1.15;
+    color: var(--white); margin-bottom: .6rem;
+  }
+  .hero h1 span { color: var(--red); }
+  .hero-sub { font-size: .9rem; color: var(--dim); max-width: 580px; line-height: 1.6; }
+  .hero-meta { display: flex; gap: 1.5rem; margin-top: 1.5rem; flex-wrap: wrap; }
+  .meta-item { font-family: var(--mono); font-size: .7rem; color: var(--dim); }
+  .meta-item span { color: var(--frost); }
+
+  /* MISSION BRIEF */
+  .brief-card {
+    background: rgba(232,64,64,.06);
+    border: 1px solid rgba(232,64,64,.25);
+    border-left: 3px solid var(--red);
+    border-radius: var(--radius); padding: 1.5rem;
+    margin-bottom: 2rem;
+  }
+  .brief-label {
+    font-family: var(--mono); font-size: .68rem;
+    letter-spacing: .12em; text-transform: uppercase;
+    color: var(--red); margin-bottom: .75rem;
+  }
+  .brief-card p { color: var(--frost); font-size: .92rem; line-height: 1.7; margin-bottom: .6rem; }
+  .brief-card p:last-child { margin-bottom: 0; }
+
+  /* SECTIONS */
+  .section {
+    opacity: 0; transform: translateY(16px);
+    transition: opacity .5s ease, transform .5s ease;
+    margin-bottom: 2rem;
+  }
+  .section.visible { opacity: 1; transform: translateY(0); }
+  .section-card {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: var(--radius); overflow: hidden;
+  }
+  .section-header {
+    padding: .9rem 1.5rem; background: var(--navy);
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; gap: .75rem;
+  }
+  .step-num {
+    font-family: var(--mono); font-size: .7rem;
+    background: var(--sky); color: #07111a;
+    width: 24px; height: 24px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 600; flex-shrink: 0;
+  }
+  .step-num.red { background: var(--red); }
+  .section-title {
+    font-family: var(--mono); font-size: .9rem;
+    font-weight: 600; color: var(--white); letter-spacing: .02em;
+  }
+  .section-body { padding: 1.5rem; }
+
+  p { line-height: 1.7; color: var(--frost); font-size: .92rem; margin-bottom: .8rem; }
+  p:last-child { margin-bottom: 0; }
+
+  .steps { list-style: none; counter-reset: step-counter; }
+  .steps li {
+    counter-increment: step-counter;
+    display: flex; gap: .9rem; align-items: flex-start;
+    padding: .6rem 0; border-bottom: 1px solid rgba(26,48,72,.6);
+    font-size: .9rem; color: var(--frost); line-height: 1.6;
+  }
+  .steps li:last-child { border-bottom: none; }
+  .steps li::before {
+    content: counter(step-counter);
+    font-family: var(--mono); font-size: .7rem;
+    background: var(--navy); color: var(--sky);
+    border: 1px solid var(--sky);
+    min-width: 22px; height: 22px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; margin-top: .1rem;
+  }
+
+  .bullets { list-style: none; }
+  .bullets li {
+    display: flex; gap: .75rem; align-items: flex-start;
+    padding: .45rem 0; font-size: .9rem; color: var(--frost); line-height: 1.6;
+    border-bottom: 1px solid rgba(26,48,72,.4);
+  }
+  .bullets li:last-child { border-bottom: none; }
+  .bullets li::before { content: '›'; color: var(--sky); font-size: 1rem; flex-shrink: 0; margin-top: .05rem; }
+
+  .code-block {
+    background: #060f17; border: 1px solid var(--border);
+    border-left: 3px solid var(--sky); border-radius: var(--radius);
+    padding: 1rem 1.25rem; margin: 1rem 0;
+    font-family: var(--mono); font-size: .85rem;
+    color: #20c070; overflow-x: auto; line-height: 1.8;
+  }
+  .code-block .comment { color: var(--dim); }
+  .code-block .prompt { color: var(--dim); user-select: none; }
+  .code-block .flag { color: var(--red); font-weight: 600; }
+
+  .callout {
+    border-radius: var(--radius); padding: 1rem 1.25rem; margin: 1rem 0;
+    display: flex; gap: .85rem; align-items: flex-start;
+    font-size: .88rem; line-height: 1.6;
+  }
+  .callout-icon { font-family: var(--mono); font-size: .75rem; font-weight: 600; letter-spacing: .06em; flex-shrink: 0; padding-top: .1rem; }
+  .callout.warn { background: rgba(240,160,48,.08); border: 1px solid rgba(240,160,48,.3); color: #f0c878; }
+  .callout.warn .callout-icon { color: var(--amber); }
+  .callout.hint { background: rgba(32,192,112,.07); border: 1px solid rgba(32,192,112,.25); border-left: 3px solid var(--green); color: #80e0b0; }
+  .callout.hint .callout-icon { color: var(--green); }
+  .callout.alert { background: rgba(232,64,64,.07); border: 1px solid rgba(232,64,64,.25); color: #f08080; }
+  .callout.alert .callout-icon { color: var(--red); }
+
+  .response-table { width: 100%; border-collapse: collapse; margin: 1rem 0; font-size: .88rem; }
+  .response-table th {
+    background: var(--navy); color: var(--sky); font-family: var(--mono);
+    font-size: .7rem; text-transform: uppercase; letter-spacing: .06em;
+    padding: .55rem 1rem; text-align: left; border-bottom: 1px solid var(--border);
+  }
+  .response-table td { padding: .7rem 1rem; border-bottom: 1px solid rgba(26,48,72,.5); vertical-align: top; }
+  .response-table td:first-child { color: var(--frost); width: 45%; font-size: .85rem; line-height: 1.5; background: rgba(13,33,55,.4); }
+  .response-table td:last-child { color: var(--dim); font-style: italic; font-size: .82rem; }
+  .response-table tr:last-child td { border-bottom: none; }
+  .answer-line { display: block; width: 100%; border-bottom: 1px solid rgba(58,176,222,.25); min-height: 28px; }
+
+  /* FLAG SUBMISSION */
+  .flag-box {
+    background: rgba(232,64,64,.06);
+    border: 1px solid rgba(232,64,64,.3);
+    border-radius: var(--radius); padding: 1.5rem;
+    margin-top: 1rem; text-align: center;
+  }
+  .flag-label {
+    font-family: var(--mono); font-size: .68rem;
+    letter-spacing: .14em; text-transform: uppercase;
+    color: var(--red); margin-bottom: .75rem;
+  }
+  .flag-field {
+    font-family: var(--mono); font-size: 1.1rem;
+    color: var(--white); letter-spacing: .1em;
+    background: #060f17; border: 1px solid rgba(232,64,64,.4);
+    border-radius: var(--radius); padding: .8rem 1.5rem;
+    display: inline-block; min-width: 260px;
+    text-align: center; margin-bottom: .5rem;
+  }
+  .flag-sub { font-size: .8rem; color: var(--dim); font-family: var(--mono); }
+
+  .deliver-card {
+    background: rgba(32,192,112,.05); border: 1px solid rgba(32,192,112,.2);
+    border-radius: var(--radius); padding: 1.5rem;
+  }
+  .deliver-label { font-family: var(--mono); font-size: .68rem; letter-spacing: .12em; text-transform: uppercase; color: var(--green); margin-bottom: 1rem; }
+
+  footer {
+    text-align: center; font-family: var(--mono); font-size: .68rem;
+    color: var(--dim); letter-spacing: .08em;
+    padding: 2rem 1rem 3rem; border-top: 1px solid var(--border);
+    position: relative; z-index: 1;
+  }
+
+  @media print {
+    body::before { display: none; }
+    header, .sidebar, #progressBar { display: none !important; }
+    .layout { padding: 0; }
+    .section { opacity: 1 !important; transform: none !important; }
+  }
+</style>
+</head>
+<body>
+
+<div id="progressBar"></div>
+
+<header>
+  <div class="breadcrumb">
+    <a href="index.html">Portal</a>
+    <span class="sep">/</span>
+    <a href="#">CTF</a>
+    <span class="sep">/</span>
+    <span class="current">The Data Heist</span>
+  </div>
+  <div class="header-right">
+    <span class="badge">⚑ CTF Active</span>
+    <button id="themeToggle" title="Toggle theme">☀</button>
+  </div>
+</header>
+
+<div class="layout">
+
+  <nav class="sidebar">
+    <div class="nav-label">The Data Heist</div>
+    <ul class="nav-list">
+      <li><a href="#mission">Mission Brief</a></li>
+      <li><a href="#step1">Step 1 — Find the Pi</a></li>
+      <li><a href="#step2">Step 2 — Watch the Traffic</a></li>
+      <li><a href="#step3">Step 3 — SSH In</a></li>
+      <li><a href="#step4">Step 4 — Find the Log</a></li>
+      <li><a href="#step5">Step 5 — Capture the Flag</a></li>
+      <div class="nav-divider"></div>
+      <li><a href="#deliver">Turn In</a></li>
+    </ul>
+  </nav>
+
+  <main>
+
+    <!-- HERO -->
+    <div class="hero section visible" id="mission">
+      <div class="hero-tag">CTF Challenge · All Teams · Auralab Network</div>
+      <h1>The <span>Data Heist</span></h1>
+      <p class="hero-sub">
+        Someone has been skimming money through the Downtown Donuts POS system.
+        A rogue transaction was planted inside the live data stream.
+        Your team's mission: find it, identify it, and report the transaction ID.
+      </p>
+      <div class="hero-meta">
+        <div class="meta-item">Target: <span>Raspberry Pi 4</span></div>
+        <div class="meta-item">Network: <span>Auralab</span></div>
+        <div class="meta-item">Tools: <span>nmap · Wireshark · SSH</span></div>
+        <div class="meta-item">SSH User: <span>ddadmin</span></div>
+      </div>
+    </div>
+
+    <!-- MISSION BRIEF -->
+    <div class="brief-card section visible">
+      <div class="brief-label">// Mission Brief</div>
+      <p>
+        A Raspberry Pi on the Auralab network is broadcasting Downtown Donuts
+        point-of-sale transactions over HTTP. Most are normal — coffee, donuts, small amounts.
+      </p>
+      <p>
+        One transaction does not belong. The amount is way too high for a donut shop.
+        That transaction ID is your flag.
+      </p>
+      <p>
+        Your three moves: <strong>Watch</strong> the traffic to spot the anomaly.
+        <strong>Connect</strong> to the Pi via SSH. <strong>Find</strong> the transaction
+        in the log file and submit the ID.
+      </p>
+    </div>
+
+    <!-- STEP 1 — Find the Pi -->
+    <section id="step1" class="section">
+      <div class="section-card">
+        <div class="section-header">
+          <div class="step-num">1</div>
+          <div class="section-title">Find the Pi</div>
+        </div>
+        <div class="section-body">
+          <p>The Pi is somewhere on the Auralab network. Use nmap to find it.</p>
+          <p>Open the Terminal and scan the network:</p>
+          <div class="code-block">
+            <span class="prompt">$ </span>nmap -sn 192.168.1.0/24
+          </div>
+          <p>
+            Look through the results for a Raspberry Pi. It will appear as a live host.
+            Write down its IP address — you will need it for every step that follows.
+          </p>
+          <div class="callout hint">
+            <span class="callout-icon">HINT</span>
+            Raspberry Pi devices often show "Raspberry Pi Foundation" in the nmap vendor field.
+          </div>
+          <table class="response-table">
+            <thead><tr><th>Item</th><th>Team Answer</th></tr></thead>
+            <tbody>
+              <tr><td>Pi IP Address</td><td><span class="answer-line"></span></td></tr>
+              <tr><td>How did you identify it as the Pi?</td><td><span class="answer-line"></span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- STEP 2 — Watch the Traffic -->
+    <section id="step2" class="section">
+      <div class="section-card">
+        <div class="section-header">
+          <div class="step-num">2</div>
+          <div class="section-title">Watch the Traffic</div>
+        </div>
+        <div class="section-body">
+          <p>
+            Open Wireshark and start capturing on <strong>wlan0</strong> or <strong>wlan0mon</strong>.
+            The Pi is broadcasting transaction data every few seconds.
+          </p>
+          <p>Filter for traffic from the Pi only. Replace PI_IP with the address you found:</p>
+          <div class="code-block">
+            <span class="comment">// Wireshark filter bar — type this and press Enter</span><br>
+            ip.addr == PI_IP
+          </div>
+          <p>
+            Watch the <strong>Info</strong> column. You will see HTTP requests going out.
+            Most transactions will be small dollar amounts. Watch for the one that is not.
+          </p>
+          <div class="callout hint">
+            <span class="callout-icon">HINT</span>
+            Right-click any HTTP packet and choose <strong>Follow &rarr; HTTP Stream</strong> to read the full transaction data as plain text.
+          </div>
+          <div class="callout warn">
+            <span class="callout-icon">NOTE</span>
+            The unusual transaction will appear once during the broadcast. Keep watching — do not close Wireshark early.
+          </div>
+          <table class="response-table">
+            <thead><tr><th>Item</th><th>Team Answer</th></tr></thead>
+            <tbody>
+              <tr><td>What was the suspicious transaction amount?</td><td><span class="answer-line"></span></td></tr>
+              <tr><td>What item was listed on that transaction?</td><td><span class="answer-line"></span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- STEP 3 — SSH In -->
+    <section id="step3" class="section">
+      <div class="section-card">
+        <div class="section-header">
+          <div class="step-num">3</div>
+          <div class="section-title">SSH Into the Pi</div>
+        </div>
+        <div class="section-body">
+          <p>
+            Now that you know the Pi's IP, connect to it using SSH.
+            Use the credentials from your <strong>Password List handout</strong>.
+          </p>
+          <div class="code-block">
+            <span class="prompt">$ </span>ssh ddadmin@PI_IP
+          </div>
+          <p>
+            Type the password when prompted. You will not see characters appear as you type — that is normal.
+            Press Enter when done.
+          </p>
+          <p>When you are in, your terminal prompt will change to show the Pi's hostname.</p>
+          <div class="callout hint">
+            <span class="callout-icon">HINT</span>
+            Connection refused? Double-check the IP address. Permission denied? Check the password on your handout carefully — it is case sensitive.
+          </div>
+          <table class="response-table">
+            <thead><tr><th>Item</th><th>Team Answer</th></tr></thead>
+            <tbody>
+              <tr><td>What does the prompt show once you are logged in?</td><td><span class="answer-line"></span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- STEP 4 — Find the Log -->
+    <section id="step4" class="section">
+      <div class="section-card">
+        <div class="section-header">
+          <div class="step-num">4</div>
+          <div class="section-title">Find the Log File</div>
+        </div>
+        <div class="section-body">
+          <p>
+            The Pi is writing every transaction to a log file.
+            Navigate to the logs folder and look inside.
+          </p>
+          <div class="code-block">
+            <span class="prompt">$ </span>cd ~/logs<br>
+            <span class="prompt">$ </span>ls<br>
+            <span class="prompt">$ </span>cat transactions.log
+          </div>
+          <p>
+            The log will show every transaction that has been broadcast.
+            Scroll through and find the one with the suspicious amount you spotted in Wireshark.
+          </p>
+          <div class="callout hint">
+            <span class="callout-icon">HINT</span>
+            Too many lines to scroll through? Use grep to search directly:<br>
+            <code style="font-family:var(--mono);color:var(--green);font-size:.82rem;">grep "9847" ~/logs/transactions.log</code>
+          </div>
+          <table class="response-table">
+            <thead><tr><th>Item</th><th>Team Answer</th></tr></thead>
+            <tbody>
+              <tr><td>What command did you use to find the entry?</td><td><span class="answer-line"></span></td></tr>
+              <tr><td>What location is listed on the suspicious transaction?</td><td><span class="answer-line"></span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- STEP 5 — Capture the Flag -->
+    <section id="step5" class="section">
+      <div class="section-card">
+        <div class="section-header">
+          <div class="step-num red">5</div>
+          <div class="section-title">Capture the Flag</div>
+        </div>
+        <div class="section-body">
+          <p>
+            You found the transaction. The <strong>txn_id</strong> field on that entry is your flag.
+            It looks like this:
+          </p>
+          <div class="code-block">
+            <span class="comment">// Example format — yours will be different</span><br>
+            "txn_id": "<span class="flag">DD-XXXXXXXX-XXXX</span>"
+          </div>
+          <p>Write it down exactly, then bring it to your teacher to submit.</p>
+
+          <div class="flag-box">
+            <div class="flag-label">⚑ Flag Submission</div>
+            <div class="flag-field">DD - _ _ _ _ _ _ _ _ - _ _ _ _</div>
+            <div class="flag-sub">Write the full transaction ID and hand it to your teacher</div>
+          </div>
+
+          <table class="response-table" style="margin-top:1.5rem;">
+            <thead><tr><th>Item</th><th>Team Answer</th></tr></thead>
+            <tbody>
+              <tr><td>Full transaction ID (the flag)</td><td><span class="answer-line"></span></td></tr>
+              <tr><td>What gave it away in Wireshark?</td><td><span class="answer-line"></span></td></tr>
+              <tr><td>How long did it take your team to find it?</td><td><span class="answer-line"></span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- TURN IN -->
+    <section id="deliver" class="section">
+      <div class="deliver-card">
+        <div class="deliver-label">// Turn In</div>
+        <p style="color:#80e0b0; margin-bottom:1rem;">Submit this completed sheet along with your flag.</p>
+        <ul class="bullets">
+          <li>Pi IP address identified via nmap</li>
+          <li>Suspicious transaction spotted in Wireshark</li>
+          <li>SSH connection established</li>
+          <li>Log file located and searched</li>
+          <li>Flag transaction ID submitted to teacher</li>
+        </ul>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<footer>
+  Intro to Ethical Hacking &nbsp;·&nbsp; Downtown Donuts CTF &nbsp;·&nbsp; The Data Heist &nbsp;·&nbsp; Auralab Network
+</footer>
+
+<script>
+  window.addEventListener('scroll', () => {
+    const pct = (window.scrollY / (document.documentElement.scrollHeight - window.innerHeight)) * 100;
+    document.getElementById('progressBar').style.width = pct + '%';
+  });
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+  }, { threshold: 0.08 });
+  document.querySelectorAll('.section').forEach(s => observer.observe(s));
+
+  const sections = document.querySelectorAll('section[id], div[id]');
+  const navLinks = document.querySelectorAll('.nav-list a');
+  window.addEventListener('scroll', () => {
+    let current = '';
+    sections.forEach(sec => { if (window.scrollY >= sec.offsetTop - 120) current = sec.id; });
+    navLinks.forEach(link => {
+      link.classList.remove('active');
+      if (link.getAttribute('href') === '#' + current) link.classList.add('active');
+    });
+  }, { passive: true });
+
+  const themeToggle = document.getElementById('themeToggle');
+  const storedTheme = localStorage.getItem('heistTheme') || 'dark';
+  document.documentElement.setAttribute('data-theme', storedTheme);
+  themeToggle.textContent = storedTheme === 'dark' ? '☀' : '☽';
+  themeToggle.addEventListener('click', () => {
+    const next = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', next);
+    localStorage.setItem('heistTheme', next);
+    themeToggle.textContent = next === 'dark' ? '☀' : '☽';
+  });
+
+  window.addEventListener('beforeprint', () => {
+    document.querySelectorAll('.section').forEach(s => s.classList.add('visible'));
+  });
+</script>
+</body>
+</html>
