@@ -100,20 +100,14 @@
     box-shadow: 0 4px 20px rgba(0,0,0,0.3);
   }
 
-  .progress-bar-wrap {
-    position: absolute;
-    bottom: -3px;
-    left: 0;
-    right: 0;
-    height: 3px;
-    background: transparent;
-    z-index: 101;
-  }
-
   #progressBar {
-    height: 100%;
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 3px;
     width: 0%;
     background: var(--sky);
+    z-index: 999;
     transition: width 0.1s linear;
   }
 
@@ -189,19 +183,23 @@
 
   .header-back:hover { border-color: var(--sky); color: var(--white); }
 
-  button#themeToggle {
-    font-family: var(--mono);
-    font-size: 14px;
-    background: none;
+  .theme-toggle {
+    flex-shrink: 0;
+    background: rgba(255,255,255,0.08);
     border: 1px solid var(--steel);
     color: var(--sky);
-    padding: 4px 9px;
-    border-radius: 3px;
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
     cursor: pointer;
-    transition: border-color 0.15s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 15px;
+    transition: background 0.2s, border-color 0.2s;
   }
 
-  button#themeToggle:hover { border-color: var(--sky); }
+  .theme-toggle:hover { border-color: var(--sky); }
 
   /* ── LAYOUT ── */
   .layout {
@@ -972,8 +970,10 @@
 </head>
 <body>
 
+<div id="progressBar"></div>
 <header>
   <div class="header-inner">
+    <a class="header-back" href="index.html">← Home</a>
     <div class="header-week">Mission</div>
     <div class="header-title">Downtown Donuts — Network Infiltration</div>
     <div class="header-meta">
@@ -981,10 +981,8 @@
       <span class="meta-chip">Team Challenge</span>
       <span class="meta-chip">80 min</span>
     </div>
-    <a href="#" class="header-back">← Back</a>
-    <button id="themeToggle">☀</button>
+    <button class="theme-toggle" id="themeToggle" aria-label="Toggle light/dark mode">☀</button>
   </div>
-  <div class="progress-bar-wrap"><div id="progressBar"></div></div>
 </header>
 
 <div class="layout">
