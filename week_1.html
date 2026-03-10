@@ -526,7 +526,7 @@
   /* Notice boxes */
   .notice {
     display: flex;
-    gap: 14px;
+    gap: 0;
     padding: 14px 16px;
     border-radius: 8px;
     margin-bottom: 12px;
@@ -542,7 +542,7 @@
   html[data-theme="dark"] .notice-info { background: rgba(74,111,165,0.12); }
   html[data-theme="dark"] .notice-ok   { background: rgba(42,157,80,0.10); }
 
-  .notice-icon { font-size: 18px; flex-shrink: 0; line-height: 1.4; }
+
 
   .notice strong {
     display: block;
@@ -767,7 +767,6 @@
       </p>
 
       <div class="notice notice-info" style="margin-bottom:20px;">
-        <span class="notice-icon">💡</span>
         <div>
           <strong>Who uses the CLI?</strong>
           <p>Cybersecurity professionals, software developers, and system administrators use the CLI every day. Learning it early gives you direct control over how systems work.</p>
@@ -852,7 +851,6 @@
   └── /home/student/Documents  → the argument (where to look)</div>
 
       <div class="notice notice-info">
-        <span class="notice-icon">ℹ️</span>
         <div>
           <strong>Not all commands need flags or arguments.</strong>
           <p>Running <code>pwd</code> on its own prints your current location. Simple commands work without extras.</p>
@@ -966,7 +964,6 @@
       </div>
 
       <div class="notice notice-warn" style="margin-top:20px;">
-        <span class="notice-icon">⚠️</span>
         <div>
           <strong>No recycle bin in the CLI.</strong>
           <p><code>rm</code> permanently deletes files. Always <code>ls</code> first to confirm what you are deleting.</p>
@@ -1045,7 +1042,6 @@
       </table>
 
       <div class="notice notice-ok" style="margin-top:16px;">
-        <span class="notice-icon">⚡</span>
         <div>
           <strong>Speed Boost</strong>
           <p>↑ arrow recalls previous commands &nbsp;·&nbsp; Tab auto-completes file and folder names — use them constantly.</p>
@@ -1064,7 +1060,6 @@
       </div>
 
       <div class="notice notice-info" style="margin-bottom:20px;">
-        <span class="notice-icon">🖥️</span>
         <div>
           <strong>Getting started</strong>
           <p>Open a terminal on your machine and use the CLI commands you just learned to explore the <strong>Terminal Tutor</strong> environment. Your instructor will provide the login details.</p>
@@ -1085,7 +1080,6 @@
             <li>What is Harry hoping to learn from you?</li>
           </ul>
           <div class="notice notice-ok" style="margin-top:16px;">
-            <span class="notice-icon">📋</span>
             <div>
               <strong>Submit answers</strong>
               <p>Record your team's answers in your shared drive folder.</p>
@@ -1118,7 +1112,6 @@
       </div>
 
       <div class="notice notice-warn" style="margin-top:20px;">
-        <span class="notice-icon">🔒</span>
         <div>
           <strong>Common Mistakes to Avoid</strong>
           <p>
@@ -1134,7 +1127,7 @@
   </main>
 </div>
 
-<button class="print-btn" onclick="window.print()">⎙ Print / PDF</button>
+<button class="print-btn" onclick="window.print()">Print / PDF</button>
 
 <script>
   // Progress bar

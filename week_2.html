@@ -397,7 +397,7 @@
 
   .numbered-steps li {
     display: flex;
-    gap: 14px;
+    gap: 0;
     align-items: flex-start;
     background: var(--white);
     border: 1px solid var(--border);
@@ -471,7 +471,7 @@
   /* Notice boxes */
   .notice {
     display: flex;
-    gap: 14px;
+    gap: 0;
     padding: 14px 16px;
     border-radius: 8px;
     margin-bottom: 12px;
@@ -488,7 +488,7 @@
   html[data-theme="dark"] .notice-info { background: rgba(74,111,165,0.12); }
   html[data-theme="dark"] .notice-ok   { background: rgba(42,157,80,0.10); }
 
-  .notice-icon { font-size: 18px; flex-shrink: 0; line-height: 1.4; }
+
 
   .notice strong {
     display: block;
@@ -740,7 +740,6 @@
       </p>
 
       <div class="notice notice-info" style="margin-bottom:20px;">
-        <span class="notice-icon">🔐</span>
         <div>
           <strong>Encryption</strong>
           <p>Everything you type and everything the remote computer sends back is scrambled so that nobody in between can read it. Imagine passing a note in class written in a secret code that only you and your friend know — that is basically what SSH does for computers.</p>
@@ -748,7 +747,6 @@
       </div>
 
       <div class="notice notice-ok">
-        <span class="notice-icon">🩺</span>
         <div>
           <strong>Why should you care?</strong>
           <p>If you want to work in cybersecurity, you will use SSH all the time. It is how professionals log into servers, investigate security problems, and manage systems. Learning SSH now is like learning to use a stethoscope if you want to be a doctor — one of the first tools you pick up.</p>
@@ -774,7 +772,6 @@
       </ol>
 
       <div class="notice notice-info" style="margin-top:16px;">
-        <span class="notice-icon">🔒</span>
         <div>
           <strong>Always encrypted</strong>
           <p>Everything that travels between the two computers is encrypted the entire time — login, commands, responses, everything.</p>
@@ -819,7 +816,6 @@
       </div>
 
       <div class="notice notice-info">
-        <span class="notice-icon">🏢</span>
         <div>
           <strong>Think of a port like an apartment number.</strong>
           <p>The address gets you to the building; the port number gets you to the right door. SSH defaults to door 22 — some servers use a different one for security or configuration reasons.</p>
@@ -850,7 +846,6 @@
       </ul>
 
       <div class="notice notice-warn">
-        <span class="notice-icon">📝</span>
         <div>
           <strong>BEFORE YOU START — Make a Notes File</strong>
           <p>Bandit does <strong>NOT</strong> save your progress. If you find a password and forget to write it down, you have to start over. Right now, open a text editor and create a file called <code>bandit_notes.txt</code>. Paste every password into this file as you find them.</p>
@@ -892,7 +887,6 @@ Password:  bandit0</div>
           <div>
             <strong>IMPORTANT:</strong> When you type the password, nothing will appear on the screen — no dots, no stars, nothing.
             <div class="notice notice-info" style="margin-top:10px;">
-              <span class="notice-icon">👁️</span>
               <div>
                 <strong>This is normal.</strong>
                 <p>Linux hides your password so nobody looking over your shoulder can see it. Just type it and press Enter.</p>
@@ -919,7 +913,6 @@ Password:  bandit0</div>
       </div>
 
       <div class="notice notice-info" style="margin-bottom:20px;">
-        <span class="notice-icon">📁</span>
         <div>
           <strong>Commands you need</strong>
           <p><code>ls</code> — lists the files in your current folder &nbsp;·&nbsp; <code>cat filename</code> — shows what is inside a file</p>
@@ -939,7 +932,6 @@ Password:  bandit0</div>
         <li>
           If your prompt now says <code>bandit1@bandit:~$</code> then you did it.
           <div class="notice notice-ok" style="margin-top:10px;">
-            <span class="notice-icon">✅</span>
             <div>
               <strong>Level 0 → 1 complete!</strong>
               <p>You used SSH to log in, found a file with <code>ls</code>, read it with <code>cat</code>, saved the password, and logged in as the next user. That is real-world sysadmin and security work.</p>
@@ -980,19 +972,19 @@ Password:  bandit0</div>
 
       <div class="team-grid">
         <div class="team-card">
-          <div class="team-name">👻 Ghost</div>
+          <div class="team-name">Ghost</div>
           <div class="team-topic">What is an <strong>SSH key</strong>, and how is it different from using a password?</div>
         </div>
         <div class="team-card">
-          <div class="team-name">🌑 Shadow</div>
+          <div class="team-name">Shadow</div>
           <div class="team-topic">What is a <strong>host fingerprint</strong> and why did SSH ask you to type "yes" the first time?</div>
         </div>
         <div class="team-card">
-          <div class="team-name">◆ Fantom</div>
+          <div class="team-name">Fantom</div>
           <div class="team-topic">What does <strong>encryption</strong> actually mean? How does SSH use it to keep your data safe?</div>
         </div>
         <div class="team-card">
-          <div class="team-name">⬡ Cipher</div>
+          <div class="team-name">Cipher</div>
           <div class="team-topic">What is a <strong>port</strong>, and why would a server use 2220 instead of the default 22?</div>
         </div>
       </div>
@@ -1009,7 +1001,6 @@ Password:  bandit0</div>
       </div>
 
       <div class="notice notice-red">
-        <span class="notice-icon">🔴</span>
         <div>
           <strong>The skills you are learning are real and powerful.</strong>
           <p>
@@ -1023,7 +1014,7 @@ Password:  bandit0</div>
   </main>
 </div>
 
-<button class="print-btn" onclick="window.print()">⎙ Print / PDF</button>
+<button class="print-btn" onclick="window.print()">Print / PDF</button>
 
 <script>
   // Progress bar
