@@ -1,0 +1,1070 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Week 2 — Intro to SSH</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy:    #0d1b2a;
+    --ink:     #1c2e40;
+    --steel:   #2e4d6e;
+    --slate:   #4a6fa5;
+    --sky:     #7eb8d4;
+    --frost:   #d0e8f2;
+    --paper:   #f4f7fa;
+    --white:   #ffffff;
+    --accent:  #e84855;
+    --green:   #2a9d50;
+    --amber:   #e8a020;
+    --mono:    'IBM Plex Mono', monospace;
+    --sans:    'IBM Plex Sans', sans-serif;
+  }
+
+  html[data-theme="dark"] {
+    --paper:  #080e17;
+    --white:  #111d29;
+    --ink:    #c8dfe8;
+    --frost:  #1e3048;
+    --steel:  #7ab8d4;
+    --border: #1e3048;
+  }
+
+  html[data-theme="light"] {
+    --border: #c4d8ec;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: var(--sans);
+    background: var(--paper);
+    color: var(--ink);
+    min-height: 100vh;
+    overflow-x: hidden;
+    transition: background 0.3s, color 0.3s;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(74,158,202,0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(74,158,202,0.04) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+    transition: opacity 0.3s;
+  }
+
+  html[data-theme="light"] body::before {
+    background-image:
+      linear-gradient(rgba(13,27,42,0.05) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(13,27,42,0.05) 1px, transparent 1px);
+  }
+
+  body::after {
+    content: '';
+    position: fixed;
+    top: -100%;
+    left: 0;
+    right: 0;
+    height: 200%;
+    background: linear-gradient(transparent 49.5%, rgba(74,158,202,0.03) 50%, transparent 50.5%);
+    background-size: 100% 4px;
+    animation: scan 8s linear infinite;
+    pointer-events: none;
+    z-index: 0;
+    transition: opacity 0.3s;
+  }
+
+  html[data-theme="light"] body::after { opacity: 0; }
+
+  @keyframes scan {
+    0%   { transform: translateY(0); }
+    100% { transform: translateY(50%); }
+  }
+
+  header {
+    background: var(--navy);
+    color: #d0e8f2;
+    padding: 0;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    border-bottom: 3px solid var(--accent);
+    box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+  }
+
+  .header-inner {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 14px 32px;
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    flex-wrap: wrap;
+  }
+
+  .header-week {
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--sky);
+    border: 1px solid var(--steel);
+    padding: 4px 10px;
+    border-radius: 3px;
+    white-space: nowrap;
+  }
+
+  .header-title {
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    flex: 1;
+  }
+
+  .header-meta {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+
+  .meta-chip {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--sky);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .meta-chip::before {
+    content: '';
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--sky);
+    opacity: 0.7;
+  }
+
+  .header-back {
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--sky);
+    text-decoration: none;
+    border: 1px solid var(--steel);
+    padding: 4px 10px;
+    border-radius: 3px;
+    white-space: nowrap;
+    transition: border-color 0.15s, color 0.15s;
+  }
+
+  .header-back:hover { border-color: var(--sky); }
+
+  .theme-toggle {
+    flex-shrink: 0;
+    background: rgba(255,255,255,0.08);
+    border: 1px solid var(--steel);
+    color: var(--sky);
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 15px;
+    transition: background 0.2s, border-color 0.2s;
+  }
+
+  .theme-toggle:hover { border-color: var(--sky); }
+
+  .progress-bar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 3px;
+    background: var(--accent);
+    z-index: 999;
+    transition: width 0.1s linear;
+  }
+
+  .layout {
+    max-width: 1100px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 220px 1fr;
+    gap: 0;
+    padding: 0 24px;
+    align-items: start;
+    position: relative;
+    z-index: 1;
+  }
+
+  .sidebar {
+    position: sticky;
+    top: 73px;
+    padding: 32px 24px 32px 0;
+  }
+
+  .nav-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--slate);
+    margin-bottom: 12px;
+    padding-left: 12px;
+  }
+
+  .nav-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .nav-list a {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 12px;
+    border-radius: 6px;
+    text-decoration: none;
+    font-size: 13px;
+    color: var(--steel);
+    transition: all 0.15s ease;
+    border-left: 3px solid transparent;
+    font-weight: 600;
+  }
+
+  .nav-list a:hover, .nav-list a.active {
+    background: var(--frost);
+    color: var(--ink);
+    border-left-color: var(--slate);
+  }
+
+  .nav-list a .nav-day {
+    font-family: var(--mono);
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--slate);
+    min-width: 28px;
+  }
+
+  .nav-divider {
+    height: 1px;
+    background: var(--frost);
+    margin: 8px 12px;
+  }
+
+  main {
+    padding: 32px 0 64px 24px;
+    border-left: 1px solid var(--border);
+    min-width: 0;
+  }
+
+  .section {
+    margin-bottom: 48px;
+    opacity: 0;
+    transform: translateY(16px);
+    transition: opacity 0.4s ease, transform 0.4s ease;
+  }
+
+  .section.visible { opacity: 1; transform: translateY(0); }
+
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 20px;
+    padding-bottom: 12px;
+    border-bottom: 2px solid var(--frost);
+  }
+
+  .section-icon {
+    width: 40px;
+    height: 40px;
+    background: var(--navy);
+    color: var(--sky);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--mono);
+    font-size: 13px;
+    font-weight: 600;
+    flex-shrink: 0;
+  }
+
+  .section-title {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--navy);
+    letter-spacing: -0.02em;
+    line-height: 1.2;
+  }
+
+  html[data-theme="dark"] .section-title { color: var(--sky); }
+
+  .section-subtitle {
+    font-size: 13px;
+    color: var(--slate);
+    font-style: italic;
+    margin-top: 2px;
+  }
+
+  .obj-list {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    list-style: none;
+  }
+
+  .obj-item {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--slate);
+    border-radius: 0 8px 8px 0;
+    padding: 12px 16px;
+    font-size: 14px;
+    line-height: 1.45;
+    color: var(--ink);
+    transition: border-left-color 0.2s, box-shadow 0.2s;
+  }
+
+  .obj-item:hover {
+    border-left-color: var(--accent);
+    box-shadow: 0 2px 12px rgba(0,0,0,0.07);
+  }
+
+  .step-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding-left: 0;
+  }
+
+  .step-list li {
+    display: flex;
+    gap: 10px;
+    font-size: 14px;
+    line-height: 1.5;
+    color: var(--ink);
+    padding: 6px 10px;
+    border-radius: 5px;
+    transition: background 0.15s;
+  }
+
+  .step-list li:hover { background: var(--paper); }
+
+  .step-list li::before {
+    content: '›';
+    color: var(--slate);
+    font-weight: 700;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+
+  .step-list li.sub {
+    padding-left: 28px;
+    font-size: 13px;
+    color: var(--steel);
+  }
+
+  .step-list li.sub::before { content: '·'; color: var(--sky); }
+
+  /* Numbered steps */
+  .numbered-steps {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    counter-reset: step-counter;
+  }
+
+  .numbered-steps li {
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px 16px;
+    font-size: 14px;
+    line-height: 1.5;
+    color: var(--ink);
+    counter-increment: step-counter;
+    transition: box-shadow 0.15s;
+  }
+
+  .numbered-steps li:hover { box-shadow: 0 2px 12px rgba(0,0,0,0.07); }
+
+  .numbered-steps li::before {
+    content: counter(step-counter);
+    background: var(--navy);
+    color: var(--sky);
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 600;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+
+  /* Command breakdown */
+  .cmd-breakdown {
+    background: var(--navy);
+    border-radius: 10px;
+    padding: 20px 24px;
+    margin-bottom: 16px;
+  }
+
+  .cmd-line {
+    font-family: var(--mono);
+    font-size: 16px;
+    color: var(--sky);
+    margin-bottom: 16px;
+    word-break: break-all;
+  }
+
+  .cmd-parts {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .cmd-part {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    font-size: 13px;
+  }
+
+  .cmd-part-token {
+    font-family: var(--mono);
+    color: var(--sky);
+    min-width: 120px;
+    flex-shrink: 0;
+    font-weight: 600;
+  }
+
+  .cmd-part-desc { color: rgba(208,232,242,0.75); line-height: 1.4; }
+
+  /* Notice boxes */
+  .notice {
+    display: flex;
+    gap: 14px;
+    padding: 14px 16px;
+    border-radius: 8px;
+    margin-bottom: 12px;
+    font-size: 14px;
+    line-height: 1.5;
+  }
+
+  .notice-warn { background: #fff5e6; border-left: 4px solid var(--amber); }
+  .notice-info { background: #e8f4fd; border-left: 4px solid var(--slate); }
+  .notice-ok   { background: #e8f8ee; border-left: 4px solid var(--green); }
+  .notice-red  { background: rgba(232,72,85,0.08); border-left: 4px solid var(--accent); }
+
+  html[data-theme="dark"] .notice-warn { background: rgba(232,160,32,0.08); }
+  html[data-theme="dark"] .notice-info { background: rgba(74,111,165,0.12); }
+  html[data-theme="dark"] .notice-ok   { background: rgba(42,157,80,0.10); }
+
+  .notice-icon { font-size: 18px; flex-shrink: 0; line-height: 1.4; }
+
+  .notice strong {
+    display: block;
+    font-size: 13px;
+    font-weight: 700;
+    margin-bottom: 3px;
+    color: var(--ink);
+  }
+
+  html[data-theme="dark"] .notice strong { color: var(--ink); }
+
+  .notice p { margin: 0; color: var(--steel); font-size: 13px; }
+
+  /* Lab block */
+  .lab-block {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+    margin-bottom: 16px;
+  }
+
+  .lab-header {
+    background: var(--navy);
+    padding: 12px 18px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .lab-badge {
+    font-family: var(--mono);
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--sky);
+    border: 1px solid rgba(126,184,212,0.3);
+    padding: 3px 8px;
+    border-radius: 3px;
+  }
+
+  .lab-title {
+    font-size: 15px;
+    font-weight: 700;
+    color: #d0e8f2;
+  }
+
+  .lab-body { padding: 16px 18px; }
+
+  /* Team challenge grid */
+  .team-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+
+  .team-card {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px 16px;
+  }
+
+  .team-name {
+    font-family: var(--mono);
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--sky);
+    margin-bottom: 6px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  .team-topic { font-size: 13px; color: var(--ink); line-height: 1.5; }
+
+  /* Reflection */
+  .reflection-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .reflection-item {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px 16px 14px 50px;
+    font-size: 14px;
+    color: var(--ink);
+    line-height: 1.5;
+    position: relative;
+  }
+
+  .reflection-item::before {
+    content: attr(data-q);
+    position: absolute;
+    left: 14px;
+    top: 14px;
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--slate);
+    background: var(--frost);
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  code {
+    font-family: var(--mono);
+    font-size: 12px;
+    background: var(--navy);
+    color: var(--sky);
+    padding: 2px 7px;
+    border-radius: 4px;
+  }
+
+  .file-tree {
+    font-family: var(--mono);
+    font-size: 13px;
+    background: var(--navy);
+    color: var(--sky);
+    padding: 16px 20px;
+    border-radius: 8px;
+    line-height: 1.8;
+    overflow-x: auto;
+  }
+
+  .print-btn {
+    position: fixed;
+    bottom: 28px;
+    right: 28px;
+    background: var(--navy);
+    color: var(--sky);
+    border: none;
+    border-radius: 50px;
+    padding: 12px 22px;
+    font-family: var(--mono);
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    cursor: pointer;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.25);
+    transition: background 0.2s, transform 0.15s;
+    z-index: 200;
+  }
+
+  .print-btn:hover { background: var(--steel); transform: translateY(-2px); }
+
+  @media (max-width: 768px) {
+    .layout { grid-template-columns: 1fr; padding: 0 16px; }
+    .sidebar { display: none; }
+    main { border-left: none; padding-left: 0; }
+    .obj-list, .team-grid { grid-template-columns: 1fr; }
+    .header-meta { display: none; }
+  }
+
+  @media print {
+    header { position: static; }
+    .sidebar, .print-btn, .theme-toggle { display: none; }
+    .layout { grid-template-columns: 1fr; }
+    main { border-left: none; }
+    .section { opacity: 1; transform: none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="progress-bar" id="progressBar"></div>
+
+<header>
+  <div class="header-inner">
+    <a class="header-back" href="index.html">← Home</a>
+    <div class="header-week">Week 02</div>
+    <div class="header-title">Intro to SSH</div>
+    <div class="header-meta">
+      <span class="meta-chip">Secure Shell</span>
+      <span class="meta-chip">OverTheWire: Bandit</span>
+      <span class="meta-chip">Levels 0 → 1</span>
+    </div>
+    <button class="theme-toggle" id="themeToggle" aria-label="Toggle light/dark mode">☀</button>
+  </div>
+</header>
+
+<div class="layout">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="nav-label">Contents</div>
+    <ul class="nav-list">
+      <li><a href="index.html"><span class="nav-day">⌂</span> Home</a></li>
+      <div class="nav-divider"></div>
+      <li><a href="#objectives"><span class="nav-day">OBJ</span> Objectives</a></li>
+      <div class="nav-divider"></div>
+      <li><a href="#what-is-ssh"><span class="nav-day">01</span> What Is SSH?</a></li>
+      <li><a href="#how-it-works"><span class="nav-day">02</span> How It Works</a></li>
+      <li><a href="#the-command"><span class="nav-day">03</span> The SSH Command</a></li>
+      <li><a href="#bandit"><span class="nav-day">04</span> OverTheWire Bandit</a></li>
+      <div class="nav-divider"></div>
+      <li><a href="#lab0"><span class="nav-day">L0</span> Lab: Level 0</a></li>
+      <li><a href="#lab1"><span class="nav-day">L1</span> Lab: Level 0 → 1</a></li>
+      <div class="nav-divider"></div>
+      <li><a href="#reflection"><span class="nav-day">REF</span> Reflection</a></li>
+      <li><a href="#team"><span class="nav-day">TEAM</span> Team Challenge</a></li>
+      <li><a href="#ethics"><span class="nav-day">ETH</span> Ethics</a></li>
+      <li><a href="#" onclick="window.print(); return false;"><span class="nav-day">PDF</span> Download PDF</a></li>
+    </ul>
+  </aside>
+
+  <!-- MAIN -->
+  <main>
+
+    <!-- OBJECTIVES -->
+    <section class="section" id="objectives">
+      <div class="section-header">
+        <div class="section-icon">OBJ</div>
+        <div>
+          <div class="section-title">Week 2 Objectives</div>
+          <div class="section-subtitle">What you will be able to do by the end of this lesson</div>
+        </div>
+      </div>
+      <ul class="obj-list">
+        <li class="obj-item">Explain what <strong>SSH</strong> is and why it matters in cybersecurity</li>
+        <li class="obj-item">Break down the parts of an <strong>SSH command</strong></li>
+        <li class="obj-item">Connect to a remote server using <code>ssh</code> on a non-standard port</li>
+        <li class="obj-item">Use <code>ls</code> and <code>cat</code> to find and read files on a remote machine</li>
+        <li class="obj-item">Complete <strong>Bandit Levels 0 and 1</strong> on OverTheWire</li>
+        <li class="obj-item">Save passwords in a notes file to track progress</li>
+      </ul>
+    </section>
+
+    <!-- WHAT IS SSH -->
+    <section class="section" id="what-is-ssh">
+      <div class="section-header">
+        <div class="section-icon">01</div>
+        <div>
+          <div class="section-title">What Is SSH?</div>
+          <div class="section-subtitle">Secure Shell — remote control over an encrypted connection</div>
+        </div>
+      </div>
+
+      <p style="font-size:15px; line-height:1.7; color:var(--ink); margin-bottom:16px;">
+        <strong>SSH</strong> stands for <strong>Secure Shell</strong>. It lets you control a computer that is somewhere else —
+        across the room, across the building, or across the world — using only your keyboard and a terminal window.
+      </p>
+
+      <div class="notice notice-info" style="margin-bottom:20px;">
+        <span class="notice-icon">🔐</span>
+        <div>
+          <strong>Encryption</strong>
+          <p>Everything you type and everything the remote computer sends back is scrambled so that nobody in between can read it. Imagine passing a note in class written in a secret code that only you and your friend know — that is basically what SSH does for computers.</p>
+        </div>
+      </div>
+
+      <div class="notice notice-ok">
+        <span class="notice-icon">🩺</span>
+        <div>
+          <strong>Why should you care?</strong>
+          <p>If you want to work in cybersecurity, you will use SSH all the time. It is how professionals log into servers, investigate security problems, and manage systems. Learning SSH now is like learning to use a stethoscope if you want to be a doctor — one of the first tools you pick up.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- HOW IT WORKS -->
+    <section class="section" id="how-it-works">
+      <div class="section-header">
+        <div class="section-icon">02</div>
+        <div>
+          <div class="section-title">How Does It Work?</div>
+          <div class="section-subtitle">The four steps from your terminal to the remote machine</div>
+        </div>
+      </div>
+
+      <ol class="numbered-steps">
+        <li>You tell your computer: <em>"I want to connect to that computer over there."</em></li>
+        <li>The two computers meet and agree on a <strong>secret code</strong> to use for the session.</li>
+        <li>You <strong>prove who you are</strong> — usually by typing a password.</li>
+        <li>Once you are in, you have a <strong>command line on the remote computer</strong>. You can type commands just like you would on your own machine.</li>
+      </ol>
+
+      <div class="notice notice-info" style="margin-top:16px;">
+        <span class="notice-icon">🔒</span>
+        <div>
+          <strong>Always encrypted</strong>
+          <p>Everything that travels between the two computers is encrypted the entire time — login, commands, responses, everything.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- THE SSH COMMAND -->
+    <section class="section" id="the-command">
+      <div class="section-header">
+        <div class="section-icon">03</div>
+        <div>
+          <div class="section-title">The SSH Command</div>
+          <div class="section-subtitle">Breaking down every piece of what you type</div>
+        </div>
+      </div>
+
+      <div class="cmd-breakdown">
+        <div class="cmd-line">ssh bandit0@bandit.labs.overthewire.org -p 2220</div>
+        <div class="cmd-parts">
+          <div class="cmd-part">
+            <div class="cmd-part-token">ssh</div>
+            <div class="cmd-part-desc">The program you are running — the SSH client.</div>
+          </div>
+          <div class="cmd-part">
+            <div class="cmd-part-token">bandit0</div>
+            <div class="cmd-part-desc">The username you are logging in as on the remote machine.</div>
+          </div>
+          <div class="cmd-part">
+            <div class="cmd-part-token">@</div>
+            <div class="cmd-part-desc">Separator — just separates the username from the address.</div>
+          </div>
+          <div class="cmd-part">
+            <div class="cmd-part-token">bandit.labs…</div>
+            <div class="cmd-part-desc">The address (hostname) of the computer you are connecting to.</div>
+          </div>
+          <div class="cmd-part">
+            <div class="cmd-part-token">-p 2220</div>
+            <div class="cmd-part-desc">The port to connect on. The default SSH port is 22 — this server uses 2220 instead.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="notice notice-info">
+        <span class="notice-icon">🏢</span>
+        <div>
+          <strong>Think of a port like an apartment number.</strong>
+          <p>The address gets you to the building; the port number gets you to the right door. SSH defaults to door 22 — some servers use a different one for security or configuration reasons.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- OVERTHEWIRE BANDIT -->
+    <section class="section" id="bandit">
+      <div class="section-header">
+        <div class="section-icon">04</div>
+        <div>
+          <div class="section-title">What Is OverTheWire Bandit?</div>
+          <div class="section-subtitle">A free, beginner-friendly wargame for learning Linux and SSH</div>
+        </div>
+      </div>
+
+      <p style="font-size:15px; line-height:1.7; color:var(--ink); margin-bottom:16px;">
+        Bandit is a free online game designed to teach you how to use the Linux command line.
+        It is hosted at overthewire.org.
+      </p>
+
+      <ul class="step-list" style="margin-bottom:20px;">
+        <li>You log in to the server using SSH</li>
+        <li>Each level gives you a challenge — solve it to find a password</li>
+        <li>Use that password to log into the next level</li>
+        <li>The challenges get harder as you go</li>
+      </ul>
+
+      <div class="notice notice-warn">
+        <span class="notice-icon">📝</span>
+        <div>
+          <strong>BEFORE YOU START — Make a Notes File</strong>
+          <p>Bandit does <strong>NOT</strong> save your progress. If you find a password and forget to write it down, you have to start over. Right now, open a text editor and create a file called <code>bandit_notes.txt</code>. Paste every password into this file as you find them.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- LAB: LEVEL 0 -->
+    <section class="section" id="lab0">
+      <div class="section-header">
+        <div class="section-icon">L0</div>
+        <div>
+          <div class="section-title">Lab: Level 0 — Log In for the First Time</div>
+          <div class="section-subtitle">Goal: Connect to the Bandit server using SSH</div>
+        </div>
+      </div>
+
+      <div class="lab-block" style="margin-bottom:20px;">
+        <div class="lab-header">
+          <div class="lab-badge">Connection Info</div>
+          <div class="lab-title">Bandit Level 0</div>
+        </div>
+        <div class="lab-body">
+          <div class="file-tree">Host:      bandit.labs.overthewire.org
+Port:      2220
+Username:  bandit0
+Password:  bandit0</div>
+        </div>
+      </div>
+
+      <ol class="numbered-steps">
+        <li>Open a terminal on your machine.</li>
+        <li>Type this command and press Enter:<br><br>
+          <code style="font-size:13px;">ssh bandit0@bandit.labs.overthewire.org -p 2220</code>
+        </li>
+        <li>The first time you connect, it will ask if you trust this server. Type <code>yes</code> and press Enter.</li>
+        <li>It will ask for a password. Type <code>bandit0</code> and press Enter.</li>
+        <li>
+          <div>
+            <strong>IMPORTANT:</strong> When you type the password, nothing will appear on the screen — no dots, no stars, nothing.
+            <div class="notice notice-info" style="margin-top:10px;">
+              <span class="notice-icon">👁️</span>
+              <div>
+                <strong>This is normal.</strong>
+                <p>Linux hides your password so nobody looking over your shoulder can see it. Just type it and press Enter.</p>
+              </div>
+            </div>
+          </div>
+        </li>
+        <li>
+          If it worked, you will see a welcome message and then a prompt like this:
+          <div class="file-tree" style="margin-top:10px;">bandit0@bandit:~$</div>
+          That means you are now on the Bandit server. <strong>You just completed Level 0.</strong>
+        </li>
+      </ol>
+    </section>
+
+    <!-- LAB: LEVEL 0→1 -->
+    <section class="section" id="lab1">
+      <div class="section-header">
+        <div class="section-icon">L1</div>
+        <div>
+          <div class="section-title">Lab: Level 0 → Level 1 — Find the Password</div>
+          <div class="section-subtitle">Goal: Read the readme file to get the password for the next level</div>
+        </div>
+      </div>
+
+      <div class="notice notice-info" style="margin-bottom:20px;">
+        <span class="notice-icon">📁</span>
+        <div>
+          <strong>Commands you need</strong>
+          <p><code>ls</code> — lists the files in your current folder &nbsp;·&nbsp; <code>cat filename</code> — shows what is inside a file</p>
+        </div>
+      </div>
+
+      <ol class="numbered-steps">
+        <li>Make sure you are still logged in as <code>bandit0</code> (your prompt says <code>bandit0@bandit</code>).</li>
+        <li>Type <code>ls</code> and press Enter. You should see a file called <code>readme</code>.</li>
+        <li>Type this and press Enter:<br><br><code>cat readme</code></li>
+        <li>A long string of random characters will appear. That is the password for <code>bandit1</code>. <strong>Copy it and paste it into your bandit_notes.txt file right now.</strong></li>
+        <li>Type <code>exit</code> and press Enter to disconnect from the server.</li>
+        <li>Now log in as <code>bandit1</code> using the password you just found:<br><br>
+          <code style="font-size:13px;">ssh bandit1@bandit.labs.overthewire.org -p 2220</code>
+        </li>
+        <li>When it asks for a password, paste or type the password you saved.</li>
+        <li>
+          If your prompt now says <code>bandit1@bandit:~$</code> then you did it.
+          <div class="notice notice-ok" style="margin-top:10px;">
+            <span class="notice-icon">✅</span>
+            <div>
+              <strong>Level 0 → 1 complete!</strong>
+              <p>You used SSH to log in, found a file with <code>ls</code>, read it with <code>cat</code>, saved the password, and logged in as the next user. That is real-world sysadmin and security work.</p>
+            </div>
+          </div>
+        </li>
+      </ol>
+    </section>
+
+    <!-- REFLECTION -->
+    <section class="section" id="reflection">
+      <div class="section-header">
+        <div class="section-icon">REF</div>
+        <div>
+          <div class="section-title">Reflection Questions</div>
+          <div class="section-subtitle">Answer these in your bandit_notes.txt or wherever your instructor tells you</div>
+        </div>
+      </div>
+
+      <div class="reflection-list">
+        <div class="reflection-item" data-q="1">What does SSH do? Explain it like you are telling a friend who has never heard of it.</div>
+        <div class="reflection-item" data-q="2">Why did we have to add <code>-p 2220</code> to our SSH command?</div>
+        <div class="reflection-item" data-q="3">Why does Linux hide your password when you type it? How does that help with security?</div>
+        <div class="reflection-item" data-q="4">What command did you use to read the readme file?</div>
+        <div class="reflection-item" data-q="5">Why is it so important to save your passwords as you go through Bandit?</div>
+      </div>
+    </section>
+
+    <!-- TEAM CHALLENGE -->
+    <section class="section" id="team">
+      <div class="section-header">
+        <div class="section-icon">TEAM</div>
+        <div>
+          <div class="section-title">Team Challenge</div>
+          <div class="section-subtitle">Research your assigned topic and prepare a short explanation in your team's shared doc</div>
+        </div>
+      </div>
+
+      <div class="team-grid">
+        <div class="team-card">
+          <div class="team-name">👻 Ghost</div>
+          <div class="team-topic">What is an <strong>SSH key</strong>, and how is it different from using a password?</div>
+        </div>
+        <div class="team-card">
+          <div class="team-name">🌑 Shadow</div>
+          <div class="team-topic">What is a <strong>host fingerprint</strong> and why did SSH ask you to type "yes" the first time?</div>
+        </div>
+        <div class="team-card">
+          <div class="team-name">◆ Fantom</div>
+          <div class="team-topic">What does <strong>encryption</strong> actually mean? How does SSH use it to keep your data safe?</div>
+        </div>
+        <div class="team-card">
+          <div class="team-name">⬡ Cipher</div>
+          <div class="team-topic">What is a <strong>port</strong>, and why would a server use 2220 instead of the default 22?</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ETHICS -->
+    <section class="section" id="ethics">
+      <div class="section-header">
+        <div class="section-icon">ETH</div>
+        <div>
+          <div class="section-title">Ethics Reminder</div>
+          <div class="section-subtitle">With great power comes great responsibility</div>
+        </div>
+      </div>
+
+      <div class="notice notice-red">
+        <span class="notice-icon">🔴</span>
+        <div>
+          <strong>The skills you are learning are real and powerful.</strong>
+          <p>
+            You are allowed to use them <strong>ONLY</strong> in our class lab environment and on sites like OverTheWire that invite you to participate.<br><br>
+            Accessing any computer system without permission is a <strong>federal crime</strong>. Ethical hackers always get written permission before testing a system. <strong>No exceptions. No excuses.</strong>
+          </p>
+        </div>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<button class="print-btn" onclick="window.print()">⎙ Print / PDF</button>
+
+<script>
+  // Progress bar
+  window.addEventListener('scroll', () => {
+    const doc = document.documentElement;
+    const pct = (doc.scrollTop / (doc.scrollHeight - doc.clientHeight)) * 100;
+    document.getElementById('progressBar').style.width = pct + '%';
+  });
+
+  // Scroll reveal
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+  }, { threshold: 0.08 });
+  document.querySelectorAll('.section').forEach(el => observer.observe(el));
+
+  // Active nav link
+  const sections = document.querySelectorAll('section[id]');
+  const navLinks = document.querySelectorAll('.nav-list a[href^="#"]');
+  const navObserver = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        navLinks.forEach(a => a.classList.remove('active'));
+        const link = document.querySelector(`.nav-list a[href="#${e.target.id}"]`);
+        if (link) link.classList.add('active');
+      }
+    });
+  }, { rootMargin: '-30% 0px -60% 0px' });
+  sections.forEach(s => navObserver.observe(s));
+
+  // Theme toggle
+  const toggle = document.getElementById('themeToggle');
+  const stored = localStorage.getItem('lessonTheme') || 'dark';
+  document.documentElement.setAttribute('data-theme', stored);
+  toggle.textContent = stored === 'dark' ? '☀' : '☽';
+  toggle.addEventListener('click', () => {
+    const next = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', next);
+    localStorage.setItem('lessonTheme', next);
+    toggle.textContent = next === 'dark' ? '☀' : '☽';
+  });
+</script>
+
+</body>
+</html>

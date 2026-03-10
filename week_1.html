@@ -1,0 +1,1181 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Week 1 — Intro to Command Line Interface</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy:    #0d1b2a;
+    --ink:     #1c2e40;
+    --steel:   #2e4d6e;
+    --slate:   #4a6fa5;
+    --sky:     #7eb8d4;
+    --frost:   #d0e8f2;
+    --paper:   #f4f7fa;
+    --white:   #ffffff;
+    --accent:  #e84855;
+    --green:   #2a9d50;
+    --amber:   #e8a020;
+    --mono:    'IBM Plex Mono', monospace;
+    --sans:    'IBM Plex Sans', sans-serif;
+  }
+
+  html[data-theme="dark"] {
+    --paper:  #080e17;
+    --white:  #111d29;
+    --ink:    #c8dfe8;
+    --frost:  #1e3048;
+    --steel:  #7ab8d4;
+    --border: #1e3048;
+  }
+
+  html[data-theme="light"] {
+    --border: #c4d8ec;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: var(--sans);
+    background: var(--paper);
+    color: var(--ink);
+    min-height: 100vh;
+    overflow-x: hidden;
+    transition: background 0.3s, color 0.3s;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(74,158,202,0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(74,158,202,0.04) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+    transition: opacity 0.3s;
+  }
+
+  html[data-theme="light"] body::before {
+    background-image:
+      linear-gradient(rgba(13,27,42,0.05) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(13,27,42,0.05) 1px, transparent 1px);
+  }
+
+  body::after {
+    content: '';
+    position: fixed;
+    top: -100%;
+    left: 0;
+    right: 0;
+    height: 200%;
+    background: linear-gradient(transparent 49.5%, rgba(74,158,202,0.03) 50%, transparent 50.5%);
+    background-size: 100% 4px;
+    animation: scan 8s linear infinite;
+    pointer-events: none;
+    z-index: 0;
+    transition: opacity 0.3s;
+  }
+
+  html[data-theme="light"] body::after { opacity: 0; }
+
+  @keyframes scan {
+    0%   { transform: translateY(0); }
+    100% { transform: translateY(50%); }
+  }
+
+  header {
+    background: var(--navy);
+    color: #d0e8f2;
+    padding: 0;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    border-bottom: 3px solid var(--accent);
+    box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+  }
+
+  .header-inner {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 14px 32px;
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    flex-wrap: wrap;
+  }
+
+  .header-week {
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--sky);
+    border: 1px solid var(--steel);
+    padding: 4px 10px;
+    border-radius: 3px;
+    white-space: nowrap;
+  }
+
+  .header-title {
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    flex: 1;
+  }
+
+  .header-meta {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+
+  .meta-chip {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--sky);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .meta-chip::before {
+    content: '';
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--sky);
+    opacity: 0.7;
+  }
+
+  .header-back {
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--sky);
+    text-decoration: none;
+    border: 1px solid var(--steel);
+    padding: 4px 10px;
+    border-radius: 3px;
+    white-space: nowrap;
+    transition: border-color 0.15s, color 0.15s;
+  }
+
+  .header-back:hover { border-color: var(--sky); }
+
+  .theme-toggle {
+    flex-shrink: 0;
+    background: rgba(255,255,255,0.08);
+    border: 1px solid var(--steel);
+    color: var(--sky);
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 15px;
+    transition: background 0.2s, border-color 0.2s;
+  }
+
+  .theme-toggle:hover { border-color: var(--sky); }
+
+  .progress-bar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 3px;
+    background: var(--accent);
+    z-index: 999;
+    transition: width 0.1s linear;
+  }
+
+  .layout {
+    max-width: 1100px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 220px 1fr;
+    gap: 0;
+    padding: 0 24px;
+    align-items: start;
+    position: relative;
+    z-index: 1;
+  }
+
+  .sidebar {
+    position: sticky;
+    top: 73px;
+    padding: 32px 24px 32px 0;
+  }
+
+  .nav-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--slate);
+    margin-bottom: 12px;
+    padding-left: 12px;
+  }
+
+  .nav-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .nav-list a {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 12px;
+    border-radius: 6px;
+    text-decoration: none;
+    font-size: 13px;
+    color: var(--steel);
+    transition: all 0.15s ease;
+    border-left: 3px solid transparent;
+    font-weight: 600;
+  }
+
+  .nav-list a:hover, .nav-list a.active {
+    background: var(--frost);
+    color: var(--ink);
+    border-left-color: var(--slate);
+  }
+
+  .nav-list a .nav-day {
+    font-family: var(--mono);
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--slate);
+    min-width: 28px;
+  }
+
+  .nav-divider {
+    height: 1px;
+    background: var(--frost);
+    margin: 8px 12px;
+  }
+
+  main {
+    padding: 32px 0 64px 24px;
+    border-left: 1px solid var(--border);
+    min-width: 0;
+  }
+
+  .section {
+    margin-bottom: 48px;
+    opacity: 0;
+    transform: translateY(16px);
+    transition: opacity 0.4s ease, transform 0.4s ease;
+  }
+
+  .section.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 20px;
+    padding-bottom: 12px;
+    border-bottom: 2px solid var(--frost);
+  }
+
+  .section-icon {
+    width: 40px;
+    height: 40px;
+    background: var(--navy);
+    color: var(--sky);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--mono);
+    font-size: 13px;
+    font-weight: 600;
+    flex-shrink: 0;
+  }
+
+  .section-title {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--navy);
+    letter-spacing: -0.02em;
+    line-height: 1.2;
+  }
+
+  html[data-theme="dark"] .section-title { color: var(--sky); }
+
+  .section-subtitle {
+    font-size: 13px;
+    color: var(--slate);
+    font-style: italic;
+    margin-top: 2px;
+  }
+
+  .obj-list {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    list-style: none;
+  }
+
+  .obj-item {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--slate);
+    border-radius: 0 8px 8px 0;
+    padding: 12px 16px;
+    font-size: 14px;
+    line-height: 1.45;
+    color: var(--ink);
+    transition: border-left-color 0.2s, box-shadow 0.2s;
+  }
+
+  .obj-item:hover {
+    border-left-color: var(--accent);
+    box-shadow: 0 2px 12px rgba(0,0,0,0.07);
+  }
+
+  /* Vocab cards */
+  .vocab-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 12px;
+  }
+
+  .vocab-card {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px 16px;
+    transition: box-shadow 0.2s;
+  }
+
+  .vocab-card:hover { box-shadow: 0 4px 16px rgba(46,77,110,0.12); }
+
+  .vocab-term {
+    font-family: var(--mono);
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--sky);
+    margin-bottom: 6px;
+  }
+
+  .vocab-def {
+    font-size: 13px;
+    color: var(--ink);
+    line-height: 1.45;
+  }
+
+  /* Command cards */
+  .cmd-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 16px;
+  }
+
+  .cmd-card {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+    transition: box-shadow 0.2s;
+  }
+
+  .cmd-card:hover { box-shadow: 0 4px 20px rgba(46,77,110,0.12); }
+
+  .cmd-header {
+    background: var(--navy);
+    padding: 10px 14px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .cmd-name {
+    font-family: var(--mono);
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--sky);
+  }
+
+  .cmd-purpose {
+    font-size: 12px;
+    color: rgba(126,184,212,0.7);
+  }
+
+  .cmd-body { padding: 12px 14px; }
+
+  .cmd-example {
+    font-family: var(--mono);
+    font-size: 12px;
+    background: var(--navy);
+    color: var(--sky);
+    padding: 6px 10px;
+    border-radius: 4px;
+    margin-bottom: 8px;
+    word-break: break-all;
+  }
+
+  .cmd-notes {
+    font-size: 12px;
+    color: var(--slate);
+    line-height: 1.5;
+  }
+
+  /* Step list */
+  .step-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding-left: 0;
+  }
+
+  .step-list li {
+    display: flex;
+    gap: 10px;
+    font-size: 14px;
+    line-height: 1.5;
+    color: var(--ink);
+    padding: 6px 10px;
+    border-radius: 5px;
+    transition: background 0.15s;
+  }
+
+  .step-list li:hover { background: var(--paper); }
+
+  .step-list li::before {
+    content: '›';
+    color: var(--slate);
+    font-weight: 700;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+
+  .step-list li.sub {
+    padding-left: 28px;
+    font-size: 13px;
+    color: var(--steel);
+  }
+
+  .step-list li.sub::before { content: '·'; color: var(--sky); }
+
+  /* Data table */
+  .data-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+
+  .data-table thead tr {
+    background: var(--navy);
+    color: var(--sky);
+  }
+
+  .data-table th {
+    padding: 10px 14px;
+    text-align: left;
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .data-table td {
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--frost);
+    color: var(--ink);
+    vertical-align: top;
+    line-height: 1.4;
+  }
+
+  .data-table td code {
+    font-family: var(--mono);
+    font-size: 12px;
+    background: var(--navy);
+    color: var(--sky);
+    padding: 2px 7px;
+    border-radius: 4px;
+  }
+
+  .data-table tr:last-child td { border-bottom: none; }
+  .data-table tbody tr:hover td { background: var(--paper); }
+
+  /* Notice boxes */
+  .notice {
+    display: flex;
+    gap: 14px;
+    padding: 14px 16px;
+    border-radius: 8px;
+    margin-bottom: 12px;
+    font-size: 14px;
+    line-height: 1.5;
+  }
+
+  .notice-warn { background: #fff5e6; border-left: 4px solid var(--amber); }
+  .notice-info { background: #e8f4fd; border-left: 4px solid var(--slate); }
+  .notice-ok   { background: #e8f8ee; border-left: 4px solid var(--green); }
+
+  html[data-theme="dark"] .notice-warn { background: rgba(232,160,32,0.08); }
+  html[data-theme="dark"] .notice-info { background: rgba(74,111,165,0.12); }
+  html[data-theme="dark"] .notice-ok   { background: rgba(42,157,80,0.10); }
+
+  .notice-icon { font-size: 18px; flex-shrink: 0; line-height: 1.4; }
+
+  .notice strong {
+    display: block;
+    font-size: 13px;
+    font-weight: 700;
+    margin-bottom: 3px;
+    color: var(--ink);
+  }
+
+  .notice p { margin: 0; color: var(--steel); font-size: 13px; }
+
+  /* Lab challenge */
+  .lab-block {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+    margin-bottom: 16px;
+  }
+
+  .lab-header {
+    background: var(--navy);
+    padding: 12px 18px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .lab-badge {
+    font-family: var(--mono);
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--sky);
+    border: 1px solid rgba(126,184,212,0.3);
+    padding: 3px 8px;
+    border-radius: 3px;
+  }
+
+  .lab-title {
+    font-size: 15px;
+    font-weight: 700;
+    color: #d0e8f2;
+  }
+
+  .lab-body { padding: 16px 18px; }
+
+  /* Reflection */
+  .reflection-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .reflection-item {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px 16px 14px 50px;
+    font-size: 14px;
+    color: var(--ink);
+    line-height: 1.5;
+    position: relative;
+  }
+
+  .reflection-item::before {
+    content: attr(data-q);
+    position: absolute;
+    left: 14px;
+    top: 14px;
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--slate);
+    background: var(--frost);
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* File tree */
+  .file-tree {
+    font-family: var(--mono);
+    font-size: 13px;
+    background: var(--navy);
+    color: var(--sky);
+    padding: 18px 20px;
+    border-radius: 8px;
+    line-height: 1.8;
+    overflow-x: auto;
+  }
+
+  code {
+    font-family: var(--mono);
+    font-size: 12px;
+    background: var(--navy);
+    color: var(--sky);
+    padding: 2px 7px;
+    border-radius: 4px;
+  }
+
+  .print-btn {
+    position: fixed;
+    bottom: 28px;
+    right: 28px;
+    background: var(--navy);
+    color: var(--sky);
+    border: none;
+    border-radius: 50px;
+    padding: 12px 22px;
+    font-family: var(--mono);
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    cursor: pointer;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.25);
+    transition: background 0.2s, transform 0.15s;
+    z-index: 200;
+  }
+
+  .print-btn:hover { background: var(--steel); transform: translateY(-2px); }
+
+  @media (max-width: 768px) {
+    .layout { grid-template-columns: 1fr; padding: 0 16px; }
+    .sidebar { display: none; }
+    main { border-left: none; padding-left: 0; }
+    .obj-list { grid-template-columns: 1fr; }
+    .header-meta { display: none; }
+    .cmd-grid { grid-template-columns: 1fr; }
+    .vocab-grid { grid-template-columns: 1fr 1fr; }
+  }
+
+  @media print {
+    header { position: static; }
+    .sidebar, .print-btn, .theme-toggle { display: none; }
+    .layout { grid-template-columns: 1fr; }
+    main { border-left: none; }
+    .section { opacity: 1; transform: none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="progress-bar" id="progressBar"></div>
+
+<header>
+  <div class="header-inner">
+    <a class="header-back" href="index.html">← Home</a>
+    <div class="header-week">Week 01</div>
+    <div class="header-title">Intro to Command Line Interface</div>
+    <div class="header-meta">
+      <span class="meta-chip">Unit: Lab Setup &amp; Foundations</span>
+      <span class="meta-chip">Computer Science</span>
+      <span class="meta-chip">Step-by-Step Guide</span>
+    </div>
+    <button class="theme-toggle" id="themeToggle" aria-label="Toggle light/dark mode">☀</button>
+  </div>
+</header>
+
+<div class="layout">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="nav-label">Contents</div>
+    <ul class="nav-list">
+      <li><a href="index.html"><span class="nav-day">⌂</span> Home</a></li>
+      <div class="nav-divider"></div>
+      <li><a href="#objectives"><span class="nav-day">OBJ</span> Objectives</a></li>
+      <div class="nav-divider"></div>
+      <li><a href="#what-is-cli"><span class="nav-day">01</span> What Is the CLI?</a></li>
+      <li><a href="#vocab"><span class="nav-day">02</span> Key Vocabulary</a></li>
+      <li><a href="#anatomy"><span class="nav-day">03</span> Anatomy of a Command</a></li>
+      <li><a href="#commands"><span class="nav-day">04</span> Core Commands</a></li>
+      <li><a href="#filesystem"><span class="nav-day">05</span> File System</a></li>
+      <li><a href="#cheatsheet"><span class="nav-day">REF</span> Cheat Sheet</a></li>
+      <div class="nav-divider"></div>
+      <li><a href="#lab"><span class="nav-day">LAB</span> Terminal Tutor</a></li>
+      <li><a href="#selfcheck"><span class="nav-day">CHK</span> Self-Check</a></li>
+      <li><a href="#" onclick="window.print(); return false;"><span class="nav-day">PDF</span> Download PDF</a></li>
+    </ul>
+  </aside>
+
+  <!-- MAIN -->
+  <main>
+
+    <!-- OBJECTIVES -->
+    <section class="section" id="objectives">
+      <div class="section-header">
+        <div class="section-icon">OBJ</div>
+        <div>
+          <div class="section-title">Week 1 Objectives</div>
+          <div class="section-subtitle">What you will be able to do by the end of this lesson</div>
+        </div>
+      </div>
+      <ul class="obj-list">
+        <li class="obj-item">Open a terminal and identify the <strong>prompt</strong></li>
+        <li class="obj-item">Navigate the file system using <strong>pwd</strong>, <strong>ls</strong>, and <strong>cd</strong></li>
+        <li class="obj-item">Create, read, copy, move, and delete <strong>files and folders</strong></li>
+        <li class="obj-item">Use <strong>Tab completion</strong> and command history to work faster</li>
+        <li class="obj-item">Read a <strong>manual page</strong> with <code>man</code></li>
+        <li class="obj-item">Complete the <strong>Terminal Tutor</strong> lab challenge</li>
+      </ul>
+    </section>
+
+    <!-- WHAT IS CLI -->
+    <section class="section" id="what-is-cli">
+      <div class="section-header">
+        <div class="section-icon">01</div>
+        <div>
+          <div class="section-title">What Is the Command Line Interface?</div>
+          <div class="section-subtitle">Your First Steps in the Terminal</div>
+        </div>
+      </div>
+
+      <p style="font-size:15px; line-height:1.7; color:var(--ink); margin-bottom:16px;">
+        The <strong>Command Line Interface (CLI)</strong> is a text-based way to interact with a computer.
+        Instead of clicking buttons and menus (GUI), you type commands and the system responds with text.
+      </p>
+
+      <div class="notice notice-info" style="margin-bottom:20px;">
+        <span class="notice-icon">💡</span>
+        <div>
+          <strong>Who uses the CLI?</strong>
+          <p>Cybersecurity professionals, software developers, and system administrators use the CLI every day. Learning it early gives you direct control over how systems work.</p>
+        </div>
+      </div>
+
+      <div class="cmd-grid" style="grid-template-columns: repeat(auto-fill, minmax(200px,1fr));">
+        <div class="cmd-card">
+          <div class="cmd-header"><div class="cmd-name">Speed</div></div>
+          <div class="cmd-body"><div class="cmd-notes">Many tasks are faster to type than to click.</div></div>
+        </div>
+        <div class="cmd-card">
+          <div class="cmd-header"><div class="cmd-name">Power</div></div>
+          <div class="cmd-body"><div class="cmd-notes">Some actions only exist in the CLI — no buttons, no menus.</div></div>
+        </div>
+        <div class="cmd-card">
+          <div class="cmd-header"><div class="cmd-name">Automation</div></div>
+          <div class="cmd-body"><div class="cmd-notes">Commands can be scripted to repeat tasks automatically.</div></div>
+        </div>
+        <div class="cmd-card">
+          <div class="cmd-header"><div class="cmd-name">Remote Access</div></div>
+          <div class="cmd-body"><div class="cmd-notes">Servers often only allow CLI access — no graphical interface.</div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- VOCABULARY -->
+    <section class="section" id="vocab">
+      <div class="section-header">
+        <div class="section-icon">02</div>
+        <div>
+          <div class="section-title">Key Vocabulary</div>
+          <div class="section-subtitle">Words you need to know before typing your first command</div>
+        </div>
+      </div>
+      <div class="vocab-grid">
+        <div class="vocab-card">
+          <div class="vocab-term">Terminal</div>
+          <div class="vocab-def">The window where you type commands.</div>
+        </div>
+        <div class="vocab-card">
+          <div class="vocab-term">Shell</div>
+          <div class="vocab-def">The program that interprets your commands (e.g., Bash, Zsh).</div>
+        </div>
+        <div class="vocab-card">
+          <div class="vocab-term">Prompt</div>
+          <div class="vocab-def">The text before your cursor — e.g., <code>student@computer:~$</code> — means the system is ready.</div>
+        </div>
+        <div class="vocab-card">
+          <div class="vocab-term">Command</div>
+          <div class="vocab-def">An instruction you give the computer — e.g., <code>ls</code>, <code>cd</code>, <code>pwd</code>.</div>
+        </div>
+        <div class="vocab-card">
+          <div class="vocab-term">Argument</div>
+          <div class="vocab-def">What to act on — e.g., a filename or folder path passed to a command.</div>
+        </div>
+        <div class="vocab-card">
+          <div class="vocab-term">Flag</div>
+          <div class="vocab-def">How to act — e.g., <code>-l</code> or <code>-a</code> modifies a command's behavior.</div>
+        </div>
+        <div class="vocab-card">
+          <div class="vocab-term">Directory</div>
+          <div class="vocab-def">A folder. Same concept — different name in the CLI world.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ANATOMY -->
+    <section class="section" id="anatomy">
+      <div class="section-header">
+        <div class="section-icon">03</div>
+        <div>
+          <div class="section-title">Anatomy of a Command</div>
+          <div class="section-subtitle">Breaking down exactly what you type</div>
+        </div>
+      </div>
+
+      <div class="file-tree" style="margin-bottom:16px;">$ ls -l /home/student/Documents
+  │
+  ├── ls              → the command
+  ├── -l              → a flag (detailed view)
+  └── /home/student/Documents  → the argument (where to look)</div>
+
+      <div class="notice notice-info">
+        <span class="notice-icon">ℹ️</span>
+        <div>
+          <strong>Not all commands need flags or arguments.</strong>
+          <p>Running <code>pwd</code> on its own prints your current location. Simple commands work without extras.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- CORE COMMANDS -->
+    <section class="section" id="commands">
+      <div class="section-header">
+        <div class="section-icon">04</div>
+        <div>
+          <div class="section-title">Core Commands</div>
+          <div class="section-subtitle">The seven essential command groups every CLI user needs</div>
+        </div>
+      </div>
+
+      <div class="cmd-grid">
+
+        <div class="cmd-card">
+          <div class="cmd-header">
+            <div>
+              <div class="cmd-name">pwd</div>
+              <div class="cmd-purpose">Where am I?</div>
+            </div>
+          </div>
+          <div class="cmd-body">
+            <div class="cmd-example">$ pwd<br>/home/student</div>
+            <div class="cmd-notes">Prints your current location in the file system. Think of it as checking your GPS. If you feel lost, run <code>pwd</code>.</div>
+          </div>
+        </div>
+
+        <div class="cmd-card">
+          <div class="cmd-header">
+            <div>
+              <div class="cmd-name">ls</div>
+              <div class="cmd-purpose">What's here?</div>
+            </div>
+          </div>
+          <div class="cmd-body">
+            <div class="cmd-example">$ ls<br>$ ls -l<br>$ ls -la</div>
+            <div class="cmd-notes">Lists files and folders. <code>-l</code> adds details. <code>-a</code> includes hidden files.</div>
+          </div>
+        </div>
+
+        <div class="cmd-card">
+          <div class="cmd-header">
+            <div>
+              <div class="cmd-name">cd</div>
+              <div class="cmd-purpose">Move around</div>
+            </div>
+          </div>
+          <div class="cmd-body">
+            <div class="cmd-example">$ cd Documents<br>$ cd ..<br>$ cd ~</div>
+            <div class="cmd-notes"><code>..</code> = parent folder &nbsp;·&nbsp; <code>~</code> = home directory</div>
+          </div>
+        </div>
+
+        <div class="cmd-card">
+          <div class="cmd-header">
+            <div>
+              <div class="cmd-name">mkdir</div>
+              <div class="cmd-purpose">Make a folder</div>
+            </div>
+          </div>
+          <div class="cmd-body">
+            <div class="cmd-example">$ mkdir my_project</div>
+            <div class="cmd-notes">Creates a new directory. Use underscores or hyphens — avoid spaces in names.</div>
+          </div>
+        </div>
+
+        <div class="cmd-card">
+          <div class="cmd-header">
+            <div>
+              <div class="cmd-name">touch · cat · echo</div>
+              <div class="cmd-purpose">Create &amp; read files</div>
+            </div>
+          </div>
+          <div class="cmd-body">
+            <div class="cmd-example">$ touch notes.txt<br>$ echo "Hello CLI" &gt; notes.txt<br>$ cat notes.txt</div>
+            <div class="cmd-notes"><code>&gt;</code> overwrites &nbsp;·&nbsp; <code>&gt;&gt;</code> appends</div>
+          </div>
+        </div>
+
+        <div class="cmd-card">
+          <div class="cmd-header">
+            <div>
+              <div class="cmd-name">cp · mv · rm</div>
+              <div class="cmd-purpose">Copy, move &amp; delete</div>
+            </div>
+          </div>
+          <div class="cmd-body">
+            <div class="cmd-example">$ cp notes.txt backup.txt<br>$ mv backup.txt Documents/<br>$ rm log.txt<br>$ rm -r my_project/</div>
+            <div class="cmd-notes"><code>mv</code> also renames files. <code>rm -r</code> deletes folders recursively.</div>
+          </div>
+        </div>
+
+        <div class="cmd-card">
+          <div class="cmd-header">
+            <div>
+              <div class="cmd-name">clear · history · man</div>
+              <div class="cmd-purpose">Stay organized</div>
+            </div>
+          </div>
+          <div class="cmd-body">
+            <div class="cmd-example">$ clear<br>$ history<br>$ man ls</div>
+            <div class="cmd-notes">↑ arrow = previous commands &nbsp;·&nbsp; Tab = auto-complete</div>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="notice notice-warn" style="margin-top:20px;">
+        <span class="notice-icon">⚠️</span>
+        <div>
+          <strong>No recycle bin in the CLI.</strong>
+          <p><code>rm</code> permanently deletes files. Always <code>ls</code> first to confirm what you are deleting.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- FILE SYSTEM -->
+    <section class="section" id="filesystem">
+      <div class="section-header">
+        <div class="section-icon">05</div>
+        <div>
+          <div class="section-title">The File System Is a Tree</div>
+          <div class="section-subtitle">How Linux organizes everything on disk</div>
+        </div>
+      </div>
+
+      <div class="file-tree" style="margin-bottom:20px;">/
+├── home/
+│   └── student/
+│       ├── Documents/
+│       ├── Downloads/
+│       └── notes.txt
+├── etc/
+└── var/
+
+  /  = root (the top of the whole tree)
+  ~  = your home folder (/home/student)
+  cd moves you through the branches</div>
+
+      <ul class="step-list">
+        <li>Every file lives somewhere in this tree, starting at <code>/</code> (root)</li>
+        <li><code>~</code> is shorthand for your own home directory</li>
+        <li>Paths starting with <code>/</code> are <em>absolute</em> — from the root</li>
+        <li>Paths without <code>/</code> are <em>relative</em> — from where you are now</li>
+      </ul>
+    </section>
+
+    <!-- CHEAT SHEET -->
+    <section class="section" id="cheatsheet">
+      <div class="section-header">
+        <div class="section-icon">REF</div>
+        <div>
+          <div class="section-title">Command Cheat Sheet</div>
+          <div class="section-subtitle">Quick reference for every command covered today</div>
+        </div>
+      </div>
+
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Command</th>
+            <th>Purpose</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td><code>pwd</code></td><td>Show current directory</td></tr>
+          <tr><td><code>ls</code></td><td>List files</td></tr>
+          <tr><td><code>ls -la</code></td><td>List all files with details</td></tr>
+          <tr><td><code>cd folder</code></td><td>Change directory</td></tr>
+          <tr><td><code>cd ..</code></td><td>Go up one level</td></tr>
+          <tr><td><code>cd ~</code></td><td>Go home</td></tr>
+          <tr><td><code>mkdir name</code></td><td>Create folder</td></tr>
+          <tr><td><code>touch file</code></td><td>Create empty file</td></tr>
+          <tr><td><code>cat file</code></td><td>Read file</td></tr>
+          <tr><td><code>echo "text" &gt; file</code></td><td>Write to file (overwrite)</td></tr>
+          <tr><td><code>echo "text" &gt;&gt; file</code></td><td>Append to file</td></tr>
+          <tr><td><code>cp src dest</code></td><td>Copy</td></tr>
+          <tr><td><code>mv src dest</code></td><td>Move / rename</td></tr>
+          <tr><td><code>rm file</code></td><td>Delete file</td></tr>
+          <tr><td><code>rm -r folder</code></td><td>Delete folder</td></tr>
+          <tr><td><code>clear</code></td><td>Clear screen</td></tr>
+          <tr><td><code>history</code></td><td>Command history</td></tr>
+          <tr><td><code>man command</code></td><td>Open manual page</td></tr>
+        </tbody>
+      </table>
+
+      <div class="notice notice-ok" style="margin-top:16px;">
+        <span class="notice-icon">⚡</span>
+        <div>
+          <strong>Speed Boost</strong>
+          <p>↑ arrow recalls previous commands &nbsp;·&nbsp; Tab auto-completes file and folder names — use them constantly.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- LAB -->
+    <section class="section" id="lab">
+      <div class="section-header">
+        <div class="section-icon">LAB</div>
+        <div>
+          <div class="section-title">Terminal Tutor — Lab Challenge</div>
+          <div class="section-subtitle">Answer all five questions and record your answers in your team's shared drive</div>
+        </div>
+      </div>
+
+      <div class="notice notice-info" style="margin-bottom:20px;">
+        <span class="notice-icon">🖥️</span>
+        <div>
+          <strong>Getting started</strong>
+          <p>Open a terminal on your machine and use the CLI commands you just learned to explore the <strong>Terminal Tutor</strong> environment. Your instructor will provide the login details.</p>
+        </div>
+      </div>
+
+      <div class="lab-block">
+        <div class="lab-header">
+          <div class="lab-badge">Challenge</div>
+          <div class="lab-title">Terminal Tutor — Find the Answers</div>
+        </div>
+        <div class="lab-body">
+          <ul class="step-list">
+            <li>How old is Tom?</li>
+            <li>Where will Tom's birthday party be held?</li>
+            <li>What groceries were picked up for the party?</li>
+            <li>What is Tom?</li>
+            <li>What is Harry hoping to learn from you?</li>
+          </ul>
+          <div class="notice notice-ok" style="margin-top:16px;">
+            <span class="notice-icon">📋</span>
+            <div>
+              <strong>Submit answers</strong>
+              <p>Record your team's answers in your shared drive folder.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SELF-CHECK -->
+    <section class="section" id="selfcheck">
+      <div class="section-header">
+        <div class="section-icon">CHK</div>
+        <div>
+          <div class="section-title">Self-Check</div>
+          <div class="section-subtitle">Can you do each of these before leaving today?</div>
+        </div>
+      </div>
+
+      <div class="reflection-list">
+        <div class="reflection-item" data-q="1">Open a terminal and identify the prompt</div>
+        <div class="reflection-item" data-q="2">Use <code>pwd</code> to locate yourself in the file system</div>
+        <div class="reflection-item" data-q="3">Use <code>ls</code> and <code>ls -l</code> to list files with details</div>
+        <div class="reflection-item" data-q="4">Navigate with <code>cd</code>, <code>cd ..</code>, and <code>cd ~</code></div>
+        <div class="reflection-item" data-q="5">Create folders with <code>mkdir</code> and files with <code>touch</code></div>
+        <div class="reflection-item" data-q="6">Read and write files using <code>cat</code> and <code>echo</code></div>
+        <div class="reflection-item" data-q="7">Copy, move, rename, and delete files</div>
+        <div class="reflection-item" data-q="8">Use Tab completion and the ↑ arrow for command history</div>
+        <div class="reflection-item" data-q="9">Open a manual page with <code>man</code></div>
+      </div>
+
+      <div class="notice notice-warn" style="margin-top:20px;">
+        <span class="notice-icon">🔒</span>
+        <div>
+          <strong>Common Mistakes to Avoid</strong>
+          <p>
+            Spaces in filenames → use <code>my_file.txt</code> instead of <code>my file.txt</code><br>
+            Not knowing your location → run <code>pwd</code> before acting<br>
+            Typos with <code>rm</code> → always <code>ls</code> first<br>
+            Ignoring error messages → read them, they tell you exactly what's wrong
+          </p>
+        </div>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<button class="print-btn" onclick="window.print()">⎙ Print / PDF</button>
+
+<script>
+  // Progress bar
+  window.addEventListener('scroll', () => {
+    const doc = document.documentElement;
+    const pct = (doc.scrollTop / (doc.scrollHeight - doc.clientHeight)) * 100;
+    document.getElementById('progressBar').style.width = pct + '%';
+  });
+
+  // Scroll reveal
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+  }, { threshold: 0.08 });
+  document.querySelectorAll('.section').forEach(el => observer.observe(el));
+
+  // Active nav link
+  const sections = document.querySelectorAll('section[id]');
+  const navLinks = document.querySelectorAll('.nav-list a[href^="#"]');
+  const navObserver = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        navLinks.forEach(a => a.classList.remove('active'));
+        const link = document.querySelector(`.nav-list a[href="#${e.target.id}"]`);
+        if (link) link.classList.add('active');
+      }
+    });
+  }, { rootMargin: '-30% 0px -60% 0px' });
+  sections.forEach(s => navObserver.observe(s));
+
+  // Theme toggle
+  const toggle = document.getElementById('themeToggle');
+  const stored = localStorage.getItem('lessonTheme') || 'dark';
+  document.documentElement.setAttribute('data-theme', stored);
+  toggle.textContent = stored === 'dark' ? '☀' : '☽';
+  toggle.addEventListener('click', () => {
+    const next = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', next);
+    localStorage.setItem('lessonTheme', next);
+    toggle.textContent = next === 'dark' ? '☀' : '☽';
+  });
+</script>
+
+</body>
+</html>
