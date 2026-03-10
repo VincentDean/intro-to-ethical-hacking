@@ -71,49 +71,95 @@
 
   /* ── HEADER ─────────────────────────────────────────── */
   header {
-    position: sticky; top: 0; z-index: 200;
-    background: rgba(7,17,26,.92);
-    backdrop-filter: blur(12px);
-    border-bottom: 1px solid var(--border);
-    padding: 0 2rem;
-    display: flex; align-items: center; justify-content: space-between;
-    height: 56px;
+    background: var(--navy);
+    padding: 0;
+    position: sticky;
+    top: 0;
+    z-index: 200;
+    border-bottom: 3px solid var(--sky);
+    box-shadow: 0 4px 20px rgba(0,0,0,0.3);
   }
-  html[data-theme="light"] header { background: rgba(238,245,252,.92); }
-
-  .header-left {
-    display: flex; align-items: center; gap: 1rem;
+  .header-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 14px 32px;
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    flex-wrap: wrap;
   }
-  .breadcrumb {
-    font-family: var(--mono); font-size: .72rem;
-    color: var(--dim);
-    display: flex; align-items: center; gap: .4rem;
+  .header-week {
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--sky);
+    border: 1px solid var(--dim);
+    padding: 4px 10px;
+    border-radius: 3px;
+    white-space: nowrap;
   }
-  .breadcrumb a {
-    color: var(--dim); text-decoration: none;
-    transition: color .2s;
+  .header-title {
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    color: var(--white);
+    flex: 1;
   }
-  .breadcrumb a:hover { color: var(--sky); }
-  .breadcrumb .sep { color: var(--border); }
-  .breadcrumb .current { color: var(--sky); }
-
-  .header-right { display: flex; align-items: center; gap: .75rem; }
-
-  .badge {
-    font-family: var(--mono); font-size: .65rem;
-    padding: .2rem .6rem; border-radius: 3px;
-    border: 1px solid var(--sky); color: var(--sky);
-    letter-spacing: .05em; text-transform: uppercase;
+  .header-meta {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
   }
-
-  #themeToggle {
-    background: none; border: 1px solid var(--border);
-    color: var(--dim); cursor: pointer;
-    width: 32px; height: 32px; border-radius: var(--radius);
-    font-size: 1rem; display: flex; align-items: center; justify-content: center;
-    transition: border-color .2s, color .2s;
+  .meta-chip {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--sky);
+    display: flex;
+    align-items: center;
+    gap: 6px;
   }
-  #themeToggle:hover { border-color: var(--sky); color: var(--sky); }
+  .meta-chip::before {
+    content: '';
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--sky);
+    opacity: 0.7;
+  }
+  .header-back {
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--sky);
+    text-decoration: none;
+    border: 1px solid var(--dim);
+    padding: 4px 10px;
+    border-radius: 3px;
+    white-space: nowrap;
+    transition: border-color 0.15s, color 0.15s;
+  }
+  .header-back:hover { border-color: var(--sky); }
+  .theme-toggle {
+    flex-shrink: 0;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid var(--dim);
+    color: var(--sky);
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 15px;
+    transition: background 0.2s, border-color 0.2s;
+  }
+  .theme-toggle:hover { border-color: var(--sky); }
 
   /* ── LAYOUT ─────────────────────────────────────────── */
   .layout {
@@ -428,18 +474,16 @@
 
 <!-- HEADER -->
 <header>
-  <div class="header-left">
-    <div class="breadcrumb">
-      <a href="index.html">Portal</a>
-      <span class="sep">/</span>
-      <a href="#">Week 4</a>
-      <span class="sep">/</span>
-      <span class="current">Wireshark</span>
+  <div class="header-inner">
+    <a class="header-back" href="index.html">← Home</a>
+    <div class="header-week">Week 04</div>
+    <div class="header-title">Wireshark &amp; Traffic Analysis</div>
+    <div class="header-meta">
+      <span class="meta-chip">Packet Analysis</span>
+      <span class="meta-chip">Auralab Network</span>
+      <span class="meta-chip">Ethical Hacking</span>
     </div>
-  </div>
-  <div class="header-right">
-    <span class="badge">Auralab Network</span>
-    <button id="themeToggle" title="Toggle theme">☀</button>
+    <button class="theme-toggle" id="themeToggle" aria-label="Toggle light/dark mode">☀</button>
   </div>
 </header>
 
