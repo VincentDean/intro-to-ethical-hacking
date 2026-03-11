@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Brute Force Grade Assignment | Ethical Hacking</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:ital,wght@0,300;0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+  /* ── TOKENS ─────────────────────────────────────────── */
+  :root {
+    --bg:        #07111a;
+    --surface:   #0d1b27;
+    --card:      #112030;
+    --border:    #1a3048;
+    --navy:      #0d2137;
+    --sky:       #3ab0de;
+    --frost:     #a0cfe8;
+    --white:     #dff0fa;
+    --dim:       #4e7090;
+    --green:     #20c070;
+    --amber:     #f0a030;
+    --red:       #e84040;
+    --mono:      'IBM Plex Mono', monospace;
+    --sans:      'IBM Plex Sans', sans-serif;
+    --radius:    6px;
+  }
+  html[data-theme="light"] {
+    --bg:      #eef5fc;
+    --surface: #e0ecf8;
+    --card:    #ffffff;
+    --border:  #b8d0e8;
+    --sky:     #1478aa;
+    --frost:   #5898c0;
+    --white:   #0a1828;
+    --dim:     #3a6080;
+    --green:   #0e9050;
+    --amber:   #a86010;
+    --red:     #c03030;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: var(--sans);
+    background: var(--bg);
+    color: var(--white);
+    min-height: 100vh;
+    overflow-x: hidden;
+    transition: background .3s, color .3s;
+  }
+
+  body::before {
+    content: '';
+    position: fixed; inset: 0; pointer-events: none; z-index: 0;
+    background-image:
+      linear-gradient(rgba(58,176,222,.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(58,176,222,.03) 1px, transparent 1px);
+    background-size: 32px 32px;
+  }
+
+  /* ── PROGRESS BAR ───────────────────────────────────── */
+  #progressBar {
+    position: fixed; top: 0; left: 0; height: 3px;
+    width: 0%; background: var(--sky);
+    z-index: 1000; transition: width .1s linear;
+    box-shadow: 0 0 8px var(--sky);
+  }
+
+  /* ── HEADER ─────────────────────────────────────────── */
+  header {
+    background: var(--navy);
+    padding: 0;
+    position: sticky;
+    top: 0;
+    z-index: 200;
+    border-bottom: 3px solid transparent;
+    border-image: linear-gradient(90deg, var(--sky), var(--red)) 1;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+  }
+  .header-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 14px 32px;
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    flex-wrap: wrap;
+  }
+  .header-week {
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--sky);
+    border: 1px solid var(--dim);
+    padding: 4px 10px;
+    border-radius: 3px;
+    white-space: nowrap;
+  }
+  .header-title {
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    color: var(--white);
+    flex: 1;
+  }
+  .header-meta {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+  .meta-chip {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--sky);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .meta-chip::before {
+    content: '';
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--sky);
+    opacity: 0.7;
+  }
+  .header-back {
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--sky);
+    text-decoration: none;
+    border: 1px solid var(--dim);
+    padding: 4px 10px;
+    border-radius: 3px;
+    white-space: nowrap;
+    transition: border-color 0.15s, color 0.15s;
+  }
+  .header-back:hover { border-color: var(--sky); }
+  .theme-toggle {
+    flex-shrink: 0;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid var(--dim);
+    color: var(--sky);
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 15px;
+    transition: background 0.2s, border-color 0.2s;
+  }
+  .theme-toggle:hover { border-color: var(--sky); }
+
+  /* ── LAYOUT ─────────────────────────────────────────── */
+  .layout {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 2.5rem 1.5rem 4rem;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* ── STAKES BANNER ──────────────────────────────────── */
+  .stakes {
+    background: linear-gradient(135deg, rgba(58,176,222,0.07), rgba(32,192,112,0.04));
+    border: 1px solid rgba(58,176,222,0.3);
+    border-left: 3px solid var(--sky);
+    padding: 1rem 1.25rem;
+    margin-bottom: 2.5rem;
+    border-radius: 0 var(--radius) var(--radius) 0;
+  }
+  .stakes-label {
+    font-family: var(--mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--sky);
+    margin-bottom: 0.3rem;
+  }
+  .stakes p {
+    font-size: 0.95rem;
+    color: var(--white);
+    line-height: 1.6;
+  }
+
+  /* ── SECTION LABEL ──────────────────────────────────── */
+  .section-label {
+    font-family: var(--mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--sky);
+    margin-bottom: 0.65rem;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+  }
+  .section-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  section { margin-bottom: 2.5rem; }
+
+  p {
+    font-size: 0.95rem;
+    color: var(--frost);
+    line-height: 1.75;
+    margin-bottom: 0.75rem;
+  }
+  p:last-child { margin-bottom: 0; }
+
+  /* ── DEFINITION CARD ────────────────────────────────── */
+  .definition-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--amber);
+    border-radius: 0 var(--radius) var(--radius) 0;
+    padding: 1.1rem 1.25rem;
+  }
+  .definition-card .def-term {
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    color: var(--amber);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-bottom: 0.4rem;
+  }
+  .definition-card p {
+    font-size: 0.9rem;
+    color: var(--frost);
+    margin: 0;
+  }
+
+  /* ── OBJECTIVE LIST ─────────────────────────────────── */
+  .objective-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 0.45rem;
+  }
+  .objective-list li {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    padding: 0.6rem 1rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    font-size: 0.9rem;
+    color: var(--frost);
+  }
+  .objective-list li .icon {
+    font-family: var(--mono);
+    font-size: 0.75rem;
+    color: var(--green);
+    margin-top: 0.15rem;
+    flex-shrink: 0;
+  }
+
+  /* ── STEPS ──────────────────────────────────────────── */
+  .steps { display: flex; flex-direction: column; gap: 0.65rem; }
+  .step {
+    display: grid;
+    grid-template-columns: 2.75rem 1fr;
+    gap: 1rem;
+    align-items: start;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1rem 1.1rem;
+    transition: border-color 0.2s;
+  }
+  .step:hover { border-color: rgba(58,176,222,0.4); }
+  .step-num {
+    font-family: var(--mono);
+    font-size: 1.3rem;
+    font-weight: 600;
+    color: var(--sky);
+    line-height: 1;
+    padding-top: 0.05rem;
+  }
+  .step-title {
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: var(--white);
+    margin-bottom: 0.25rem;
+  }
+  .step-desc { font-size: 0.85rem; color: var(--dim); line-height: 1.6; }
+
+  /* ── PRIMER GRID ────────────────────────────────────── */
+  .primer-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+  }
+  @media (max-width: 580px) { .primer-grid { grid-template-columns: 1fr; } }
+
+  .primer-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.1rem 1.2rem;
+  }
+  .primer-card h3 {
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    color: var(--sky);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 0.8rem;
+  }
+  .cmd-list { list-style: none; display: flex; flex-direction: column; gap: 0.55rem; }
+  .cmd-list li { display: flex; flex-direction: column; gap: 0.15rem; }
+  code {
+    font-family: var(--mono);
+    font-size: 0.8rem;
+    color: var(--green);
+    background: rgba(32,192,112,0.07);
+    padding: 0.2rem 0.5rem;
+    border-radius: 3px;
+    display: inline-block;
+  }
+  .cmd-note {
+    font-size: 0.78rem;
+    color: var(--dim);
+    padding-left: 0.25rem;
+    line-height: 1.5;
+  }
+
+  /* ── WARNING ────────────────────────────────────────── */
+  .warning {
+    background: rgba(240,160,48,0.06);
+    border: 1px solid rgba(240,160,48,0.25);
+    border-left: 3px solid var(--amber);
+    border-radius: 0 var(--radius) var(--radius) 0;
+    padding: 1rem 1.25rem;
+    font-size: 0.875rem;
+    color: var(--amber);
+  }
+  .warning strong {
+    display: block;
+    font-family: var(--mono);
+    font-size: 0.68rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 0.3rem;
+    opacity: 0.75;
+  }
+
+</style>
+</head>
+<body>
+
+<div id="progressBar"></div>
+
+<!-- ── HEADER ───────────────────────────────────────────── -->
+<header>
+  <div class="header-inner">
+    <a href="index.html" class="header-back">← Home</a>
+    <span class="header-week">Cycle 02</span>
+    <span class="header-title">Brute Force Grade Assignment</span>
+    <div class="header-meta">
+      <span class="meta-chip">Ethical Hacking</span>
+      <span class="meta-chip">SSH</span>
+      <span class="meta-chip">Nmap</span>
+      <span class="meta-chip">Nano</span>
+    </div>
+    <button class="theme-toggle" onclick="toggleTheme()" title="Toggle theme">☀</button>
+  </div>
+</header>
+
+<!-- ── MAIN ─────────────────────────────────────────────── -->
+<div class="layout">
+
+  <!-- Authorized Warning -->
+  <div class="warning" style="margin-bottom:1.5rem; background:rgba(232,64,64,0.06); border-color:rgba(232,64,64,0.25); border-left-color:var(--red); color:var(--red);">
+    <strong>// Authorized Lab Environment Only</strong>
+    All activities in this assignment must be performed exclusively within the designated classroom lab network. Attempting these techniques outside of this environment is unauthorized and may have serious consequences.
+  </div>
+
+  <!-- Stakes -->
+  <div class="stakes">
+    <div class="stakes-label">// Mission Stakes</div>
+    <p>In this assignment, you have the ability to change your grade for this assignment.</p>
+  </div>
+
+  <!-- Objective -->
+  <section>
+    <div class="section-label">Objective</div>
+    <p>Your objective is to locate and access a device on the network. Once you have gained SSH access, you will find a text document containing student grades. Using Nano, you will be able to view and modify those grade records.</p>
+  </section>
+
+  <!-- What is a Brute Force Attack -->
+  <section>
+    <div class="section-label">What is a Brute Force Attack?</div>
+    <div class="definition-card">
+      <div class="def-term">// Definition</div>
+      <p>A <strong>brute force attack</strong> is a method of gaining unauthorized access to a system by systematically trying every possible password or credential until the correct one is found. Rather than exploiting a technical vulnerability, it relies on persistence — and on the fact that many people use weak, predictable passwords. In this mission, you will use a list of the most commonly used passwords to attempt to authenticate via SSH.</p>
+    </div>
+  </section>
+
+  <!-- What You'll Learn -->
+  <section>
+    <div class="section-label">What You'll Learn</div>
+    <ul class="objective-list">
+      <li><span class="icon">[+]</span> Network reconnaissance to discover a target device</li>
+      <li><span class="icon">[+]</span> SSH authentication using common password strategies</li>
+      <li><span class="icon">[+]</span> File system navigation on a Linux machine</li>
+      <li><span class="icon">[+]</span> Text editing using the Nano editor</li>
+      <li><span class="icon">[+]</span> The real-world implications of unauthorized access to sensitive data</li>
+    </ul>
+  </section>
+
+  <!-- The Challenge -->
+  <section>
+    <div class="section-label">The Challenge</div>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">01</div>
+        <div>
+          <div class="step-title">Find the device on the network</div>
+          <div class="step-desc">Use your network scanning tools to discover active devices. Look for a device name that you think would have grades on it.</div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">02</div>
+        <div>
+          <div class="step-title">Determine the credentials</div>
+          <div class="step-desc">The password is among the top ten most commonly used passwords. You will need to try them until you find the right one.</div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">03</div>
+        <div>
+          <div class="step-title">SSH into the device</div>
+          <div class="step-desc">Use the username and password you discovered to establish an SSH connection to the target device.</div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">04</div>
+        <div>
+          <div class="step-title">Locate and open the grades document</div>
+          <div class="step-desc">Navigate the file system to find the grades file. Open it using Nano.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Before You Start -->
+  <section>
+    <div class="section-label">Before You Start</div>
+    <div class="primer-grid">
+
+      <div class="primer-card">
+        <h3>// Network Scanning Primer</h3>
+        <ul class="cmd-list">
+          <li>
+            <code>ifconfig</code>
+            <span class="cmd-note">Find your own IP address on the network.</span>
+          </li>
+          <li>
+            <code>nmap -sn &lt;your-range&gt;/24</code>
+            <span class="cmd-note">Scan the network. Look for a device name that you think would have grades on it.</span>
+          </li>
+        </ul>
+      </div>
+
+      <div class="primer-card">
+        <h3>// Nano Primer</h3>
+        <ul class="cmd-list">
+          <li>
+            <code>nano &lt;filename&gt;</code>
+            <span class="cmd-note">Open a file for editing.</span>
+          </li>
+          <li>
+            <code>Arrow keys</code>
+            <span class="cmd-note">Navigate within the file.</span>
+          </li>
+          <li>
+            <code>Ctrl + X → Y → Enter</code>
+            <span class="cmd-note">Save and exit.</span>
+          </li>
+        </ul>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- Warning -->
+  <div class="warning">
+    <strong>// Critical</strong>
+    A wrong move in Nano could corrupt the file. Make sure you understand how to save and exit before making any changes.
+  </div>
+
+</div>
+
+<script>
+  // Progress bar
+  window.addEventListener('scroll', () => {
+    const scrolled = window.scrollY;
+    const total = document.body.scrollHeight - window.innerHeight;
+    document.getElementById('progressBar').style.width = (scrolled / total * 100) + '%';
+  });
+
+  // Theme toggle
+  function toggleTheme() {
+    const html = document.documentElement;
+    html.dataset.theme = html.dataset.theme === 'dark' ? 'light' : 'dark';
+  }
+</script>
+
+</body>
+</html>
