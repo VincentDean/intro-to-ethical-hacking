@@ -1,0 +1,723 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hydra Reference & Troubleshooting | Ethical Hacking</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:ital,wght@0,300;0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+  /* ── TOKENS ─────────────────────────────────────────── */
+  :root {
+    --bg:        #07111a;
+    --surface:   #0d1b27;
+    --card:      #112030;
+    --border:    #1a3048;
+    --navy:      #0d2137;
+    --sky:       #3ab0de;
+    --frost:     #a0cfe8;
+    --white:     #dff0fa;
+    --dim:       #4e7090;
+    --green:     #20c070;
+    --amber:     #f0a030;
+    --red:       #e84040;
+    --mono:      'IBM Plex Mono', monospace;
+    --sans:      'IBM Plex Sans', sans-serif;
+    --radius:    6px;
+  }
+  html[data-theme="light"] {
+    --bg:      #eef5fc;
+    --surface: #e0ecf8;
+    --card:    #ffffff;
+    --border:  #b8d0e8;
+    --sky:     #1478aa;
+    --frost:   #5898c0;
+    --white:   #0a1828;
+    --dim:     #3a6080;
+    --green:   #0e9050;
+    --amber:   #a86010;
+    --red:     #c03030;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: var(--sans);
+    background: var(--bg);
+    color: var(--white);
+    min-height: 100vh;
+    overflow-x: hidden;
+    transition: background .3s, color .3s;
+  }
+
+  body::before {
+    content: '';
+    position: fixed; inset: 0; pointer-events: none; z-index: 0;
+    background-image:
+      linear-gradient(rgba(58,176,222,.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(58,176,222,.03) 1px, transparent 1px);
+    background-size: 32px 32px;
+  }
+
+  /* ── PROGRESS BAR ───────────────────────────────────── */
+  #progressBar {
+    position: fixed; top: 0; left: 0; height: 3px;
+    width: 0%; background: var(--sky);
+    z-index: 1000; transition: width .1s linear;
+    box-shadow: 0 0 8px var(--sky);
+  }
+
+  /* ── HEADER ─────────────────────────────────────────── */
+  header {
+    background: var(--navy);
+    padding: 0;
+    position: sticky;
+    top: 0;
+    z-index: 200;
+    border-bottom: 3px solid transparent;
+    border-image: linear-gradient(90deg, var(--sky), var(--red)) 1;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+  }
+  .header-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 14px 32px;
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    flex-wrap: wrap;
+  }
+  .header-week {
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--sky);
+    border: 1px solid var(--dim);
+    padding: 4px 10px;
+    border-radius: 3px;
+    white-space: nowrap;
+  }
+  .header-title {
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    color: var(--white);
+    flex: 1;
+  }
+  .header-meta {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+  .meta-chip {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--sky);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .meta-chip::before {
+    content: '';
+    display: inline-block;
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--sky);
+    opacity: 0.7;
+  }
+  .header-back {
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--sky);
+    text-decoration: none;
+    border: 1px solid var(--dim);
+    padding: 4px 10px;
+    border-radius: 3px;
+    white-space: nowrap;
+    transition: border-color 0.15s, color 0.15s;
+  }
+  .header-back:hover { border-color: var(--sky); }
+  .theme-toggle {
+    flex-shrink: 0;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid var(--dim);
+    color: var(--sky);
+    width: 34px; height: 34px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 15px;
+    transition: background 0.2s, border-color 0.2s;
+  }
+  .theme-toggle:hover { border-color: var(--sky); }
+
+  /* ── LAYOUT ─────────────────────────────────────────── */
+  .layout {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 2.5rem 1.5rem 4rem;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* ── STAKES BANNER ──────────────────────────────────── */
+  .stakes {
+    background: linear-gradient(135deg, rgba(58,176,222,0.07), rgba(32,192,112,0.04));
+    border: 1px solid rgba(58,176,222,0.3);
+    border-left: 3px solid var(--sky);
+    padding: 1rem 1.25rem;
+    margin-bottom: 2.5rem;
+    border-radius: 0 var(--radius) var(--radius) 0;
+  }
+  .stakes-label {
+    font-family: var(--mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--sky);
+    margin-bottom: 0.3rem;
+  }
+  .stakes p {
+    font-size: 0.95rem;
+    color: var(--white);
+    line-height: 1.6;
+  }
+
+  /* ── SECTION LABEL ──────────────────────────────────── */
+  .section-label {
+    font-family: var(--mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--sky);
+    margin-bottom: 0.65rem;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+  }
+  .section-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  section { margin-bottom: 2.5rem; }
+
+  p {
+    font-size: 0.95rem;
+    color: var(--frost);
+    line-height: 1.75;
+    margin-bottom: 0.75rem;
+  }
+  p:last-child { margin-bottom: 0; }
+
+  /* ── DEFINITION CARD ────────────────────────────────── */
+  .definition-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--amber);
+    border-radius: 0 var(--radius) var(--radius) 0;
+    padding: 1.1rem 1.25rem;
+  }
+  .definition-card .def-term {
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    color: var(--amber);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-bottom: 0.4rem;
+  }
+  .definition-card p {
+    font-size: 0.9rem;
+    color: var(--frost);
+    margin: 0;
+  }
+
+  /* ── OBJECTIVE LIST ─────────────────────────────────── */
+  .objective-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 0.45rem;
+  }
+  .objective-list li {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    padding: 0.6rem 1rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    font-size: 0.9rem;
+    color: var(--frost);
+  }
+  .objective-list li .icon {
+    font-family: var(--mono);
+    font-size: 0.75rem;
+    color: var(--green);
+    margin-top: 0.15rem;
+    flex-shrink: 0;
+  }
+
+  /* ── STEPS ──────────────────────────────────────────── */
+  .steps { display: flex; flex-direction: column; gap: 0.65rem; }
+  .step {
+    display: grid;
+    grid-template-columns: 2.75rem 1fr;
+    gap: 1rem;
+    align-items: start;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1rem 1.1rem;
+    transition: border-color 0.2s;
+  }
+  .step:hover { border-color: rgba(58,176,222,0.4); }
+  .step-num {
+    font-family: var(--mono);
+    font-size: 1.3rem;
+    font-weight: 600;
+    color: var(--sky);
+    line-height: 1;
+    padding-top: 0.05rem;
+  }
+  .step-title {
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: var(--white);
+    margin-bottom: 0.25rem;
+  }
+  .step-desc { font-size: 0.85rem; color: var(--dim); line-height: 1.6; }
+  .step-desc code {
+    font-family: var(--mono);
+    font-size: 0.8rem;
+    color: var(--green);
+    background: rgba(32,192,112,0.07);
+    padding: 0.15rem 0.4rem;
+    border-radius: 3px;
+  }
+
+  /* ── PRIMER GRID ────────────────────────────────────── */
+  .primer-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+  }
+  @media (max-width: 580px) { .primer-grid { grid-template-columns: 1fr; } }
+
+  .primer-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.1rem 1.2rem;
+  }
+  .primer-card h3 {
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    color: var(--sky);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 0.8rem;
+  }
+  .cmd-list { list-style: none; display: flex; flex-direction: column; gap: 0.55rem; }
+  .cmd-list li { display: flex; flex-direction: column; gap: 0.15rem; }
+  code {
+    font-family: var(--mono);
+    font-size: 0.8rem;
+    color: var(--green);
+    background: rgba(32,192,112,0.07);
+    padding: 0.2rem 0.5rem;
+    border-radius: 3px;
+    display: inline-block;
+  }
+  .cmd-note {
+    font-size: 0.78rem;
+    color: var(--dim);
+    padding-left: 0.25rem;
+    line-height: 1.5;
+  }
+
+  /* ── WARNING ────────────────────────────────────────── */
+  .warning {
+    background: rgba(240,160,48,0.06);
+    border: 1px solid rgba(240,160,48,0.25);
+    border-left: 3px solid var(--amber);
+    border-radius: 0 var(--radius) var(--radius) 0;
+    padding: 1rem 1.25rem;
+    font-size: 0.875rem;
+    color: var(--amber);
+  }
+  .warning strong {
+    display: block;
+    font-family: var(--mono);
+    font-size: 0.68rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 0.3rem;
+    opacity: 0.75;
+  }
+
+  /* ── CREDS TABLE ────────────────────────────────────── */
+  .creds-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: var(--mono);
+  }
+  .creds-table th {
+    background: var(--navy);
+    font-size: 0.68rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--sky);
+    padding: 0.6rem 1rem;
+    text-align: left;
+    border: 1px solid var(--border);
+  }
+  .creds-table td {
+    padding: 0.75rem 1rem;
+    border: 1px solid var(--border);
+    font-size: 1.2rem;
+    color: var(--green);
+    background: var(--card);
+    font-weight: 600;
+    letter-spacing: 0.04em;
+  }
+
+  /* ── FLAG TABLE ─────────────────────────────────────── */
+  .flag-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.875rem;
+  }
+  .flag-table th {
+    background: var(--navy);
+    font-family: var(--mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--sky);
+    padding: 0.6rem 1rem;
+    text-align: left;
+    border: 1px solid var(--border);
+  }
+  .flag-table td {
+    padding: 0.6rem 1rem;
+    border: 1px solid var(--border);
+    color: var(--frost);
+    vertical-align: top;
+  }
+  .flag-table tbody tr:nth-child(odd) td { background: var(--surface); }
+  .flag-table tbody tr:nth-child(even) td { background: var(--card); }
+  .flag-table .flag-key {
+    font-family: var(--mono);
+    font-size: 0.8rem;
+    color: var(--green);
+    white-space: nowrap;
+  }
+  .flag-table .flag-note { font-size: 0.82rem; color: var(--dim); }
+  .flag-table .flag-warn { font-size: 0.82rem; color: var(--amber); font-weight: 600; }
+
+  /* ── QUESTION BLOCK ─────────────────────────────────── */
+  .question-block {
+    display: flex;
+    flex-direction: column;
+    gap: 0.65rem;
+  }
+  .question-item {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    transition: border-color 0.2s;
+  }
+  .question-item:hover { border-color: rgba(58,176,222,0.35); }
+  .question-header {
+    display: grid;
+    grid-template-columns: 2.75rem 1fr;
+    gap: 1rem;
+    align-items: center;
+    padding: 0.85rem 1.1rem;
+    background: var(--card);
+    border-bottom: 1px solid var(--border);
+  }
+  .question-num {
+    font-family: var(--mono);
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--sky);
+  }
+  .question-text {
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: var(--white);
+    line-height: 1.5;
+  }
+  .question-lines {
+    padding: 0.5rem 1.1rem 0.75rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.65rem;
+  }
+  .answer-line {
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 2px;
+    min-height: 24px;
+  }
+</style>
+</head>
+<body>
+
+<div id="progressBar"></div>
+
+<!-- ── HEADER ───────────────────────────────────────────── -->
+<header>
+  <div class="header-inner">
+    <a href="index.html" class="header-back">← Home</a>
+    <span class="header-week">Week 04</span>
+    <span class="header-title">Hydra Reference &amp; Troubleshooting</span>
+    <div class="header-meta">
+      <span class="meta-chip">Crack the Courier</span>
+      <span class="meta-chip">Hydra</span>
+      <span class="meta-chip">SSH</span>
+      <span class="meta-chip">Nmap</span>
+    </div>
+    <button class="theme-toggle" onclick="toggleTheme()" title="Toggle theme">☀</button>
+  </div>
+</header>
+
+<!-- ── MAIN ─────────────────────────────────────────────── -->
+<div class="layout">
+
+  <!-- Authorized Warning -->
+  <div class="warning" style="margin-bottom:1.5rem; background:rgba(232,64,64,0.06); border-color:rgba(232,64,64,0.25); border-left-color:var(--red); color:var(--red);">
+    <strong>// Authorized Lab Environment Only</strong>
+    All activities must be performed exclusively within the designated classroom lab network. Running these tools against any system without written permission is illegal.
+  </div>
+
+  <!-- Stakes -->
+  <div class="stakes">
+    <div class="stakes-label">// Reference Sheet</div>
+    <p>Use this sheet if Hydra isn't behaving, if a Kali login dialog appeared, or while you wait for the password crack to complete. Ghost &bull; Shadow &bull; Fantom &bull; Cipher.</p>
+  </div>
+
+  <!-- Section 1: Kali Creds -->
+  <section>
+    <div class="section-label">Kali Live Credentials</div>
+    <p>If a login dialog appears at any point during the lab, use these. Every session, every time.</p>
+    <table class="creds-table" style="margin-bottom:1rem;">
+      <thead>
+        <tr>
+          <th>Username</th>
+          <th>Password</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>kali</td>
+          <td>kali</td>
+        </tr>
+      </tbody>
+    </table>
+    <div class="warning">
+      <strong>// Screen Appears Frozen?</strong>
+      Hit <strong>Escape</strong> or click <strong>Cancel</strong> on the dialog. Your terminal and running Hydra session will still be in the taskbar — do not close it.
+    </div>
+  </section>
+
+  <!-- Section 2: The Command -->
+  <section>
+    <div class="section-label">The Correct Hydra Command</div>
+    <p>Copy this exactly. The IP is already set for this lab. Do not modify anything.</p>
+    <div class="primer-card" style="margin-bottom:1rem;">
+      <h3>// Run This</h3>
+      <ul class="cmd-list">
+        <li>
+          <code>hydra -l jrogers -P /usr/share/wordlists/rockyou.txt ssh://192.168.1.115 -t 1 -W 3 -V</code>
+          <span class="cmd-note">Full command — all flags required for this hardware.</span>
+        </li>
+      </ul>
+    </div>
+    <table class="flag-table">
+      <thead>
+        <tr>
+          <th>Flag</th>
+          <th>What it does</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="flag-key">-l jrogers</td>
+          <td>Single username to attack <span class="flag-note">(lowercase L)</span></td>
+        </tr>
+        <tr>
+          <td class="flag-key">-P rockyou.txt</td>
+          <td>Wordlist of passwords — <span class="flag-warn">UPPERCASE P required</span></td>
+        </tr>
+        <tr>
+          <td class="flag-key">ssh://192.168.1.115</td>
+          <td>Target protocol and IP address</td>
+        </tr>
+        <tr>
+          <td class="flag-key">-t 1</td>
+          <td>1 thread — prevents the Pi from dropping the connection</td>
+        </tr>
+        <tr>
+          <td class="flag-key">-W 3</td>
+          <td>3 second wait between retries — keeps the session stable</td>
+        </tr>
+        <tr>
+          <td class="flag-key">-V</td>
+          <td>Verbose — shows each attempt so you know it's running</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- Section 3: Troubleshooting -->
+  <section>
+    <div class="section-label">Troubleshooting — Work Through In Order</div>
+    <div class="steps">
+
+      <div class="step">
+        <div class="step-num">01</div>
+        <div>
+          <div class="step-title">Hydra printed a help menu / list of options</div>
+          <div class="step-desc">The command had a syntax error. Check: lowercase <code>-p</code> vs uppercase <code>-P</code> — they do different things and the wrong one breaks the command silently. Also confirm you replaced TARGET-IP with the actual address from your Nmap scan, and verify the wordlist path with <code>ls /usr/share/wordlists/rockyou.txt</code>.</div>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num">02</div>
+        <div>
+          <div class="step-title">rockyou.txt not found</div>
+          <div class="step-desc">Live USB does not persist files. Run <code>sudo gunzip /usr/share/wordlists/rockyou.txt.gz</code> at the start of every session. If it says the file already exists, skip it. Confirm with <code>ls -lh /usr/share/wordlists/rockyou.txt</code> — should show ~130MB.</div>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num">03</div>
+        <div>
+          <div class="step-title">[ERROR] 1 target was disabled — too many errors</div>
+          <div class="step-desc">The Pi is dropping connections because Hydra is hitting it too fast. The <code>-t 1 -W 3</code> flags in the command above fix this. Make sure both flags are present. Do not run the default Hydra command without them on this hardware.</div>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num">04</div>
+        <div>
+          <div class="step-title">Hydra is running but counting slowly</div>
+          <div class="step-desc">Normal. <code>letmein</code> is near the top of rockyou.txt but the exact position varies slightly by Kali version. If the counter passes 100 with no result, raise your hand.</div>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num">05</div>
+        <div>
+          <div class="step-title">SSH says Permission denied</div>
+          <div class="step-desc">Write down the password Hydra prints exactly as shown. When entering it in SSH, nothing appears on screen while you type — this is standard Linux behavior. Type the password and press Enter.</div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- Section 4: While You Wait -->
+  <section>
+    <div class="section-label">While You Wait — Team Discussion</div>
+    <p>Hydra is running. Answer these as a team while it cracks. Write your answers below.</p>
+    <div class="question-block">
+
+      <div class="question-item">
+        <div class="question-header">
+          <div class="question-num">Q1</div>
+          <div class="question-text">What is a dictionary attack? How is it different from a brute force attack that tries every possible character combination?</div>
+        </div>
+        <div class="question-lines">
+          <div class="answer-line"></div>
+          <div class="answer-line"></div>
+          <div class="answer-line"></div>
+        </div>
+      </div>
+
+      <div class="question-item">
+        <div class="question-header">
+          <div class="question-num">Q2</div>
+          <div class="question-text">rockyou.txt contains over 14 million passwords. Where did this list originally come from, and why is it so widely used in security testing?</div>
+        </div>
+        <div class="question-lines">
+          <div class="answer-line"></div>
+          <div class="answer-line"></div>
+          <div class="answer-line"></div>
+        </div>
+      </div>
+
+      <div class="question-item">
+        <div class="question-header">
+          <div class="question-num">Q3</div>
+          <div class="question-text">Hydra is trying passwords one by one over SSH. What could a sysadmin configure on the server to stop or slow down this exact attack?</div>
+        </div>
+        <div class="question-lines">
+          <div class="answer-line"></div>
+          <div class="answer-line"></div>
+          <div class="answer-line"></div>
+        </div>
+      </div>
+
+      <div class="question-item">
+        <div class="question-header">
+          <div class="question-num">Q4</div>
+          <div class="question-text">We set <code style="font-size:0.8rem;">-t 1</code> for this lab. Why might a higher thread count cause problems on a Raspberry Pi target?</div>
+        </div>
+        <div class="question-lines">
+          <div class="answer-line"></div>
+          <div class="answer-line"></div>
+          <div class="answer-line"></div>
+        </div>
+      </div>
+
+      <div class="question-item">
+        <div class="question-header">
+          <div class="question-num">Q5</div>
+          <div class="question-text">If jrogers had used <code style="font-size:0.8rem;">X7$kP!2mQw9#rL</code> instead of <code style="font-size:0.8rem;">letmein</code>, how long would this attack realistically take? What does that tell you about password policy?</div>
+        </div>
+        <div class="question-lines">
+          <div class="answer-line"></div>
+          <div class="answer-line"></div>
+          <div class="answer-line"></div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- Footer warning -->
+  <div class="warning">
+    <strong>// Stay In Bounds</strong>
+    This lab runs on an isolated classroom network. Running these tools against any system outside this environment without written permission is illegal. Stay ethical. Stay curious.
+  </div>
+
+</div>
+
+<script>
+  window.addEventListener('scroll', () => {
+    const scrolled = window.scrollY;
+    const total = document.body.scrollHeight - window.innerHeight;
+    document.getElementById('progressBar').style.width = (scrolled / total * 100) + '%';
+  });
+
+  function toggleTheme() {
+    const html = document.documentElement;
+    html.dataset.theme = html.dataset.theme === 'dark' ? 'light' : 'dark';
+  }
+</script>
+
+</body>
+</html>
