@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Operation: Crack the Courier | Ethical Hacking</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:ital,wght@0,300;0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+  /* ── TOKENS ─────────────────────────────────────────── */
+  :root {
+    --bg:        #07111a;
+    --surface:   #0d1b27;
+    --card:      #112030;
+    --border:    #1a3048;
+    --navy:      #0d2137;
+    --sky:       #3ab0de;
+    --frost:     #a0cfe8;
+    --white:     #dff0fa;
+    --dim:       #4e7090;
+    --green:     #20c070;
+    --amber:     #f0a030;
+    --red:       #e84040;
+    --mono:      'IBM Plex Mono', monospace;
+    --sans:      'IBM Plex Sans', sans-serif;
+    --radius:    6px;
+  }
+  html[data-theme="light"] {
+    --bg:      #eef5fc;
+    --surface: #e0ecf8;
+    --card:    #ffffff;
+    --border:  #b8d0e8;
+    --navy:    #d0e4f4;
+    --sky:     #1478aa;
+    --frost:   #1a3a58;
+    --white:   #0a1828;
+    --dim:     #3a6080;
+    --green:   #0e7040;
+    --amber:   #a86010;
+    --red:     #c03030;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: var(--sans);
+    background: var(--bg);
+    color: var(--white);
+    min-height: 100vh;
+    overflow-x: hidden;
+    transition: background .3s, color .3s;
+  }
+
+  body::before {
+    content: '';
+    position: fixed; inset: 0; pointer-events: none; z-index: 0;
+    background-image:
+      linear-gradient(rgba(58,176,222,.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(58,176,222,.03) 1px, transparent 1px);
+    background-size: 32px 32px;
+  }
+
+  /* ── PROGRESS BAR ───────────────────────────────────── */
+  #progressBar {
+    position: fixed; top: 0; left: 0; height: 3px;
+    width: 0%; background: var(--sky);
+    z-index: 1000; transition: width .1s linear;
+    box-shadow: 0 0 8px var(--sky);
+  }
+
+  /* ── HEADER ─────────────────────────────────────────── */
+  header {
+    background: var(--navy);
+    position: sticky; top: 0; z-index: 200;
+    border-bottom: 3px solid transparent;
+    border-image: linear-gradient(90deg, var(--sky), var(--red)) 1;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+  }
+  .header-inner {
+    max-width: 1200px; margin: 0 auto;
+    padding: 14px 32px;
+    display: flex; align-items: center; gap: 24px; flex-wrap: wrap;
+  }
+  .header-week {
+    font-family: var(--mono); font-size: 11px; font-weight: 600;
+    letter-spacing: 0.15em; text-transform: uppercase;
+    color: var(--sky); border: 1px solid var(--dim);
+    padding: 4px 10px; border-radius: 3px; white-space: nowrap;
+  }
+  .header-title {
+    font-size: 18px; font-weight: 700;
+    letter-spacing: -0.01em; color: var(--white); flex: 1;
+  }
+  .header-meta { display: flex; gap: 16px; flex-wrap: wrap; }
+  .meta-chip {
+    font-family: var(--mono); font-size: 11px; color: var(--sky);
+    display: flex; align-items: center; gap: 6px;
+  }
+  .meta-chip::before {
+    content: ''; display: inline-block;
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--sky); opacity: 0.7;
+  }
+  .header-back {
+    font-family: var(--mono); font-size: 11px; font-weight: 600;
+    letter-spacing: 0.1em; text-transform: uppercase;
+    color: var(--sky); text-decoration: none;
+    border: 1px solid var(--dim); padding: 4px 10px;
+    border-radius: 3px; white-space: nowrap;
+    transition: border-color 0.15s;
+  }
+  .header-back:hover { border-color: var(--sky); }
+  .theme-toggle {
+    flex-shrink: 0; background: rgba(255,255,255,0.05);
+    border: 1px solid var(--dim); color: var(--sky);
+    width: 34px; height: 34px; border-radius: 50%;
+    cursor: pointer; display: flex; align-items: center;
+    justify-content: center; font-size: 15px;
+    transition: background 0.2s, border-color 0.2s;
+  }
+  .theme-toggle:hover { border-color: var(--sky); }
+
+  /* ── LAYOUT ─────────────────────────────────────────── */
+  .layout {
+    max-width: 860px; margin: 0 auto;
+    padding: 2.5rem 1.5rem 4rem;
+    position: relative; z-index: 1;
+  }
+
+  /* ── STAKES BANNER ──────────────────────────────────── */
+  .stakes {
+    background: linear-gradient(135deg, rgba(58,176,222,0.07), rgba(32,192,112,0.04));
+    border: 1px solid rgba(58,176,222,0.3);
+    border-left: 3px solid var(--sky);
+    padding: 1rem 1.25rem; margin-bottom: 2.5rem;
+    border-radius: 0 var(--radius) var(--radius) 0;
+  }
+  .stakes-label {
+    font-family: var(--mono); font-size: 0.68rem;
+    letter-spacing: 0.12em; text-transform: uppercase;
+    color: var(--sky); margin-bottom: 0.3rem;
+  }
+  .stakes p { font-size: 0.95rem; color: var(--white); line-height: 1.6; }
+
+  /* ── SECTION LABEL ──────────────────────────────────── */
+  .section-label {
+    font-family: var(--mono); font-size: 0.68rem;
+    letter-spacing: 0.15em; text-transform: uppercase;
+    color: var(--sky); margin-bottom: 0.65rem;
+    display: flex; align-items: center; gap: 0.6rem;
+  }
+  .section-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+  section { margin-bottom: 2.5rem; }
+
+  p {
+    font-size: 0.95rem; color: var(--frost);
+    line-height: 1.75; margin-bottom: 0.75rem;
+  }
+  p:last-child { margin-bottom: 0; }
+
+  /* ── OBJECTIVE LIST ─────────────────────────────────── */
+  .objective-list {
+    list-style: none; display: flex; flex-direction: column; gap: 0.45rem;
+  }
+  .objective-list li {
+    display: flex; align-items: flex-start; gap: 0.75rem;
+    padding: 0.6rem 1rem;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); font-size: 0.9rem; color: var(--frost);
+  }
+  .objective-list li .icon {
+    font-family: var(--mono); font-size: 0.75rem;
+    color: var(--green); margin-top: 0.15rem; flex-shrink: 0;
+  }
+
+  /* ── INFO TABLE ─────────────────────────────────────── */
+  .info-table { width: 100%; border-collapse: collapse; font-size: 0.875rem; }
+  .info-table th {
+    background: var(--navy); font-family: var(--mono);
+    font-size: 0.68rem; letter-spacing: 0.12em; text-transform: uppercase;
+    color: var(--sky); padding: 0.6rem 1rem; text-align: left;
+    border: 1px solid var(--border);
+  }
+  .info-table td {
+    padding: 0.6rem 1rem; border: 1px solid var(--border);
+    color: var(--frost); vertical-align: top;
+  }
+  .info-table tbody tr:nth-child(odd) td { background: var(--surface); }
+  .info-table tbody tr:nth-child(even) td { background: var(--card); }
+  .info-table td:first-child {
+    font-family: var(--mono); font-size: 0.8rem;
+    color: var(--white); font-weight: 600; white-space: nowrap;
+  }
+
+  /* ── STEPS ──────────────────────────────────────────── */
+  .steps { display: flex; flex-direction: column; gap: 0.65rem; }
+  .step {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); overflow: hidden;
+    transition: border-color 0.2s;
+  }
+  .step:hover { border-color: rgba(58,176,222,0.4); }
+  .step-header {
+    display: grid; grid-template-columns: 2.75rem 1fr;
+    gap: 1rem; align-items: center;
+    padding: 0.9rem 1.1rem;
+    background: var(--card); border-bottom: 1px solid var(--border);
+  }
+  .step-num {
+    font-family: var(--mono); font-size: 1.3rem;
+    font-weight: 600; color: var(--sky); line-height: 1;
+  }
+  .step-title { font-weight: 600; font-size: 0.9rem; color: var(--white); }
+  .step-body { padding: 1rem 1.1rem; }
+  .step-body p { font-size: 0.875rem; margin-bottom: 0.6rem; }
+
+  /* ── CODE BLOCK ─────────────────────────────────────── */
+  .code-block {
+    background: var(--surface); border: 1px solid var(--border);
+    border-left: 3px solid var(--green);
+    border-radius: 0 var(--radius) var(--radius) 0;
+    padding: 0.75rem 1rem; margin: 0.6rem 0;
+    font-family: var(--mono); font-size: 0.82rem;
+    color: var(--green); line-height: 1.7;
+    white-space: pre-wrap; word-break: break-all;
+  }
+  .code-block .comment { color: var(--dim); }
+
+  code {
+    font-family: var(--mono); font-size: 0.8rem;
+    color: var(--green); background: rgba(32,192,112,0.07);
+    padding: 0.15rem 0.4rem; border-radius: 3px;
+  }
+
+  .tip {
+    background: rgba(58,176,222,0.06);
+    border: 1px solid rgba(58,176,222,0.2);
+    border-left: 3px solid var(--sky);
+    border-radius: 0 var(--radius) var(--radius) 0;
+    padding: 0.65rem 1rem; margin: 0.6rem 0;
+    font-size: 0.82rem; color: var(--sky);
+  }
+  .tip strong { font-family: var(--mono); font-size: 0.7rem;
+    letter-spacing: 0.1em; text-transform: uppercase; display: block;
+    margin-bottom: 0.2rem; opacity: 0.75;
+  }
+
+  /* ── CHECKPOINT TABLE ───────────────────────────────── */
+  .checkpoint {
+    width: 100%; border-collapse: collapse;
+    margin: 1rem 0 0; font-size: 0.875rem;
+  }
+  .checkpoint th {
+    background: rgba(58,176,222,0.08);
+    font-family: var(--mono); font-size: 0.68rem;
+    letter-spacing: 0.12em; text-transform: uppercase;
+    color: var(--sky); padding: 0.55rem 1rem; text-align: left;
+    border: 1px solid var(--border);
+  }
+  .checkpoint td {
+    padding: 0; border: 1px solid var(--border);
+    vertical-align: top;
+  }
+  .checkpoint td:first-child {
+    padding: 0.65rem 1rem; color: var(--frost);
+    font-size: 0.85rem; line-height: 1.5;
+    background: var(--surface); width: 55%;
+  }
+  .checkpoint td:last-child {
+    background: var(--card); width: 45%;
+    position: relative;
+  }
+  .answer-lines {
+    display: flex; flex-direction: column;
+    gap: 0; padding: 0.4rem 0.75rem 0.5rem;
+  }
+  .answer-line {
+    border-bottom: 1px solid var(--border);
+    min-height: 26px;
+  }
+  .answer-line:last-child { border-bottom: none; }
+
+  /* ── PRIMER GRID ────────────────────────────────────── */
+  .primer-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+  @media (max-width: 580px) { .primer-grid { grid-template-columns: 1fr; } }
+  .primer-card {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 1.1rem 1.2rem;
+  }
+  .primer-card h3 {
+    font-family: var(--mono); font-size: 0.7rem; color: var(--sky);
+    text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 0.8rem;
+  }
+  .cmd-list { list-style: none; display: flex; flex-direction: column; gap: 0.55rem; }
+  .cmd-list li { display: flex; flex-direction: column; gap: 0.15rem; }
+  .cmd-note { font-size: 0.78rem; color: var(--dim); padding-left: 0.25rem; line-height: 1.5; }
+
+  /* ── FLAG TABLE ─────────────────────────────────────── */
+  .flag-table { width: 100%; border-collapse: collapse; font-size: 0.875rem; margin: 0.75rem 0; }
+  .flag-table th {
+    background: var(--navy); font-family: var(--mono);
+    font-size: 0.68rem; letter-spacing: 0.12em; text-transform: uppercase;
+    color: var(--sky); padding: 0.6rem 1rem; text-align: left;
+    border: 1px solid var(--border);
+  }
+  .flag-table td { padding: 0.6rem 1rem; border: 1px solid var(--border); color: var(--frost); }
+  .flag-table tbody tr:nth-child(odd) td { background: var(--surface); }
+  .flag-table tbody tr:nth-child(even) td { background: var(--card); }
+  .flag-table .fk { font-family: var(--mono); font-size: 0.8rem; color: var(--green); white-space: nowrap; }
+
+  /* ── DEBRIEF ────────────────────────────────────────── */
+  .debrief-item {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); margin-bottom: 0.65rem; overflow: hidden;
+  }
+  .debrief-q {
+    background: var(--card); border-bottom: 1px solid var(--border);
+    padding: 0.85rem 1.1rem;
+    font-size: 0.88rem; font-weight: 600; color: var(--white); line-height: 1.5;
+    display: flex; gap: 0.75rem; align-items: flex-start;
+  }
+  .debrief-q .qnum {
+    font-family: var(--mono); font-size: 0.75rem; color: var(--sky);
+    background: rgba(58,176,222,0.1); border: 1px solid rgba(58,176,222,0.25);
+    padding: 2px 8px; border-radius: 3px; flex-shrink: 0; margin-top: 1px;
+  }
+  .debrief-lines { padding: 0.5rem 1.1rem 0.75rem; display: flex; flex-direction: column; gap: 0.6rem; }
+  .debrief-line { border-bottom: 1px solid var(--border); min-height: 24px; }
+  .debrief-line:last-child { border-bottom: none; }
+
+  /* ── WARNING ────────────────────────────────────────── */
+  .warning {
+    background: rgba(240,160,48,0.06);
+    border: 1px solid rgba(240,160,48,0.25);
+    border-left: 3px solid var(--amber);
+    border-radius: 0 var(--radius) var(--radius) 0;
+    padding: 1rem 1.25rem; font-size: 0.875rem; color: var(--amber);
+  }
+  .warning strong {
+    display: block; font-family: var(--mono); font-size: 0.68rem;
+    text-transform: uppercase; letter-spacing: 0.1em;
+    margin-bottom: 0.3rem; opacity: 0.75;
+  }
+</style>
+</head>
+<body>
+
+<div id="progressBar"></div>
+
+<!-- ── HEADER ───────────────────────────────────────────── -->
+<header>
+  <div class="header-inner">
+    <a href="index.html" class="header-back">← Home</a>
+    <span class="header-week">Week 04</span>
+    <span class="header-title">Operation: Crack the Courier</span>
+    <div class="header-meta">
+      <span class="meta-chip">Ethical Hacking</span>
+      <span class="meta-chip">Nmap</span>
+      <span class="meta-chip">Hydra</span>
+      <span class="meta-chip">SSH</span>
+    </div>
+    <button class="theme-toggle" onclick="toggleTheme()" title="Toggle theme">☀</button>
+  </div>
+</header>
+
+<!-- ── MAIN ─────────────────────────────────────────────── -->
+<div class="layout">
+
+  <!-- Auth Warning -->
+  <div class="warning" style="margin-bottom:1.5rem; background:rgba(232,64,64,0.06); border-color:rgba(232,64,64,0.25); border-left-color:var(--red); color:var(--red);">
+    <strong>// Authorized Lab Environment Only</strong>
+    This lab runs on an isolated classroom network. Running these tools against any system without written permission is illegal. Stay in bounds.
+  </div>
+
+  <!-- Mission Brief -->
+  <div class="stakes">
+    <div class="stakes-label">// Mission Brief</div>
+    <p>Downtown Donuts runs an internal server called <strong>grades_service</strong>. A staff account on the server uses a dangerously weak password. Intelligence has confirmed a flag file is stored there. Your mission: locate the server on the network, crack the credentials, log in, and retrieve the flag.</p>
+  </div>
+
+  <!-- Objectives -->
+  <section>
+    <div class="section-label">Objectives</div>
+    <ul class="objective-list">
+      <li><span class="icon">[+]</span> Use Nmap to discover live hosts on a local network</li>
+      <li><span class="icon">[+]</span> Use Hydra to run a dictionary attack against SSH</li>
+      <li><span class="icon">[+]</span> Log into a remote machine via SSH using cracked credentials</li>
+      <li><span class="icon">[+]</span> Navigate the Linux filesystem and read a target file</li>
+      <li><span class="icon">[+]</span> Explain the ethical and legal limits of this type of attack</li>
+    </ul>
+  </section>
+
+  <!-- Tools & Target -->
+  <section>
+    <div class="section-label">Tools &amp; Target</div>
+    <table class="info-table">
+      <thead><tr><th>Item</th><th>Details</th></tr></thead>
+      <tbody>
+        <tr><td>Your machine</td><td>Kali Linux (live USB — no files persist between sessions)</td></tr>
+        <tr><td>Tools</td><td>Nmap, Hydra (both pre-installed on Kali)</td></tr>
+        <tr><td>Wordlist</td><td>/usr/share/wordlists/rockyou.txt</td></tr>
+        <tr><td>Target</td><td>grades_service — find it yourself on the 192.168.1.0/24 network</td></tr>
+        <tr><td>Target username</td><td>jrogers</td></tr>
+        <tr><td>Target service</td><td>SSH (port 22)</td></tr>
+        <tr><td>Goal</td><td>Read the flag file on grades_service</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- Pre-Flight -->
+  <section>
+    <div class="section-label">Pre-Flight — Prepare rockyou.txt</div>
+    <p>You are on a Kali live USB. Live boot does not save anything between sessions — rockyou.txt must be unzipped fresh every time before Hydra can use it.</p>
+    <div class="code-block">sudo gunzip /usr/share/wordlists/rockyou.txt.gz
+<span class="comment"># Takes ~20 seconds. If it says 'file not found' it is already unzipped — move on.</span></div>
+    <p>Verify the wordlist is ready:</p>
+    <div class="code-block">ls -lh /usr/share/wordlists/rockyou.txt
+<span class="comment"># You should see a file around 130MB</span></div>
+    <table class="checkpoint">
+      <thead><tr><th>Checkpoint Question</th><th>Your Answer</th></tr></thead>
+      <tbody>
+        <tr>
+          <td>Did the unzip succeed, or was the file already there?</td>
+          <td><div class="answer-lines"><div class="answer-line"></div><div class="answer-line"></div></div></td>
+        </tr>
+        <tr>
+          <td>Why does a live boot USB require this step every session?</td>
+          <td><div class="answer-lines"><div class="answer-line"></div><div class="answer-line"></div></div></td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- Steps -->
+  <section>
+    <div class="section-label">The Mission</div>
+    <div class="steps">
+
+      <!-- Step 1 -->
+      <div class="step">
+        <div class="step-header">
+          <div class="step-num">01</div>
+          <div class="step-title">Discover the Target</div>
+        </div>
+        <div class="step-body">
+          <p>You have not been given the server's IP address. Find it yourself. Run a ping sweep of the classroom network to list every live host:</p>
+          <div class="code-block">nmap -sn 192.168.1.0/24
+<span class="comment"># -sn = ping scan only. Lists all responding hosts without scanning ports.</span></div>
+          <p>Scan the output for <strong>grades_service</strong>. The Pi will appear in the results. Write down its IP — you will use it for every remaining step.</p>
+          <div class="tip"><strong>// Tip</strong>If the hostname is not obvious in the output, try: <code>nmap -sn 192.168.1.0/24 | grep -i grades</code></div>
+          <table class="checkpoint">
+            <thead><tr><th>Checkpoint Question</th><th>Your Answer</th></tr></thead>
+            <tbody>
+              <tr><td>What IP address did you find for grades_service?</td><td><div class="answer-lines"><div class="answer-line"></div><div class="answer-line"></div></div></td></tr>
+              <tr><td>How many total hosts did Nmap find on the network?</td><td><div class="answer-lines"><div class="answer-line"></div><div class="answer-line"></div></div></td></tr>
+              <tr><td>What does a ping sweep tell you — and what does it NOT tell you?</td><td><div class="answer-lines"><div class="answer-line"></div><div class="answer-line"></div></div></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Step 2 -->
+      <div class="step">
+        <div class="step-header">
+          <div class="step-num">02</div>
+          <div class="step-title">Confirm SSH is Open</div>
+        </div>
+        <div class="step-body">
+          <p>Confirm that SSH is actually running on the target before attacking. Replace TARGET-IP with the address you found in Step 1.</p>
+          <div class="code-block">nmap -p 22 TARGET-IP</div>
+          <p>You are looking for:</p>
+          <div class="code-block">22/tcp   open   ssh</div>
+          <p>If the port shows as closed or filtered, raise your hand before continuing.</p>
+          <table class="checkpoint">
+            <thead><tr><th>Checkpoint Question</th><th>Your Answer</th></tr></thead>
+            <tbody>
+              <tr><td>What did Nmap report for port 22?</td><td><div class="answer-lines"><div class="answer-line"></div><div class="answer-line"></div></div></td></tr>
+              <tr><td>What does 'open' mean in this context?</td><td><div class="answer-lines"><div class="answer-line"></div><div class="answer-line"></div></div></td></tr>
+              <tr><td>Why confirm the port is open before running Hydra?</td><td><div class="answer-lines"><div class="answer-line"></div><div class="answer-line"></div></div></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Step 3 -->
+      <div class="step">
+        <div class="step-header">
+          <div class="step-num">03</div>
+          <div class="step-title">Brute Force SSH with Hydra</div>
+        </div>
+        <div class="step-body">
+          <p>Run Hydra. It will try every password in rockyou.txt against the jrogers account until one works.</p>
+          <div class="code-block">hydra -l jrogers -P /usr/share/wordlists/rockyou.txt ssh://TARGET-IP</div>
+          <p>Flag breakdown:</p>
+          <table class="flag-table">
+            <thead><tr><th>Flag</th><th>What it does</th></tr></thead>
+            <tbody>
+              <tr><td class="fk">-l jrogers</td><td>Single username to attack (lowercase L)</td></tr>
+              <tr><td class="fk">-P rockyou.txt</td><td>Wordlist of passwords to try (uppercase P)</td></tr>
+              <tr><td class="fk">ssh://</td><td>Tells Hydra the target protocol is SSH</td></tr>
+              <tr><td class="fk">TARGET-IP</td><td>IP address of grades_service</td></tr>
+            </tbody>
+          </table>
+          <div class="tip"><strong>// Success Output</strong>When Hydra finds the password it prints: <code>[22][ssh] host: TARGET-IP &nbsp; login: jrogers &nbsp; password: ??????</code> — write it down immediately.</div>
+          <table class="checkpoint">
+            <thead><tr><th>Checkpoint Question</th><th>Your Answer</th></tr></thead>
+            <tbody>
+              <tr><td>Write the exact Hydra command you ran:</td><td><div class="answer-lines"><div class="answer-line"></div><div class="answer-line"></div></div></td></tr>
+              <tr><td>How long did Hydra take to crack the password?</td><td><div class="answer-lines"><div class="answer-line"></div><div class="answer-line"></div></div></td></tr>
+              <tr><td>What was the cracked password?</td><td><div class="answer-lines"><div class="answer-line"></div><div class="answer-line"></div></div></td></tr>
+              <tr><td>Why did it crack so fast? What does this tell you about the password?</td><td><div class="answer-lines"><div class="answer-line"></div><div class="answer-line"></div></div></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Step 4 -->
+      <div class="step">
+        <div class="step-header">
+          <div class="step-num">04</div>
+          <div class="step-title">Log In via SSH</div>
+        </div>
+        <div class="step-body">
+          <p>Use the cracked password to open a session on grades_service as jrogers.</p>
+          <div class="code-block">ssh jrogers@TARGET-IP
+<span class="comment"># Type the cracked password when prompted — nothing appears on screen as you type. Hit Enter.</span></div>
+          <p>A successful login looks like this:</p>
+          <div class="code-block">jrogers@grades_service:~$</div>
+          <table class="checkpoint">
+            <thead><tr><th>Checkpoint Question</th><th>Your Answer</th></tr></thead>
+            <tbody>
+              <tr><td>Did you log in successfully? (Yes / No)</td><td><div class="answer-lines"><div class="answer-line"></div><div class="answer-line"></div></div></td></tr>
+              <tr><td>What does the prompt <code>jrogers@grades_service:~$</code> tell you?</td><td><div class="answer-lines"><div class="answer-line"></div><div class="answer-line"></div></div></td></tr>
+              <tr><td>Run <code>pwd</code> — what does it return?</td><td><div class="answer-lines"><div class="answer-line"></div><div class="answer-line"></div></div></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Step 5 -->
+      <div class="step">
+        <div class="step-header">
+          <div class="step-num">05</div>
+          <div class="step-title">Read the Flag</div>
+        </div>
+        <div class="step-body">
+          <p>You are in. Retrieve the flag file.</p>
+          <div class="code-block">cat flag.txt</div>
+          <p>If that returns an error, run:</p>
+          <div class="code-block">cat /home/jrogers/flag.txt</div>
+          <p>Write the exact flag text below — word for word. This is your proof of completion.</p>
+          <table class="checkpoint">
+            <thead><tr><th>Checkpoint Question</th><th>Your Answer</th></tr></thead>
+            <tbody>
+              <tr><td>Write the exact flag text here:</td><td><div class="answer-lines"><div class="answer-line"></div><div class="answer-line"></div><div class="answer-line"></div></div></td></tr>
+              <tr><td>What does the <code>cat</code> command do?</td><td><div class="answer-lines"><div class="answer-line"></div><div class="answer-line"></div></div></td></tr>
+              <tr><td>What does <code>~</code> refer to in a Linux path?</td><td><div class="answer-lines"><div class="answer-line"></div><div class="answer-line"></div></div></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Step 6 -->
+      <div class="step">
+        <div class="step-header">
+          <div class="step-num">06</div>
+          <div class="step-title">Clean Exit</div>
+        </div>
+        <div class="step-body">
+          <p>Close the session properly when done.</p>
+          <div class="code-block">exit
+<span class="comment"># Your terminal returns to the Kali prompt</span></div>
+          <table class="checkpoint">
+            <thead><tr><th>Checkpoint Question</th><th>Your Answer</th></tr></thead>
+            <tbody>
+              <tr><td>What prompt do you see after running exit?</td><td><div class="answer-lines"><div class="answer-line"></div><div class="answer-line"></div></div></td></tr>
+              <tr><td>Why is exit better than just closing the terminal window?</td><td><div class="answer-lines"><div class="answer-line"></div><div class="answer-line"></div></div></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- Debrief -->
+  <section>
+    <div class="section-label">Debrief</div>
+    <p>Answer in complete sentences. Research is allowed and encouraged.</p>
+    <div>
+
+      <div class="debrief-item">
+        <div class="debrief-q"><span class="qnum">01</span>What made this attack possible? Name at least two specific weaknesses in the target system.</div>
+        <div class="debrief-lines">
+          <div class="debrief-line"></div>
+          <div class="debrief-line"></div>
+          <div class="debrief-line"></div>
+        </div>
+      </div>
+
+      <div class="debrief-item">
+        <div class="debrief-q"><span class="qnum">02</span>letmein cracked almost instantly. What would have happened if jrogers used a 20-character random password? Explain why.</div>
+        <div class="debrief-lines">
+          <div class="debrief-line"></div>
+          <div class="debrief-line"></div>
+          <div class="debrief-line"></div>
+        </div>
+      </div>
+
+      <div class="debrief-item">
+        <div class="debrief-q"><span class="qnum">03</span>Name two defenses Downtown Donuts IT should implement immediately to prevent this attack.</div>
+        <div class="debrief-lines">
+          <div class="debrief-line"></div>
+          <div class="debrief-line"></div>
+          <div class="debrief-line"></div>
+        </div>
+      </div>
+
+      <div class="debrief-item">
+        <div class="debrief-q"><span class="qnum">04</span>This was an authorized lab. What law would you be breaking if you ran the same Hydra command against a real server without permission?</div>
+        <div class="debrief-lines">
+          <div class="debrief-line"></div>
+          <div class="debrief-line"></div>
+          <div class="debrief-line"></div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- Footer warning -->
+  <div class="warning">
+    <strong>// Stay In Bounds</strong>
+    Ghost &bull; Shadow &bull; Fantom &bull; Cipher &nbsp;|&nbsp; Stay ethical. Stay curious.
+  </div>
+
+</div>
+
+<script>
+  window.addEventListener('scroll', () => {
+    const scrolled = window.scrollY;
+    const total = document.body.scrollHeight - window.innerHeight;
+    document.getElementById('progressBar').style.width = (scrolled / total * 100) + '%';
+  });
+  function toggleTheme() {
+    const html = document.documentElement;
+    html.dataset.theme = html.dataset.theme === 'dark' ? 'light' : 'dark';
+  }
+</script>
+
+</body>
+</html>
