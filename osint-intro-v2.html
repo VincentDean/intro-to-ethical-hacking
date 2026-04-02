@@ -1,0 +1,1193 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Week 7 — Open Source Intelligence (OSINT)</title>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --navy:   #0d1b2a;
+      --ink:    #1c2e40;
+      --steel:  #2e4d6e;
+      --slate:  #4a6fa5;
+      --sky:    #7eb8d4;
+      --frost:  #d0e8f2;
+      --paper:  #f4f7fa;
+      --white:  #ffffff;
+      --accent: #e84855;
+      --green:  #2a9d50;
+      --amber:  #e8a020;
+      --mono:   'IBM Plex Mono', monospace;
+      --sans:   'IBM Plex Sans', sans-serif;
+      color-scheme: light;
+    }
+
+    html[data-theme="dark"] {
+      --paper:  #080e17;
+      --white:  #111d29;
+      --ink:    #c8dfe8;
+      --frost:  #1e3048;
+      --steel:  #7ab8d4;
+      --border: #1e3048;
+      color-scheme: dark;
+    }
+
+    html[data-theme="light"] { --border: #c4d8ec; }
+    html[data-theme="light"] .header-title { color: var(--frost); }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: var(--sans);
+      background: var(--paper);
+      color: var(--ink);
+      min-height: 100vh;
+      overflow-x: hidden;
+      transition: background 0.3s, color 0.3s;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(74,158,202,0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(74,158,202,0.04) 1px, transparent 1px);
+      background-size: 40px 40px;
+      pointer-events: none;
+      z-index: 0;
+      transition: opacity 0.3s;
+    }
+
+    html[data-theme="light"] body::before {
+      background-image:
+        linear-gradient(rgba(13,27,42,0.05) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(13,27,42,0.05) 1px, transparent 1px);
+    }
+
+    body::after {
+      content: '';
+      position: fixed;
+      top: -100%;
+      left: 0; right: 0;
+      height: 200%;
+      background: linear-gradient(transparent 49.5%, rgba(74,158,202,0.03) 50%, transparent 50.5%);
+      background-size: 100% 4px;
+      animation: scan 8s linear infinite;
+      pointer-events: none;
+      z-index: 0;
+      transition: opacity 0.3s;
+    }
+
+    html[data-theme="light"] body::after { opacity: 0; }
+
+    @keyframes scan {
+      0%   { transform: translateY(0); }
+      100% { transform: translateY(50%); }
+    }
+
+    /* HEADER */
+    header {
+      background: var(--navy);
+      color: #d0e8f2;
+      padding: 0;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      border-bottom: 3px solid var(--accent);
+      box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+    }
+
+    .header-inner {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 14px 32px;
+      display: flex;
+      align-items: center;
+      gap: 24px;
+      flex-wrap: wrap;
+    }
+
+    .header-week {
+      font-family: var(--mono);
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--sky);
+      border: 1px solid var(--steel);
+      padding: 4px 10px;
+      border-radius: 3px;
+      white-space: nowrap;
+    }
+
+    .header-title { font-size: 18px; font-weight: 700; letter-spacing: -0.01em; flex: 1; }
+
+    .header-meta { display: flex; gap: 16px; flex-wrap: wrap; }
+
+    .meta-chip {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--sky);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .meta-chip::before {
+      content: '';
+      display: inline-block;
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--sky);
+      opacity: 0.7;
+    }
+
+    .header-back {
+      font-family: var(--mono);
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--sky);
+      text-decoration: none;
+      border: 1px solid var(--steel);
+      padding: 4px 10px;
+      border-radius: 3px;
+      white-space: nowrap;
+      transition: border-color 0.15s, color 0.15s;
+    }
+
+    .header-back:hover { border-color: var(--sky); }
+
+    .theme-toggle {
+      flex-shrink: 0;
+      background: rgba(255,255,255,0.08);
+      border: 1px solid var(--steel);
+      color: var(--sky);
+      width: 34px; height: 34px;
+      border-radius: 50%;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 15px;
+      transition: background 0.2s, border-color 0.2s;
+    }
+
+    .theme-toggle:hover { border-color: var(--sky); }
+
+    .progress-bar {
+      position: fixed;
+      top: 0; left: 0;
+      height: 3px;
+      background: var(--accent);
+      z-index: 999;
+      transition: width 0.1s linear;
+    }
+
+    /* LAYOUT */
+    .layout {
+      max-width: 1100px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 220px 1fr;
+      gap: 0;
+      padding: 0 24px;
+      align-items: start;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* SIDEBAR */
+    .sidebar {
+      position: sticky;
+      top: 73px;
+      padding: 32px 24px 32px 0;
+    }
+
+    .nav-label {
+      font-family: var(--mono);
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--slate);
+      margin-bottom: 12px;
+      padding-left: 12px;
+    }
+
+    .nav-list { list-style: none; display: flex; flex-direction: column; gap: 2px; }
+
+    .nav-list a {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 12px;
+      border-radius: 6px;
+      text-decoration: none;
+      font-size: 13px;
+      color: var(--steel);
+      transition: all 0.15s ease;
+      border-left: 3px solid transparent;
+      font-weight: 600;
+    }
+
+    .nav-list a:hover, .nav-list a.active {
+      background: var(--frost);
+      color: var(--ink);
+      border-left-color: var(--slate);
+    }
+
+    .nav-list a .nav-day {
+      font-family: var(--mono);
+      font-size: 10px;
+      font-weight: 600;
+      color: var(--slate);
+      min-width: 28px;
+    }
+
+    .nav-divider { height: 1px; background: var(--frost); margin: 8px 12px; }
+
+    /* MAIN */
+    main {
+      padding: 32px 0 64px 24px;
+      border-left: 1px solid var(--border);
+      min-width: 0;
+    }
+
+    .section {
+      margin-bottom: 48px;
+      opacity: 0;
+      transform: translateY(16px);
+      transition: opacity 0.4s ease, transform 0.4s ease;
+    }
+
+    .section.visible { opacity: 1; transform: translateY(0); }
+
+    .section-header {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 20px;
+      padding-bottom: 12px;
+      border-bottom: 2px solid var(--frost);
+    }
+
+    .section-icon {
+      width: 40px; height: 40px;
+      background: var(--navy);
+      color: var(--sky);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--mono);
+      font-size: 13px;
+      font-weight: 600;
+      flex-shrink: 0;
+    }
+
+    .section-title {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--navy);
+      letter-spacing: -0.02em;
+      line-height: 1.2;
+    }
+
+    html[data-theme="dark"] .section-title { color: var(--sky); }
+
+    .section-subtitle {
+      font-size: 13px;
+      color: var(--slate);
+      font-style: italic;
+      margin-top: 2px;
+    }
+
+    /* OBJECTIVES */
+    .obj-list {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      list-style: none;
+    }
+
+    .obj-item {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-left: 4px solid var(--slate);
+      border-radius: 0 8px 8px 0;
+      padding: 12px 16px;
+      font-size: 14px;
+      line-height: 1.45;
+      color: var(--ink);
+      transition: border-left-color 0.2s, box-shadow 0.2s;
+    }
+
+    .obj-item:hover { border-left-color: var(--accent); box-shadow: 0 2px 12px rgba(0,0,0,0.07); }
+
+    /* VOCAB CARDS */
+    .vocab-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 12px;
+    }
+
+    .vocab-card {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 14px 16px;
+      transition: box-shadow 0.2s;
+    }
+
+    .vocab-card:hover { box-shadow: 0 4px 16px rgba(46,77,110,0.12); }
+
+    .vocab-term {
+      font-family: var(--mono);
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--sky);
+      margin-bottom: 6px;
+    }
+
+    .vocab-def { font-size: 13px; color: var(--ink); line-height: 1.45; }
+
+    /* CMD CARDS */
+    .cmd-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 16px;
+    }
+
+    .cmd-card {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      overflow: hidden;
+      transition: box-shadow 0.2s;
+    }
+
+    .cmd-card:hover { box-shadow: 0 4px 20px rgba(46,77,110,0.12); }
+
+    .cmd-header {
+      background: var(--navy);
+      padding: 10px 14px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .cmd-name { font-family: var(--mono); font-size: 14px; font-weight: 600; color: var(--sky); }
+    .cmd-purpose { font-size: 12px; color: rgba(126,184,212,0.7); }
+    .cmd-body { padding: 12px 14px; }
+
+    .cmd-example {
+      font-family: var(--mono);
+      font-size: 12px;
+      background: var(--navy);
+      color: var(--sky);
+      padding: 6px 10px;
+      border-radius: 4px;
+      margin-bottom: 8px;
+      word-break: break-all;
+    }
+
+    .cmd-notes { font-size: 12px; color: var(--slate); line-height: 1.5; }
+
+    /* STEP LIST */
+    .step-list { list-style: none; display: flex; flex-direction: column; gap: 6px; padding-left: 0; }
+
+    .step-list li {
+      display: flex;
+      gap: 10px;
+      font-size: 14px;
+      line-height: 1.5;
+      color: var(--ink);
+      padding: 6px 10px;
+      border-radius: 5px;
+      transition: background 0.15s;
+    }
+
+    .step-list li:hover { background: var(--paper); }
+
+    .step-list li::before { content: '›'; color: var(--slate); font-weight: 700; flex-shrink: 0; margin-top: 1px; }
+
+    /* DATA TABLE */
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    .data-table thead tr { background: var(--navy); color: var(--sky); }
+
+    .data-table th {
+      padding: 10px 14px;
+      text-align: left;
+      font-family: var(--mono);
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .data-table td {
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--frost);
+      color: var(--ink);
+      vertical-align: top;
+      line-height: 1.4;
+    }
+
+    .data-table td code {
+      font-family: var(--mono);
+      font-size: 12px;
+      background: var(--navy);
+      color: var(--sky);
+      padding: 2px 7px;
+      border-radius: 4px;
+    }
+
+    .data-table tr:last-child td { border-bottom: none; }
+    .data-table tbody tr:hover td { background: var(--paper); }
+
+    /* NOTICE BOXES */
+    .notice {
+      display: flex;
+      gap: 0;
+      padding: 14px 16px;
+      border-radius: 8px;
+      margin-bottom: 12px;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    .notice-warn { background: #fff5e6; border-left: 4px solid var(--amber); }
+    .notice-info { background: #e8f4fd; border-left: 4px solid var(--slate); }
+    .notice-ok   { background: #e8f8ee; border-left: 4px solid var(--green); }
+    .notice-alert { background: #fdecea; border-left: 4px solid var(--accent); }
+
+    html[data-theme="dark"] .notice-warn  { background: rgba(232,160,32,0.08); }
+    html[data-theme="dark"] .notice-info  { background: rgba(74,111,165,0.12); }
+    html[data-theme="dark"] .notice-ok    { background: rgba(42,157,80,0.10); }
+    html[data-theme="dark"] .notice-alert { background: rgba(232,72,85,0.10); }
+
+    .notice strong { display: block; font-size: 13px; font-weight: 700; margin-bottom: 3px; color: var(--ink); }
+    .notice p { margin: 0; color: var(--steel); font-size: 13px; }
+
+    html[data-theme="dark"] .notice strong { color: var(--ink); }
+    html[data-theme="dark"] .notice p { color: var(--steel); }
+
+    /* LAB BLOCK */
+    .lab-block {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      overflow: hidden;
+      margin-bottom: 16px;
+    }
+
+    .lab-header {
+      background: var(--navy);
+      padding: 12px 18px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .lab-badge {
+      font-family: var(--mono);
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--sky);
+      border: 1px solid rgba(126,184,212,0.3);
+      padding: 3px 8px;
+      border-radius: 3px;
+    }
+
+    .lab-title { font-size: 15px; font-weight: 700; color: #d0e8f2; }
+    .lab-body { padding: 16px 18px; }
+
+    /* RESOURCE LIST */
+    .resource-list { display: flex; flex-direction: column; gap: 10px; }
+
+    .resource-item {
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      align-items: center;
+      gap: 16px;
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 14px 16px;
+      text-decoration: none;
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+
+    .resource-item:hover { border-color: var(--slate); box-shadow: 0 2px 12px rgba(46,77,110,0.1); }
+
+    .resource-num {
+      font-family: var(--mono);
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--slate);
+      min-width: 24px;
+    }
+
+    .resource-name {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--sky);
+      display: block;
+      margin-bottom: 3px;
+    }
+
+    .resource-desc { font-size: 12px; color: var(--slate); line-height: 1.45; }
+
+    .resource-url {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--slate);
+      white-space: nowrap;
+    }
+
+    /* REFLECTION */
+    .reflection-list { display: flex; flex-direction: column; gap: 10px; }
+
+    .reflection-item {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 14px 16px 14px 50px;
+      font-size: 14px;
+      color: var(--ink);
+      line-height: 1.5;
+      position: relative;
+    }
+
+    .reflection-item::before {
+      content: attr(data-q);
+      position: absolute;
+      left: 14px; top: 14px;
+      font-family: var(--mono);
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--slate);
+      background: var(--frost);
+      width: 24px; height: 24px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    code {
+      font-family: var(--mono);
+      font-size: 12px;
+      background: var(--navy);
+      color: var(--sky);
+      padding: 2px 7px;
+      border-radius: 4px;
+    }
+
+    .print-btn {
+      position: fixed;
+      bottom: 28px; right: 28px;
+      background: var(--navy);
+      color: var(--sky);
+      border: none;
+      border-radius: 50px;
+      padding: 12px 22px;
+      font-family: var(--mono);
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      cursor: pointer;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.25);
+      transition: background 0.2s, transform 0.15s;
+      z-index: 200;
+    }
+
+    .print-btn:hover { background: var(--steel); transform: translateY(-2px); }
+
+    p.body-text {
+      font-size: 15px;
+      line-height: 1.7;
+      color: var(--ink);
+      margin-bottom: 16px;
+    }
+
+    @media (max-width: 768px) {
+      .layout { grid-template-columns: 1fr; padding: 0 16px; }
+      .sidebar { display: none; }
+      main { border-left: none; padding-left: 0; }
+      .obj-list { grid-template-columns: 1fr; }
+      .header-meta { display: none; }
+      .cmd-grid { grid-template-columns: 1fr; }
+      .vocab-grid { grid-template-columns: 1fr 1fr; }
+      .resource-item { grid-template-columns: auto 1fr; }
+      .resource-url { display: none; }
+    }
+
+    @media print {
+      header { position: static; }
+      .sidebar, .print-btn, .theme-toggle { display: none; }
+      .layout { grid-template-columns: 1fr; }
+      main { border-left: none; }
+      .section { opacity: 1; transform: none; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="progress-bar" id="progressBar" style="width:0%"></div>
+
+<header>
+  <div class="header-inner">
+    <a class="header-back" href="index.html">← Home</a>
+    <div class="header-week">Week 07</div>
+    <div class="header-title">Open Source Intelligence (OSINT)</div>
+    <div class="header-meta">
+      <span class="meta-chip">Unit: Reconnaissance</span>
+      <span class="meta-chip">Ethical Hacking</span>
+      <span class="meta-chip">Intro + Resources</span>
+    </div>
+    <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">☀</button>
+  </div>
+</header>
+
+<div class="layout">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="nav-label">Contents</div>
+    <ul class="nav-list">
+      <li><a href="index.html"><span class="nav-day">⌂</span> Home</a></li>
+      <div class="nav-divider"></div>
+      <li><a href="#objectives" class="active"><span class="nav-day">OBJ</span> Objectives</a></li>
+      <div class="nav-divider"></div>
+      <li><a href="#what-is-osint"><span class="nav-day">01</span> What Is OSINT?</a></li>
+      <li><a href="#recon-types"><span class="nav-day">02</span> Passive vs. Active</a></li>
+      <li><a href="#vocab"><span class="nav-day">03</span> Key Vocabulary</a></li>
+      <li><a href="#what-you-find"><span class="nav-day">04</span> What You Can Find</a></li>
+      <li><a href="#tools"><span class="nav-day">05</span> Tools Overview</a></li>
+      <li><a href="#resources"><span class="nav-day">REF</span> Resources</a></li>
+      <div class="nav-divider"></div>
+      <li><a href="#research"><span class="nav-day">ACT</span> Research Activity</a></li>
+      <li><a href="#selfcheck"><span class="nav-day">CHK</span> Self-Check</a></li>
+      <li><a href="#" onclick="window.print(); return false;"><span class="nav-day">PDF</span> Download PDF</a></li>
+    </ul>
+  </aside>
+
+  <!-- MAIN -->
+  <main>
+
+    <!-- OBJECTIVES -->
+    <section class="section visible" id="objectives">
+      <div class="section-header">
+        <div class="section-icon">OBJ</div>
+        <div>
+          <div class="section-title">Week 7 Objectives</div>
+          <div class="section-subtitle">What you will be able to do by the end of this lesson</div>
+        </div>
+      </div>
+      <ul class="obj-list">
+        <li class="obj-item">Define <strong>OSINT</strong> and explain its role in the recon phase</li>
+        <li class="obj-item">Distinguish between <strong>passive</strong> and <strong>active</strong> reconnaissance</li>
+        <li class="obj-item">Identify at least <strong>four categories</strong> of OSINT data</li>
+        <li class="obj-item">Use <strong>Google dorking</strong> to find information using advanced search operators</li>
+        <li class="obj-item">Locate a target's domain info using <strong>WHOIS</strong></li>
+        <li class="obj-item">Complete the <strong>Downtown Donuts Recon Challenge</strong></li>
+      </ul>
+    </section>
+
+    <!-- WHAT IS OSINT -->
+    <section class="section" id="what-is-osint">
+      <div class="section-header">
+        <div class="section-icon">01</div>
+        <div>
+          <div class="section-title">What Is OSINT?</div>
+          <div class="section-subtitle">Intelligence gathered entirely from public sources</div>
+        </div>
+      </div>
+
+      <p class="body-text">
+        <strong>OSINT</strong> — Open Source Intelligence — is the practice of collecting and analyzing information from publicly available sources. No unauthorized access required. No systems touched without permission. Just knowing where to look and how to connect the dots.
+      </p>
+
+      <p class="body-text">
+        Governments, corporations, journalists, private investigators, and security researchers all rely on OSINT. For ethical hackers, it's the starting point of every engagement — understand your target before you ever touch their systems.
+      </p>
+
+      <div class="notice notice-info" style="margin-bottom: 20px;">
+        <div>
+          <strong>In the Downtown Donuts scenario</strong>
+          <p>Before your team attempts any technical exploit, you gather intelligence. Who runs the network? What domains do they own? What services are exposed? What does their digital footprint reveal? That's OSINT.</p>
+        </div>
+      </div>
+
+      <div class="cmd-grid" style="grid-template-columns: repeat(auto-fill, minmax(200px,1fr));">
+        <div class="cmd-card">
+          <div class="cmd-header"><div class="cmd-name">No footprint</div></div>
+          <div class="cmd-body"><div class="cmd-notes">Passive OSINT leaves no trace — the target doesn't know you're looking.</div></div>
+        </div>
+        <div class="cmd-card">
+          <div class="cmd-header"><div class="cmd-name">Widely used</div></div>
+          <div class="cmd-body"><div class="cmd-notes">Law enforcement, journalists, HR departments, and red teams all use OSINT daily.</div></div>
+        </div>
+        <div class="cmd-card">
+          <div class="cmd-header"><div class="cmd-name">First phase</div></div>
+          <div class="cmd-body"><div class="cmd-notes">In any pentest, recon comes before scanning, exploitation, or anything else.</div></div>
+        </div>
+        <div class="cmd-card">
+          <div class="cmd-header"><div class="cmd-name">Legal — if passive</div></div>
+          <div class="cmd-body"><div class="cmd-notes">Using public data is legal. Accessing private systems without permission is not.</div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- RECON TYPES -->
+    <section class="section" id="recon-types">
+      <div class="section-header">
+        <div class="section-icon">02</div>
+        <div>
+          <div class="section-title">Passive vs. Active Reconnaissance</div>
+          <div class="section-subtitle">Understanding the line between observation and interaction</div>
+        </div>
+      </div>
+
+      <div class="cmd-grid" style="grid-template-columns: 1fr 1fr; margin-bottom: 20px;">
+        <div class="cmd-card">
+          <div class="cmd-header">
+            <div>
+              <div class="cmd-name">Passive Recon</div>
+              <div class="cmd-purpose">Pure OSINT — no contact with target</div>
+            </div>
+          </div>
+          <div class="cmd-body">
+            <div class="cmd-notes">You gather intelligence from third-party sources — search engines, public records, social media, DNS registries. The target has no way of knowing you're looking. This is where OSINT lives.</div>
+          </div>
+        </div>
+        <div class="cmd-card">
+          <div class="cmd-header">
+            <div>
+              <div class="cmd-name">Active Recon</div>
+              <div class="cmd-purpose">Direct interaction — leaves traces</div>
+            </div>
+          </div>
+          <div class="cmd-body">
+            <div class="cmd-notes">You directly interact with the target system — running <code>nmap</code> scans, pinging hosts, probing services. Faster and more detailed, but it leaves traces and requires explicit authorization.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="notice notice-alert">
+        <div>
+          <strong>Authorization required for active recon</strong>
+          <p>Running nmap or any probe against systems you don't own — without written permission — is illegal under the Computer Fraud and Abuse Act. In this course, active recon is only performed on AuraLab targets.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- VOCABULARY -->
+    <section class="section" id="vocab">
+      <div class="section-header">
+        <div class="section-icon">03</div>
+        <div>
+          <div class="section-title">Key Vocabulary</div>
+          <div class="section-subtitle">Terms you need before your first OSINT operation</div>
+        </div>
+      </div>
+      <div class="vocab-grid">
+        <div class="vocab-card">
+          <div class="vocab-term">OSINT</div>
+          <div class="vocab-def">Open Source Intelligence — intelligence gathered from publicly available sources.</div>
+        </div>
+        <div class="vocab-card">
+          <div class="vocab-term">Passive Recon</div>
+          <div class="vocab-def">Gathering info without interacting with the target. No trace left behind.</div>
+        </div>
+        <div class="vocab-card">
+          <div class="vocab-term">Active Recon</div>
+          <div class="vocab-def">Directly probing target systems. Leaves traces. Requires authorization.</div>
+        </div>
+        <div class="vocab-card">
+          <div class="vocab-term">Footprint</div>
+          <div class="vocab-def">The total amount of publicly available information about a target.</div>
+        </div>
+        <div class="vocab-card">
+          <div class="vocab-term">Google Dorking</div>
+          <div class="vocab-def">Using advanced Google search operators to surface sensitive or specific data.</div>
+        </div>
+        <div class="vocab-card">
+          <div class="vocab-term">WHOIS</div>
+          <div class="vocab-def">A public database of domain registration records — owner, registrar, dates.</div>
+        </div>
+        <div class="vocab-card">
+          <div class="vocab-term">DNS Enumeration</div>
+          <div class="vocab-def">Querying DNS records to map a target's infrastructure (A, MX, TXT, NS records).</div>
+        </div>
+        <div class="vocab-card">
+          <div class="vocab-term">Metadata</div>
+          <div class="vocab-def">Hidden data embedded in files — can reveal author, GPS location, software used.</div>
+        </div>
+        <div class="vocab-card">
+          <div class="vocab-term">Shodan</div>
+          <div class="vocab-def">A search engine for internet-connected devices — reveals open ports and exposed services.</div>
+        </div>
+        <div class="vocab-card">
+          <div class="vocab-term">SOCMINT</div>
+          <div class="vocab-def">Social Media Intelligence — using social platforms as OSINT data sources.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- WHAT YOU CAN FIND -->
+    <section class="section" id="what-you-find">
+      <div class="section-header">
+        <div class="section-icon">04</div>
+        <div>
+          <div class="section-title">What You Can Find</div>
+          <div class="section-subtitle">Two categories of OSINT intelligence targets</div>
+        </div>
+      </div>
+
+      <div class="cmd-grid" style="grid-template-columns: 1fr 1fr; margin-bottom: 20px;">
+        <div class="cmd-card">
+          <div class="cmd-header"><div class="cmd-name">Technical Targets</div></div>
+          <div class="cmd-body">
+            <ul class="step-list" style="gap: 4px;">
+              <li>Domain names and subdomains</li>
+              <li>IP address ranges</li>
+              <li>Exposed ports and services (Shodan)</li>
+              <li>SSL certificates and metadata</li>
+              <li>Email addresses</li>
+              <li>Tech stack and software versions</li>
+            </ul>
+          </div>
+        </div>
+        <div class="cmd-card">
+          <div class="cmd-header"><div class="cmd-name">Human Targets</div></div>
+          <div class="cmd-body">
+            <ul class="step-list" style="gap: 4px;">
+              <li>Employee names and roles (LinkedIn)</li>
+              <li>Social media profiles and activity</li>
+              <li>Public records and business filings</li>
+              <li>Document metadata (author, location)</li>
+              <li>Username patterns across platforms</li>
+              <li>Photos and embedded geolocation data</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="notice notice-warn">
+        <div>
+          <strong>Remember: public ≠ fair game</strong>
+          <p>Collecting OSINT on real individuals without authorization can violate privacy laws and terms of service. In this course, all techniques are practiced on fictional targets (Downtown Donuts) or on yourself.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- TOOLS -->
+    <section class="section" id="tools">
+      <div class="section-header">
+        <div class="section-icon">05</div>
+        <div>
+          <div class="section-title">Tools Overview</div>
+          <div class="section-subtitle">The OSINT toolkit — what each tool does and when to use it</div>
+        </div>
+      </div>
+
+      <table class="data-table" style="margin-bottom: 16px;">
+        <thead>
+          <tr>
+            <th>Tool</th>
+            <th>Category</th>
+            <th>What It Does</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>theHarvester</code></td>
+            <td>Email / Subdomain harvesting</td>
+            <td>Pulls emails, subdomains, and hostnames from public sources. Built into Kali Linux.</td>
+          </tr>
+          <tr>
+            <td><code>whois</code></td>
+            <td>Domain registration</td>
+            <td>Queries registration records for a domain — owner, registrar, expiration date.</td>
+          </tr>
+          <tr>
+            <td>Shodan</td>
+            <td>Device search engine</td>
+            <td>Finds internet-connected devices by port, service, location, or banner — no touching the target.</td>
+          </tr>
+          <tr>
+            <td>Google Dorking</td>
+            <td>Search operator techniques</td>
+            <td>Uses operators like <code>site:</code>, <code>filetype:</code>, <code>intitle:</code> to surface sensitive indexed data.</td>
+          </tr>
+          <tr>
+            <td>Maltego CE</td>
+            <td>Visual link analysis</td>
+            <td>Maps relationships between domains, IPs, people, and organizations as a visual graph.</td>
+          </tr>
+          <tr>
+            <td>Recon-ng</td>
+            <td>Recon framework</td>
+            <td>Modular Python-based framework for web reconnaissance — similar to Metasploit for OSINT.</td>
+          </tr>
+          <tr>
+            <td>ExifTool</td>
+            <td>Metadata extraction</td>
+            <td>Extracts metadata from images, PDFs, and documents — can reveal GPS, author, device info.</td>
+          </tr>
+          <tr>
+            <td>Wayback Machine</td>
+            <td>Archived web pages</td>
+            <td>Retrieves old versions of websites — useful for finding removed content or prior configurations.</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="notice notice-ok">
+        <div>
+          <strong>Kali Linux has most of these pre-installed</strong>
+          <p>theHarvester, Recon-ng, ExifTool, and Maltego are all available on your Kali USB. Shodan and Google Dorking work from any browser.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- RESOURCES -->
+    <section class="section" id="resources">
+      <div class="section-header">
+        <div class="section-icon">REF</div>
+        <div>
+          <div class="section-title">Notable Resources</div>
+          <div class="section-subtitle">Bookmark these — you will return to them throughout the course</div>
+        </div>
+      </div>
+
+      <div class="resource-list">
+
+        <a class="resource-item" href="https://osintframework.com" target="_blank" rel="noopener">
+          <div class="resource-num">01</div>
+          <div>
+            <span class="resource-name">OSINT Framework</span>
+            <span class="resource-desc">The definitive visual map of OSINT tools and techniques, organized by category. Start here when you don't know where to look.</span>
+          </div>
+          <div class="resource-url">osintframework.com ↗</div>
+        </a>
+
+        <a class="resource-item" href="https://www.shodan.io" target="_blank" rel="noopener">
+          <div class="resource-num">02</div>
+          <div>
+            <span class="resource-name">Shodan</span>
+            <span class="resource-desc">Search engine for internet-connected devices. Reveals open ports, exposed services, and device banners — without touching the target.</span>
+          </div>
+          <div class="resource-url">shodan.io ↗</div>
+        </a>
+
+        <a class="resource-item" href="https://github.com/laramies/theHarvester" target="_blank" rel="noopener">
+          <div class="resource-num">03</div>
+          <div>
+            <span class="resource-name">theHarvester</span>
+            <span class="resource-desc">Command-line tool for harvesting emails, subdomains, and employee names from public sources. Pre-installed on Kali Linux.</span>
+          </div>
+          <div class="resource-url">github.com/laramies ↗</div>
+        </a>
+
+        <a class="resource-item" href="https://www.maltego.com/ce-registration/" target="_blank" rel="noopener">
+          <div class="resource-num">04</div>
+          <div>
+            <span class="resource-name">Maltego Community Edition</span>
+            <span class="resource-desc">Visual link analysis tool for mapping relationships between people, domains, and IPs. Free CE version available for students.</span>
+          </div>
+          <div class="resource-url">maltego.com ↗</div>
+        </a>
+
+        <a class="resource-item" href="https://inteltechniques.com/tools/" target="_blank" rel="noopener">
+          <div class="resource-num">05</div>
+          <div>
+            <span class="resource-name">IntelTechniques OSINT Tools</span>
+            <span class="resource-desc">Free browser-based search tools by Michael Bazzell — a leading OSINT practitioner. Covers people, usernames, email, domains, and images.</span>
+          </div>
+          <div class="resource-url">inteltechniques.com ↗</div>
+        </a>
+
+        <a class="resource-item" href="https://osintcurio.us" target="_blank" rel="noopener">
+          <div class="resource-num">06</div>
+          <div>
+            <span class="resource-name">OSINT Curious</span>
+            <span class="resource-desc">Community blog covering real-world OSINT techniques, case studies, and tool walkthroughs. Great for going deeper beyond the basics.</span>
+          </div>
+          <div class="resource-url">osintcurio.us ↗</div>
+        </a>
+
+      </div>
+    </section>
+
+    <!-- RESEARCH ACTIVITY -->
+    <section class="section" id="research">
+      <div class="section-header">
+        <div class="section-icon">ACT</div>
+        <div>
+          <div class="section-title">Research Activity — OSINT in the Real World</div>
+          <div class="section-subtitle">Investigate how OSINT is used professionally and ethically</div>
+        </div>
+      </div>
+
+      <div class="notice notice-info" style="margin-bottom: 20px;">
+        <div>
+          <strong>Overview</strong>
+          <p>OSINT isn't just a hacker technique — it's used by journalists, law enforcement, human rights investigators, and corporate security teams every day. Your job is to research one real-world OSINT use case and present your findings to the class.</p>
+        </div>
+      </div>
+
+      <div class="lab-block" style="margin-bottom: 16px;">
+        <div class="lab-header">
+          <div class="lab-badge">Step 1</div>
+          <div class="lab-title">Choose a Use Case</div>
+        </div>
+        <div class="lab-body">
+          <p style="font-size:14px; color:var(--ink); margin-bottom:12px;">Select one of the following OSINT application areas to research:</p>
+          <ul class="step-list">
+            <li><strong>Investigative journalism</strong> — how reporters use OSINT to verify stories and locate sources</li>
+            <li><strong>Law enforcement</strong> — how agencies use open-source data in criminal investigations</li>
+            <li><strong>Human rights investigations</strong> — organizations like Bellingcat using OSINT to document atrocities</li>
+            <li><strong>Corporate threat intelligence</strong> — security teams monitoring for brand exposure and leaked credentials</li>
+            <li><strong>Missing persons</strong> — volunteer OSINT communities helping locate missing individuals</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="lab-block" style="margin-bottom: 16px;">
+        <div class="lab-header">
+          <div class="lab-badge">Step 2</div>
+          <div class="lab-title">Research Your Use Case</div>
+        </div>
+        <div class="lab-body">
+          <p style="font-size:14px; color:var(--ink); margin-bottom:12px;">Find at least <strong>two sources</strong> (article, video, case study, or official documentation) and answer the following:</p>
+          <ul class="step-list">
+            <li>Who uses OSINT in this field, and what is their goal?</li>
+            <li>What specific tools or techniques are commonly used?</li>
+            <li>Describe one real case or example from your research</li>
+            <li>What are the ethical considerations or risks in this use case?</li>
+            <li>How does this use case connect to what we've learned about passive vs. active recon?</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="lab-block">
+        <div class="lab-header">
+          <div class="lab-badge">Step 3</div>
+          <div class="lab-title">Present Your Findings</div>
+        </div>
+        <div class="lab-body">
+          <ul class="step-list">
+            <li>Prepare a <strong>3–5 minute verbal summary</strong> to share with the class — no slides required</li>
+            <li>Be ready to answer: <em>"What surprised you most about this use case?"</em></li>
+            <li>Submit your sources and written notes to your shared drive folder before presenting</li>
+          </ul>
+          <div class="notice notice-ok" style="margin-top:16px;">
+            <div>
+              <strong>Deliverable</strong>
+              <p>Written notes (bullet points are fine) + two cited sources, saved to your shared drive folder. Verbal presentation to the class.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SELF-CHECK -->
+    <section class="section" id="selfcheck">
+      <div class="section-header">
+        <div class="section-icon">CHK</div>
+        <div>
+          <div class="section-title">Self-Check</div>
+          <div class="section-subtitle">Can you answer each of these before leaving today?</div>
+        </div>
+      </div>
+
+      <div class="reflection-list">
+        <div class="reflection-item" data-q="1">Explain what OSINT is and why ethical hackers use it first</div>
+        <div class="reflection-item" data-q="2">Describe the difference between passive and active recon — and why it matters legally</div>
+        <div class="reflection-item" data-q="3">Name three types of data OSINT can surface about a target organization</div>
+        <div class="reflection-item" data-q="4">Perform a WHOIS lookup on a domain and read the results</div>
+        <div class="reflection-item" data-q="5">Use at least two Google dork operators to narrow a search</div>
+        <div class="reflection-item" data-q="6">Describe what Shodan shows and why it's useful for passive recon</div>
+        <div class="reflection-item" data-q="7">Explain why OSINT on real individuals requires caution even when the data is public</div>
+      </div>
+
+      <div class="notice notice-warn" style="margin-top: 20px;">
+        <div>
+          <strong>Common Mistakes to Avoid</strong>
+          <p>
+            Treating "public" as "authorized" — it isn't &nbsp;·&nbsp;
+            Jumping to active recon before exhausting passive sources &nbsp;·&nbsp;
+            Forgetting to document your sources and methodology &nbsp;·&nbsp;
+            Running theHarvester or Shodan queries on real targets without permission
+          </p>
+        </div>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<button class="print-btn" onclick="window.print()">Print / PDF</button>
+
+<script>
+  // Progress bar
+  window.addEventListener('scroll', () => {
+    const doc = document.documentElement;
+    const pct = (doc.scrollTop / (doc.scrollHeight - doc.clientHeight)) * 100;
+    document.getElementById('progressBar').style.width = pct + '%';
+  });
+
+  // Scroll reveal
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+  }, { threshold: 0.08 });
+  document.querySelectorAll('.section').forEach(el => observer.observe(el));
+
+  // Active nav
+  const sections = document.querySelectorAll('section[id]');
+  const navLinks = document.querySelectorAll('.nav-list a[href^="#"]');
+  const navObserver = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        navLinks.forEach(a => a.classList.remove('active'));
+        const link = document.querySelector(`.nav-list a[href="#${e.target.id}"]`);
+        if (link) link.classList.add('active');
+      }
+    });
+  }, { rootMargin: '-30% 0px -60% 0px' });
+  sections.forEach(s => navObserver.observe(s));
+
+  // Theme toggle
+  const toggle = document.getElementById('themeToggle');
+  const stored = localStorage.getItem('lessonTheme') || 'dark';
+  document.documentElement.setAttribute('data-theme', stored);
+  toggle.textContent = stored === 'dark' ? '☀' : '☽';
+  toggle.addEventListener('click', () => {
+    const next = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', next);
+    localStorage.setItem('lessonTheme', next);
+    toggle.textContent = next === 'dark' ? '☀' : '☽';
+  });
+</script>
+
+</body>
+</html>
