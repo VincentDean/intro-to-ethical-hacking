@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -735,7 +735,6 @@
     gap: 8px;
   }
 
-  .integrity-title::before { content: '⚠'; }
 
   .integrity-box p { font-size: 13px; color: var(--text2); margin: 0; }
 
@@ -783,6 +782,61 @@
     .detail-grid { grid-template-columns: 1fr; }
     .incident-grid { grid-template-columns: 1fr; }
   }
+
+  /* ── LIGHT THEME ── */
+  html[data-theme="light"] {
+    --bg:      #f0f6fc;
+    --panel:   #ffffff;
+    --panel2:  #e8f2fa;
+    --border:  #c4d8ec;
+    --border2: #a8c4dc;
+    --cyan:    #0076a8;
+    --amber:   #b07000;
+    --green:   #009950;
+    --red:     #cc2233;
+    --dim:     #3a5a78;
+    --muted:   #527090;
+    --text:    #0d1b2a;
+    --text2:   #2a4060;
+    color-scheme: light;
+  }
+
+  html[data-theme="light"] body::before { opacity: 0; }
+
+  html[data-theme="light"] .grid-bg {
+    background-image:
+      linear-gradient(rgba(0,80,120,0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,80,120,0.04) 1px, transparent 1px);
+  }
+
+  html[data-theme="light"] h1 { color: var(--text); }
+  html[data-theme="light"] h1 em { text-shadow: none; }
+  html[data-theme="light"] .incident-name { color: var(--text); }
+  html[data-theme="light"] .step-name { color: var(--text); }
+  html[data-theme="light"] .section-title { color: var(--text); }
+  html[data-theme="light"] .checklist-title { color: var(--text); }
+  html[data-theme="light"] .rubric-total span { color: var(--text); }
+  html[data-theme="light"] .rubric-total strong { text-shadow: none; }
+
+  /* ── THEME TOGGLE ── */
+  .theme-toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    color: var(--cyan);
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 17px;
+    transition: background 0.2s, border-color 0.2s;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.25);
+    margin: 0 auto 24px;
+  }
+
+  .theme-toggle:hover { border-color: var(--cyan); }
 </style>
 </head>
 <body>
@@ -790,6 +844,7 @@
 <div class="grid-bg"></div>
 
 <header>
+  <button class="theme-toggle" id="themeToggle" aria-label="Toggle light/dark mode">☀</button>
   <div class="breadcrumb">
     Intro to Ethical Hacking &nbsp;/&nbsp; <span>Research Projects</span>
   </div>
@@ -819,7 +874,6 @@
   <!-- ── SECTION 1: OVERVIEW ── -->
   <section id="overview" class="section active">
     <div class="section-head">
-      <div class="section-icon">📋</div>
       <div class="section-title">What This <span>Project Is</span></div>
     </div>
 
@@ -859,7 +913,6 @@
   <!-- ── SECTION 2: INCIDENTS ── -->
   <section id="incidents" class="section">
     <div class="section-head">
-      <div class="section-icon">🎯</div>
       <div class="section-title">Choose Your <span>Topic</span></div>
     </div>
 
@@ -939,7 +992,6 @@
   <!-- ── SECTION 3: REQUIREMENTS ── -->
   <section id="requirements" class="section">
     <div class="section-head">
-      <div class="section-icon">📐</div>
       <div class="section-title">Paper <span>Requirements</span></div>
     </div>
 
@@ -999,7 +1051,6 @@
   <!-- ── SECTION 4: STRUCTURE ── -->
   <section id="structure" class="section">
     <div class="section-head">
-      <div class="section-icon">✍️</div>
       <div class="section-title">Paper <span>Structure</span></div>
     </div>
 
@@ -1072,7 +1123,6 @@
   <!-- ── SECTION 5: RUBRIC ── -->
   <section id="rubric" class="section">
     <div class="section-head">
-      <div class="section-icon">🏆</div>
       <div class="section-title">Grading <span>Rubric</span></div>
     </div>
 
@@ -1132,7 +1182,6 @@
   <!-- ── SECTION 6: CITATIONS ── -->
   <section id="citations" class="section">
     <div class="section-head">
-      <div class="section-icon">📚</div>
       <div class="section-title">MLA <span>Format Guide</span></div>
     </div>
 
@@ -1213,7 +1262,6 @@
   <!-- ── SECTION 7: CHECKLIST ── -->
   <section id="checklist" class="section">
     <div class="section-head">
-      <div class="section-icon">✅</div>
       <div class="section-title">My Pre-Submit <span>Checklist</span></div>
     </div>
 
@@ -1407,6 +1455,19 @@ function selectIncident(card, idx) {
   `;
   detail.classList.add('show');
 }
+
+// ── THEME TOGGLE ──
+const themeToggle = document.getElementById('themeToggle');
+const storedTheme = localStorage.getItem('researchTheme') || 'dark';
+document.documentElement.setAttribute('data-theme', storedTheme);
+themeToggle.textContent = storedTheme === 'dark' ? '☀' : '☽';
+
+themeToggle.addEventListener('click', () => {
+  const next = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', next);
+  localStorage.setItem('researchTheme', next);
+  themeToggle.textContent = next === 'dark' ? '☀' : '☽';
+});
 
 // ── CHECKLIST ──
 const TOTAL_CHECKS = 16;
