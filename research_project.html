@@ -1,0 +1,1427 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cybersecurity Incident Research Project | Intro to Ethical Hacking</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@400;500;600;700&family=Exo+2:wght@300;400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:        #080c10;
+    --panel:     #0d1117;
+    --panel2:    #111820;
+    --border:    #1e2d3d;
+    --border2:   #243347;
+    --green:     #00ff88;
+    --cyan:      #00d4ff;
+    --amber:     #ffb300;
+    --red:       #ff4757;
+    --dim:       #3a4a5c;
+    --muted:     #607080;
+    --text:      #c8d8e8;
+    --text2:     #8fa3b8;
+    --mono:      'Share Tech Mono', monospace;
+    --head:      'Rajdhani', sans-serif;
+    --body:      'Exo 2', sans-serif;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--body);
+    font-size: 15px;
+    line-height: 1.7;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ── SCANLINE OVERLAY ── */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(0,0,0,0.07) 2px,
+      rgba(0,0,0,0.07) 4px
+    );
+    pointer-events: none;
+    z-index: 999;
+  }
+
+  /* ── GRID BG ── */
+  .grid-bg {
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(0,212,255,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,212,255,0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ── HEADER ── */
+  header {
+    position: relative;
+    z-index: 10;
+    padding: 60px 0 40px;
+    text-align: center;
+    border-bottom: 1px solid var(--border);
+    background: linear-gradient(180deg, rgba(0,212,255,0.04) 0%, transparent 100%);
+  }
+
+  .breadcrumb {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 0.12em;
+    margin-bottom: 20px;
+    text-transform: uppercase;
+  }
+
+  .breadcrumb span { color: var(--cyan); }
+
+  .badge {
+    display: inline-block;
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    background: rgba(0,212,255,0.08);
+    border: 1px solid rgba(0,212,255,0.25);
+    color: var(--cyan);
+    padding: 4px 14px;
+    border-radius: 2px;
+    margin-bottom: 20px;
+  }
+
+  h1 {
+    font-family: var(--head);
+    font-size: clamp(28px, 5vw, 52px);
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: #fff;
+    line-height: 1.1;
+    margin-bottom: 10px;
+  }
+
+  h1 em {
+    font-style: normal;
+    color: var(--cyan);
+    text-shadow: 0 0 30px rgba(0,212,255,0.5);
+  }
+
+  .subtitle {
+    font-family: var(--mono);
+    font-size: 13px;
+    color: var(--muted);
+    letter-spacing: 0.08em;
+    margin-bottom: 30px;
+  }
+
+  .meta-row {
+    display: flex;
+    justify-content: center;
+    gap: 30px;
+    flex-wrap: wrap;
+  }
+
+  .meta-item {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+  }
+
+  .meta-item strong {
+    color: var(--amber);
+    font-weight: normal;
+  }
+
+  /* ── LAYOUT ── */
+  .main-wrap {
+    position: relative;
+    z-index: 1;
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 50px 24px 80px;
+  }
+
+  /* ── NAV TABS ── */
+  .nav-tabs {
+    display: flex;
+    gap: 2px;
+    margin-bottom: 40px;
+    overflow-x: auto;
+    padding-bottom: 2px;
+  }
+
+  .nav-tabs::-webkit-scrollbar { height: 2px; }
+  .nav-tabs::-webkit-scrollbar-thumb { background: var(--border2); }
+
+  .tab-btn {
+    flex-shrink: 0;
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    background: var(--panel);
+    border: 1px solid var(--border);
+    padding: 10px 18px;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+
+  .tab-btn:hover {
+    color: var(--cyan);
+    border-color: rgba(0,212,255,0.3);
+  }
+
+  .tab-btn.active {
+    color: var(--bg);
+    background: var(--cyan);
+    border-color: var(--cyan);
+  }
+
+  /* ── SECTIONS ── */
+  .section { display: none; animation: fadeIn 0.3s ease; }
+  .section.active { display: block; }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ── SECTION HEADER ── */
+  .section-head {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 28px;
+  }
+
+  .section-icon {
+    width: 36px;
+    height: 36px;
+    border: 1px solid var(--border2);
+    background: var(--panel2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    flex-shrink: 0;
+  }
+
+  .section-title {
+    font-family: var(--head);
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #fff;
+  }
+
+  .section-title span { color: var(--cyan); }
+
+  /* ── PANEL CARD ── */
+  .card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    padding: 24px 28px;
+    margin-bottom: 20px;
+    position: relative;
+  }
+
+  .card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 3px; height: 100%;
+    background: var(--cyan);
+  }
+
+  .card.amber::before { background: var(--amber); }
+  .card.green::before { background: var(--green); }
+  .card.red::before   { background: var(--red); }
+  .card.no-accent::before { display: none; }
+
+  .card-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--cyan);
+    margin-bottom: 8px;
+  }
+
+  .card.amber .card-label { color: var(--amber); }
+  .card.green .card-label { color: var(--green); }
+  .card.red   .card-label { color: var(--red); }
+
+  p { color: var(--text2); margin-bottom: 12px; }
+  p:last-child { margin-bottom: 0; }
+
+  p strong { color: var(--text); font-weight: 600; }
+  p em { color: var(--cyan); font-style: normal; font-family: var(--mono); font-size: 0.9em; }
+
+  /* ── INCIDENT GRID ── */
+  .incident-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 12px;
+    margin-bottom: 24px;
+  }
+
+  .incident-card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    padding: 18px 20px;
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .incident-card::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(0,212,255,0.04), transparent);
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+
+  .incident-card:hover {
+    border-color: rgba(0,212,255,0.3);
+    transform: translateY(-2px);
+  }
+
+  .incident-card:hover::after { opacity: 1; }
+
+  .incident-card.selected {
+    border-color: var(--cyan);
+    background: rgba(0,212,255,0.06);
+  }
+
+  .incident-card.selected::before {
+    content: '✓ SELECTED';
+    position: absolute;
+    top: 8px; right: 10px;
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: 0.12em;
+    color: var(--cyan);
+  }
+
+  .incident-year {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    color: var(--amber);
+    margin-bottom: 6px;
+  }
+
+  .incident-name {
+    font-family: var(--head);
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    color: #fff;
+    margin-bottom: 8px;
+    line-height: 1.3;
+  }
+
+  .incident-desc {
+    font-size: 12px;
+    color: var(--muted);
+    line-height: 1.5;
+  }
+
+  .incident-type {
+    display: inline-block;
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 3px 8px;
+    border-radius: 2px;
+    margin-top: 10px;
+    background: rgba(255,179,0,0.1);
+    color: var(--amber);
+    border: 1px solid rgba(255,179,0,0.2);
+  }
+
+  /* ── INCIDENT DETAIL ── */
+  .incident-detail {
+    background: var(--panel2);
+    border: 1px solid var(--cyan);
+    padding: 24px 28px;
+    margin-top: 16px;
+    display: none;
+    animation: fadeIn 0.3s ease;
+  }
+
+  .incident-detail.show { display: block; }
+
+  .detail-title {
+    font-family: var(--head);
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--cyan);
+    letter-spacing: 0.06em;
+    margin-bottom: 12px;
+  }
+
+  .detail-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-top: 16px;
+  }
+
+  .detail-box {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    padding: 14px 16px;
+  }
+
+  .detail-box-label {
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 6px;
+  }
+
+  .detail-box p {
+    font-size: 13px;
+    color: var(--text);
+    margin: 0;
+  }
+
+  /* ── REQUIREMENTS LIST ── */
+  .req-group { margin-bottom: 24px; }
+
+  .req-group-title {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--amber);
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .req-group-title::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  .req-list { list-style: none; }
+
+  .req-list li {
+    padding: 9px 0 9px 24px;
+    border-bottom: 1px solid rgba(30,45,61,0.6);
+    position: relative;
+    font-size: 13.5px;
+    color: var(--text2);
+  }
+
+  .req-list li:last-child { border-bottom: none; }
+
+  .req-list li::before {
+    content: '▸';
+    position: absolute;
+    left: 0;
+    color: var(--cyan);
+    font-size: 11px;
+    top: 11px;
+  }
+
+  .req-list li strong { color: var(--text); }
+  .req-list li .mono { font-family: var(--mono); font-size: 12px; color: var(--cyan); }
+
+  /* ── PAPER STRUCTURE ── */
+  .structure-steps { counter-reset: step; }
+
+  .step {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 16px;
+    padding: 20px 22px;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    position: relative;
+    transition: border-color 0.2s;
+  }
+
+  .step:hover { border-color: var(--border2); }
+
+  .step-num {
+    counter-increment: step;
+    width: 40px;
+    height: 40px;
+    flex-shrink: 0;
+    background: var(--panel2);
+    border: 1px solid var(--border2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--mono);
+    font-size: 16px;
+    color: var(--cyan);
+    font-weight: bold;
+  }
+
+  .step-body {}
+
+  .step-name {
+    font-family: var(--head);
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    color: #fff;
+    margin-bottom: 6px;
+  }
+
+  .step-desc {
+    font-size: 13px;
+    color: var(--text2);
+    line-height: 1.6;
+    margin: 0;
+  }
+
+  .step-prompts {
+    margin-top: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .prompt {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--muted);
+    padding: 5px 10px;
+    background: var(--bg);
+    border-left: 2px solid var(--border2);
+  }
+
+  .prompt::before { content: '> '; color: var(--green); }
+
+  /* ── RUBRIC TABLE ── */
+  .rubric-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+  }
+
+  .rubric-table thead tr {
+    background: var(--panel2);
+  }
+
+  .rubric-table th {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+    padding: 12px 16px;
+    text-align: left;
+    border-bottom: 1px solid var(--border2);
+  }
+
+  .rubric-table th:last-child { text-align: center; }
+
+  .rubric-table td {
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--border);
+    font-size: 13px;
+    color: var(--text2);
+    vertical-align: top;
+  }
+
+  .rubric-table tr:hover td { background: rgba(255,255,255,0.015); }
+
+  .rubric-table .cat {
+    font-family: var(--head);
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text);
+    white-space: nowrap;
+  }
+
+  .rubric-table .pts {
+    text-align: center;
+    font-family: var(--mono);
+    font-size: 16px;
+    color: var(--cyan);
+    font-weight: bold;
+  }
+
+  .rubric-total {
+    background: rgba(0,212,255,0.06);
+    border: 1px solid rgba(0,212,255,0.2);
+    padding: 14px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .rubric-total span {
+    font-family: var(--head);
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: #fff;
+  }
+
+  .rubric-total strong {
+    font-family: var(--mono);
+    font-size: 28px;
+    color: var(--cyan);
+    text-shadow: 0 0 20px rgba(0,212,255,0.4);
+  }
+
+  /* ── CITATIONS ── */
+  .cite-entry {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--border2);
+    padding: 16px 20px;
+    margin-bottom: 12px;
+    font-size: 13px;
+    color: var(--text2);
+    line-height: 1.7;
+  }
+
+  .cite-entry em { color: var(--text); font-style: italic; }
+
+  .cite-label {
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 8px;
+  }
+
+  /* ── CHECKLIST ── */
+  .checklist-wrap {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    padding: 24px 28px;
+  }
+
+  .checklist-title {
+    font-family: var(--head);
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: #fff;
+    margin-bottom: 18px;
+  }
+
+  .check-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    padding: 10px 0;
+    border-bottom: 1px solid rgba(30,45,61,0.5);
+    cursor: pointer;
+  }
+
+  .check-item:last-child { border-bottom: none; }
+
+  .check-box {
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+    border: 1px solid var(--border2);
+    background: var(--bg);
+    position: relative;
+    margin-top: 2px;
+    transition: all 0.2s;
+  }
+
+  .check-item:hover .check-box { border-color: var(--cyan); }
+
+  .check-item.done .check-box {
+    background: var(--cyan);
+    border-color: var(--cyan);
+  }
+
+  .check-item.done .check-box::after {
+    content: '';
+    position: absolute;
+    left: 3px; top: 1px;
+    width: 8px; height: 5px;
+    border-left: 2px solid var(--bg);
+    border-bottom: 2px solid var(--bg);
+    transform: rotate(-45deg);
+  }
+
+  .check-text {
+    font-size: 13px;
+    color: var(--text2);
+    line-height: 1.5;
+  }
+
+  .check-item.done .check-text {
+    text-decoration: line-through;
+    color: var(--dim);
+  }
+
+  .progress-bar-wrap {
+    height: 4px;
+    background: var(--border);
+    margin: 20px 0 8px;
+    border-radius: 2px;
+    overflow: hidden;
+  }
+
+  .progress-bar {
+    height: 100%;
+    background: linear-gradient(90deg, var(--cyan), var(--green));
+    width: 0%;
+    transition: width 0.4s ease;
+    border-radius: 2px;
+  }
+
+  .progress-label {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--muted);
+    text-align: right;
+  }
+
+  .progress-label span { color: var(--cyan); }
+
+  /* ── INTEGRITY BOX ── */
+  .integrity-box {
+    background: rgba(255,71,87,0.05);
+    border: 1px solid rgba(255,71,87,0.25);
+    padding: 20px 24px;
+    margin-top: 20px;
+  }
+
+  .integrity-title {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--red);
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .integrity-title::before { content: '⚠'; }
+
+  .integrity-box p { font-size: 13px; color: var(--text2); margin: 0; }
+
+  /* ── FOOTER ── */
+  .page-footer {
+    margin-top: 60px;
+    padding-top: 24px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: gap;
+    gap: 16px;
+  }
+
+  .footer-text {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 0.08em;
+  }
+
+  .footer-text a { color: var(--cyan); text-decoration: none; }
+
+  .next-btn {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    background: transparent;
+    border: 1px solid var(--cyan);
+    color: var(--cyan);
+    padding: 10px 22px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .next-btn:hover {
+    background: var(--cyan);
+    color: var(--bg);
+  }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 640px) {
+    .detail-grid { grid-template-columns: 1fr; }
+    .incident-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div class="grid-bg"></div>
+
+<header>
+  <div class="breadcrumb">
+    Intro to Ethical Hacking &nbsp;/&nbsp; <span>Research Projects</span>
+  </div>
+  <div class="badge">Unit Assignment</div>
+  <h1>Cybersecurity Incident<br><em>Research Project</em></h1>
+  <p class="subtitle">// analyze a real-world breach using professional security methodology</p>
+  <div class="meta-row">
+    <div class="meta-item"><strong>Format:</strong> MLA, 3 Pages + Works Cited</div>
+    <div class="meta-item"><strong>Sources:</strong> Minimum 3</div>
+    <div class="meta-item"><strong>Points:</strong> 100</div>
+  </div>
+</header>
+
+<main class="main-wrap">
+
+  <!-- NAV TABS -->
+  <nav class="nav-tabs" id="tabs">
+    <button class="tab-btn active" onclick="switchTab('overview', this)">01 Overview</button>
+    <button class="tab-btn" onclick="switchTab('incidents', this)">02 Choose Topic</button>
+    <button class="tab-btn" onclick="switchTab('requirements', this)">03 Requirements</button>
+    <button class="tab-btn" onclick="switchTab('structure', this)">04 Paper Structure</button>
+    <button class="tab-btn" onclick="switchTab('rubric', this)">05 Rubric</button>
+    <button class="tab-btn" onclick="switchTab('citations', this)">06 MLA Guide</button>
+    <button class="tab-btn" onclick="switchTab('checklist', this)">07 My Checklist</button>
+  </nav>
+
+  <!-- ── SECTION 1: OVERVIEW ── -->
+  <section id="overview" class="section active">
+    <div class="section-head">
+      <div class="section-icon">📋</div>
+      <div class="section-title">What This <span>Project Is</span></div>
+    </div>
+
+    <div class="card">
+      <div class="card-label">The Assignment</div>
+      <p>In this course, you have learned how attackers think — how tools like <em>nmap</em>, <em>Hydra</em>, and <em>Burp Suite</em> work, and why ethical boundaries matter. Now it is time to apply that knowledge to the real world.</p>
+      <p>You will research a real, documented cybersecurity incident and write a <strong>three-page analytical paper</strong> explaining what happened, why it mattered, and what defenders could have done differently.</p>
+    </div>
+
+    <div class="card amber">
+      <div class="card-label">Important Note</div>
+      <p>This is <strong>not a summary assignment.</strong> You are expected to <strong>analyze</strong> the incident using what you know about security concepts and professional methodology. Your paper must demonstrate that you understand the attack — not just that you can look it up.</p>
+    </div>
+
+    <div class="card green">
+      <div class="card-label">Connection to Class</div>
+      <p>Every incident on the topic list connects to tools and concepts you have used in this class. As you write, ask yourself: <em>Have we seen this type of attack before? What tool could detect or prevent this?</em> Making those connections is what earns full credit on the Technical Understanding section of the rubric.</p>
+    </div>
+
+    <div class="card no-accent" style="background: var(--panel2); border-color: var(--border2);">
+      <div class="card-label">Deliverables</div>
+      <ul class="req-list">
+        <li>Three full pages of body text (minimum)</li>
+        <li>MLA format throughout (heading, in-text citations, spacing)</li>
+        <li>Works Cited page as a separate page at the end</li>
+        <li>Minimum 3 credible sources cited correctly</li>
+        <li>File name: <span class="mono">LastName_CyberIncident_Research.docx</span></li>
+      </ul>
+    </div>
+
+    <div class="page-footer">
+      <div class="footer-text">Step 1 of 7</div>
+      <button class="next-btn" onclick="switchTab('incidents', document.querySelectorAll('.tab-btn')[1])">Next: Choose Your Topic →</button>
+    </div>
+  </section>
+
+  <!-- ── SECTION 2: INCIDENTS ── -->
+  <section id="incidents" class="section">
+    <div class="section-head">
+      <div class="section-icon">🎯</div>
+      <div class="section-title">Choose Your <span>Topic</span></div>
+    </div>
+
+    <div class="card no-accent">
+      <p>Select <strong>one</strong> of the incidents below. Click a card to learn more. If you want to research a different incident not on this list, you must get <strong>instructor approval before you start writing.</strong></p>
+    </div>
+
+    <div class="incident-grid" id="incidentGrid">
+
+      <div class="incident-card" onclick="selectIncident(this, 0)">
+        <div class="incident-year">2017</div>
+        <div class="incident-name">WannaCry Ransomware</div>
+        <div class="incident-desc">A global ransomware attack that encrypted files on hundreds of thousands of computers across 150 countries.</div>
+        <span class="incident-type">Ransomware</span>
+      </div>
+
+      <div class="incident-card" onclick="selectIncident(this, 1)">
+        <div class="incident-year">2021</div>
+        <div class="incident-name">Colonial Pipeline Attack</div>
+        <div class="incident-desc">Ransomware hit a major U.S. fuel pipeline, causing gas shortages along the entire East Coast.</div>
+        <span class="incident-type">Ransomware / Critical Infrastructure</span>
+      </div>
+
+      <div class="incident-card" onclick="selectIncident(this, 2)">
+        <div class="incident-year">2020</div>
+        <div class="incident-name">SolarWinds Supply Chain</div>
+        <div class="incident-desc">Malicious code was hidden inside a legitimate software update, compromising thousands of organizations undetected for months.</div>
+        <span class="incident-type">Supply Chain Attack</span>
+      </div>
+
+      <div class="incident-card" onclick="selectIncident(this, 3)">
+        <div class="incident-year">2016</div>
+        <div class="incident-name">Mirai Botnet</div>
+        <div class="incident-desc">Malware infected insecure IoT devices and weaponized them to launch one of the largest DDoS attacks ever recorded.</div>
+        <span class="incident-type">Botnet / DDoS</span>
+      </div>
+
+      <div class="incident-card" onclick="selectIncident(this, 4)">
+        <div class="incident-year">2020</div>
+        <div class="incident-name">Twitter Bitcoin Hack</div>
+        <div class="incident-desc">Attackers used social engineering to access internal admin tools and hijacked high-profile accounts to run a cryptocurrency scam.</div>
+        <span class="incident-type">Social Engineering</span>
+      </div>
+
+      <div class="incident-card" onclick="selectIncident(this, 5)">
+        <div class="incident-year">2014</div>
+        <div class="incident-name">Heartbleed Bug</div>
+        <div class="incident-desc">A critical flaw in OpenSSL let anyone read protected memory from servers — and it went undetected for over two years.</div>
+        <span class="incident-type">Vulnerability / Memory Leak</span>
+      </div>
+
+      <div class="incident-card" onclick="selectIncident(this, 6)">
+        <div class="incident-year">2013</div>
+        <div class="incident-name">Target Data Breach</div>
+        <div class="incident-desc">Attackers stole 40 million credit cards by first compromising a third-party HVAC vendor with network access to Target's systems.</div>
+        <span class="incident-type">Third-Party / POS Malware</span>
+      </div>
+
+      <div class="incident-card" onclick="selectIncident(this, 7)">
+        <div class="incident-year">2017</div>
+        <div class="incident-name">Equifax Data Breach</div>
+        <div class="incident-desc">Personal data on 147 million Americans was exposed after attackers exploited an unpatched web application vulnerability.</div>
+        <span class="incident-type">Unpatched Vulnerability</span>
+      </div>
+
+    </div>
+
+    <!-- DETAIL PANEL -->
+    <div class="incident-detail" id="incidentDetail"></div>
+
+    <div class="page-footer">
+      <div class="footer-text">Step 2 of 7</div>
+      <button class="next-btn" onclick="switchTab('requirements', document.querySelectorAll('.tab-btn')[2])">Next: Requirements →</button>
+    </div>
+  </section>
+
+  <!-- ── SECTION 3: REQUIREMENTS ── -->
+  <section id="requirements" class="section">
+    <div class="section-head">
+      <div class="section-icon">📐</div>
+      <div class="section-title">Paper <span>Requirements</span></div>
+    </div>
+
+    <div class="req-group">
+      <div class="req-group-title">Format</div>
+      <ul class="req-list">
+        <li>MLA format throughout — heading, in-text citations, Works Cited page</li>
+        <li><strong>Times New Roman, 12pt font, double-spaced</strong></li>
+        <li>1-inch margins on all sides</li>
+        <li>Last name and page number in the upper-right header (e.g., <span class="mono">Smith 1</span>)</li>
+        <li>Standard MLA heading block on the first page: <strong>Name → Course → School → Date</strong></li>
+        <li>Title centered on the first page — no bold, no special formatting</li>
+      </ul>
+    </div>
+
+    <div class="req-group">
+      <div class="req-group-title">Length</div>
+      <ul class="req-list">
+        <li><strong>Minimum 3 full pages</strong> of body text (not counting the Works Cited page)</li>
+        <li>Works Cited appears on its own separate page at the end</li>
+        <li>A paper that runs short will lose points under Content & Analysis</li>
+      </ul>
+    </div>
+
+    <div class="req-group">
+      <div class="req-group-title">Sources</div>
+      <ul class="req-list">
+        <li><strong>Minimum 3 credible sources</strong> — news articles, government reports, security research, academic papers</li>
+        <li>Wikipedia may be used for background only — <strong>it cannot be a primary source</strong></li>
+        <li>AI-generated content <strong>may not be cited</strong> as a source</li>
+        <li>Every source must appear in both in-text citations AND the Works Cited page</li>
+      </ul>
+    </div>
+
+    <div class="req-group">
+      <div class="req-group-title">Good Source Examples</div>
+      <ul class="req-list">
+        <li><span class="mono">cisa.gov</span> — U.S. government cybersecurity alerts and advisories</li>
+        <li><span class="mono">krebsonsecurity.com</span> — professional security journalism</li>
+        <li><span class="mono">theregister.com</span>, <span class="mono">wired.com</span> — reputable tech journalism</li>
+        <li>Published books on specific incidents (e.g., <em>Countdown to Zero Day</em>, <em>Sandworm</em>)</li>
+        <li>Peer-reviewed academic papers from security conferences (IEEE, USENIX)</li>
+      </ul>
+    </div>
+
+    <div class="integrity-box">
+      <div class="integrity-title">Academic Integrity</div>
+      <p>Copying text from any source without citation is plagiarism. Submitting AI-generated writing as your own is academic dishonesty. Both result in a zero and may lead to further disciplinary action. Your sources should support <em>your</em> analysis — not replace it.</p>
+    </div>
+
+    <div class="page-footer">
+      <div class="footer-text">Step 3 of 7</div>
+      <button class="next-btn" onclick="switchTab('structure', document.querySelectorAll('.tab-btn')[3])">Next: Paper Structure →</button>
+    </div>
+  </section>
+
+  <!-- ── SECTION 4: STRUCTURE ── -->
+  <section id="structure" class="section">
+    <div class="section-head">
+      <div class="section-icon">✍️</div>
+      <div class="section-title">Paper <span>Structure</span></div>
+    </div>
+
+    <div class="card no-accent">
+      <p>Your paper does not need section headers. These four areas are a <strong>guide for your thinking</strong>, not a rigid outline you must follow. Use them to make sure you are covering everything the rubric expects.</p>
+    </div>
+
+    <div class="structure-steps">
+
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-body">
+          <div class="step-name">What Happened</div>
+          <p class="step-desc">Describe the incident clearly and accurately. Who was attacked? When did it happen? How did the attacker get in? What systems or data were affected? Use specific facts from your sources.</p>
+          <div class="step-prompts">
+            <div class="prompt">Who was the victim organization?</div>
+            <div class="prompt">What was the attacker's goal — data theft, disruption, money?</div>
+            <div class="prompt">How long did the attack go undetected?</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-body">
+          <div class="step-name">The Technical Breakdown</div>
+          <p class="step-desc">Explain the security weaknesses that made the attack possible. Identify the attack type. Connect what you learned in class to what actually happened. This is where you demonstrate technical understanding.</p>
+          <div class="step-prompts">
+            <div class="prompt">What vulnerability or weakness did the attacker exploit?</div>
+            <div class="prompt">Is this related to anything we did with nmap, Hydra, or Burp Suite?</div>
+            <div class="prompt">What type of attack is this — brute force, social engineering, exploit?</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-body">
+          <div class="step-name">Impact and Response</div>
+          <p class="step-desc">What were the consequences — financial, operational, political, or social? How did the victim organization respond? Was the response effective? What would a professional security team have done differently?</p>
+          <div class="step-prompts">
+            <div class="prompt">What did the breach actually cost — money, trust, operations?</div>
+            <div class="prompt">Did the organization respond quickly and transparently?</div>
+            <div class="prompt">Were there legal or regulatory consequences?</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num">4</div>
+        <div class="step-body">
+          <div class="step-name">Lessons Learned</div>
+          <p class="step-desc">What should organizations take away from this incident? What defensive practices — patching, access control, network segmentation, employee training — could have prevented it? Connect your recommendations to real security principles.</p>
+          <div class="step-prompts">
+            <div class="prompt">What one change would have stopped this attack?</div>
+            <div class="prompt">Does this incident change how you think about any lab we did?</div>
+            <div class="prompt">What advice would you give a company's security team today?</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="page-footer">
+      <div class="footer-text">Step 4 of 7</div>
+      <button class="next-btn" onclick="switchTab('rubric', document.querySelectorAll('.tab-btn')[4])">Next: Rubric →</button>
+    </div>
+  </section>
+
+  <!-- ── SECTION 5: RUBRIC ── -->
+  <section id="rubric" class="section">
+    <div class="section-head">
+      <div class="section-icon">🏆</div>
+      <div class="section-title">Grading <span>Rubric</span></div>
+    </div>
+
+    <table class="rubric-table">
+      <thead>
+        <tr>
+          <th style="width:180px;">Category</th>
+          <th>What Graders Are Looking For</th>
+          <th style="width:80px;">Points</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><div class="cat">Content &amp; Analysis</div></td>
+          <td>The incident is accurately described, connections to security concepts are clear and specific, and all four areas of the paper structure are addressed with real depth — not just surface-level summary.</td>
+          <td><div class="pts">40</div></td>
+        </tr>
+        <tr>
+          <td><div class="cat">Technical Understanding</div></td>
+          <td>The paper shows clear understanding of attack methods, relevant tools, and security weaknesses. The student connects course concepts (nmap, Hydra, Burp Suite, etc.) to the real incident in a meaningful way.</td>
+          <td><div class="pts">25</div></td>
+        </tr>
+        <tr>
+          <td><div class="cat">Sources &amp; Citations</div></td>
+          <td>At least 3 credible sources are cited correctly in MLA format, both in-text and in a properly formatted Works Cited page. Sources are relevant and strengthen the analysis.</td>
+          <td><div class="pts">15</div></td>
+        </tr>
+        <tr>
+          <td><div class="cat">Writing Quality</div></td>
+          <td>Writing is clear, organized, and professional in tone. No major grammatical errors. Appropriate security vocabulary is used throughout without over-relying on jargon.</td>
+          <td><div class="pts">10</div></td>
+        </tr>
+        <tr>
+          <td><div class="cat">MLA Formatting</div></td>
+          <td>Header, margins, font, line spacing, page numbers, and in-text citations all follow MLA 9th edition guidelines consistently throughout the document.</td>
+          <td><div class="pts">10</div></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="rubric-total">
+      <span>Total Points Possible</span>
+      <strong>100</strong>
+    </div>
+
+    <div class="card amber" style="margin-top: 20px;">
+      <div class="card-label">Where Most Points Are Lost</div>
+      <p>The two biggest point categories are <strong>Content & Analysis (40 pts)</strong> and <strong>Technical Understanding (25 pts)</strong>. Students who write only a summary — without analysis or class connections — are leaving 65 points of depth on the table.</p>
+    </div>
+
+    <div class="page-footer">
+      <div class="footer-text">Step 5 of 7</div>
+      <button class="next-btn" onclick="switchTab('citations', document.querySelectorAll('.tab-btn')[5])">Next: MLA Guide →</button>
+    </div>
+  </section>
+
+  <!-- ── SECTION 6: CITATIONS ── -->
+  <section id="citations" class="section">
+    <div class="section-head">
+      <div class="section-icon">📚</div>
+      <div class="section-title">MLA <span>Format Guide</span></div>
+    </div>
+
+    <div class="card no-accent">
+      <p>MLA (Modern Language Association) format has specific rules for how to format your paper and cite your sources. Below are the most common citation types you will need and examples of each.</p>
+    </div>
+
+    <div class="req-group">
+      <div class="req-group-title">In-Text Citations</div>
+      <ul class="req-list">
+        <li>Place citations <strong>inside the sentence</strong>, before the period: <span class="mono">(Author LastName PageNumber).</span></li>
+        <li>For websites with no page numbers: <span class="mono">(Author LastName).</span></li>
+        <li>If no author is listed, use a shortened version of the title: <span class="mono">("WannaCry Attack").</span></li>
+        <li>The in-text citation must match a full entry in the Works Cited page.</li>
+      </ul>
+    </div>
+
+    <div class="req-group">
+      <div class="req-group-title">Works Cited — Website / News Article</div>
+      <div class="cite-entry">
+        <div class="cite-label">Format</div>
+        Last, First. "Article Title." <em>Website Name</em>, Day Month Year, URL.
+      </div>
+      <div class="cite-entry">
+        <div class="cite-label">Example</div>
+        Heath, Ryan. "The Colonial Pipeline Hack, Explained." <em>Politico</em>, 10 May 2021, www.politico.com/news/2021/05/10/colonial-pipeline-hack-486534.
+      </div>
+    </div>
+
+    <div class="req-group">
+      <div class="req-group-title">Works Cited — Book</div>
+      <div class="cite-entry">
+        <div class="cite-label">Format</div>
+        Last, First. <em>Book Title: Subtitle If Any</em>. Publisher, Year.
+      </div>
+      <div class="cite-entry">
+        <div class="cite-label">Example</div>
+        Greenberg, Andy. <em>Sandworm: A New Era of Cyberwar and the Hunt for the Kremlin's Most Dangerous Hackers</em>. Doubleday, 2019.
+      </div>
+    </div>
+
+    <div class="req-group">
+      <div class="req-group-title">Works Cited — Government Report</div>
+      <div class="cite-entry">
+        <div class="cite-label">Format</div>
+        Country, Agency Name. <em>Report Title</em>. Agency Abbreviation, Date, URL.
+      </div>
+      <div class="cite-entry">
+        <div class="cite-label">Example</div>
+        United States, Cybersecurity and Infrastructure Security Agency. <em>Alert AA21-131A: DarkSide Ransomware Best Practices</em>. CISA, 11 May 2021, www.cisa.gov/uscert/ncas/alerts/aa21-131a.
+      </div>
+    </div>
+
+    <div class="req-group">
+      <div class="req-group-title">Works Cited — Blog / Security Research</div>
+      <div class="cite-entry">
+        <div class="cite-label">Example</div>
+        Krebs, Brian. "What We Know About the Mirai Botnet." <em>KrebsOnSecurity</em>, 17 Oct. 2016, krebsonsecurity.com/2016/10/hacked-cameras-dvrs-powered-todays-massive-internet-outage.
+      </div>
+    </div>
+
+    <div class="card no-accent" style="margin-top: 8px;">
+      <div class="card-label">Quick Rules</div>
+      <ul class="req-list">
+        <li>Works Cited entries use a <strong>hanging indent</strong> — second and later lines are indented 0.5 inches</li>
+        <li>Entries are listed <strong>alphabetically</strong> by author's last name</li>
+        <li>Months with 5+ letters are <strong>abbreviated</strong>: Jan., Feb., Mar., Apr., Aug., Sept., Oct., Nov., Dec.</li>
+        <li>Book and website titles are <em>italicized</em>; article titles go in "quotation marks"</li>
+      </ul>
+    </div>
+
+    <div class="page-footer">
+      <div class="footer-text">Step 6 of 7</div>
+      <button class="next-btn" onclick="switchTab('checklist', document.querySelectorAll('.tab-btn')[6])">Next: My Checklist →</button>
+    </div>
+  </section>
+
+  <!-- ── SECTION 7: CHECKLIST ── -->
+  <section id="checklist" class="section">
+    <div class="section-head">
+      <div class="section-icon">✅</div>
+      <div class="section-title">My Pre-Submit <span>Checklist</span></div>
+    </div>
+
+    <div class="card no-accent" style="margin-bottom:24px;">
+      <p>Check off each item before you submit. Your progress saves in this browser tab — but it will reset if you close the page, so use this as a last-minute review, not a long-term tracker.</p>
+    </div>
+
+    <div class="checklist-wrap">
+      <div class="checklist-title">Before You Submit</div>
+
+      <div class="progress-bar-wrap">
+        <div class="progress-bar" id="progressBar"></div>
+      </div>
+      <div class="progress-label"><span id="progressLabel">0</span> of 16 complete</div>
+
+      <br>
+
+      <div id="checklistItems">
+
+        <div style="font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--amber);margin:16px 0 8px;">Content</div>
+        <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><div class="check-text">I selected one incident from the approved list (or got instructor approval)</div></div>
+        <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><div class="check-text">My paper accurately describes what happened, who was affected, and how the attacker got in</div></div>
+        <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><div class="check-text">I explained the security weakness or vulnerability that was exploited</div></div>
+        <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><div class="check-text">I connected the incident to tools or concepts from class (nmap, Hydra, Burp Suite, etc.)</div></div>
+        <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><div class="check-text">I discussed the real-world impact — financial, operational, or social consequences</div></div>
+        <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><div class="check-text">I included specific lessons learned and security recommendations</div></div>
+
+        <div style="font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--amber);margin:16px 0 8px;">Sources</div>
+        <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><div class="check-text">I have at least 3 credible sources (not Wikipedia as a primary, not AI)</div></div>
+        <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><div class="check-text">Every source has an in-text citation in MLA format</div></div>
+        <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><div class="check-text">Every source cited in the paper also appears in the Works Cited page</div></div>
+        <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><div class="check-text">Works Cited entries use correct MLA format (hanging indent, alphabetical order, italics)</div></div>
+
+        <div style="font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--amber);margin:16px 0 8px;">Formatting</div>
+        <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><div class="check-text">Font is Times New Roman, 12pt, double-spaced throughout</div></div>
+        <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><div class="check-text">Margins are 1 inch on all sides</div></div>
+        <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><div class="check-text">MLA heading block is on the first page (Name, Course, School, Date)</div></div>
+        <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><div class="check-text">Last name and page number appear in the upper-right header</div></div>
+
+        <div style="font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--amber);margin:16px 0 8px;">Final Checks</div>
+        <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><div class="check-text">Paper is at least 3 full pages of body text (Works Cited is on a separate page)</div></div>
+        <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><div class="check-text">File is saved as <span class="mono" style="font-size:11px;">LastName_CyberIncident_Research.docx</span></div></div>
+
+      </div>
+    </div>
+
+    <div class="page-footer" style="margin-top: 30px;">
+      <div class="footer-text">All done? Submit to <a href="#">Mr. Dean</a> via Google Classroom.</div>
+      <div class="footer-text" style="color: var(--muted);">Questions? Post in AuraLab or see Mr. Dean before class.</div>
+    </div>
+  </section>
+
+</main>
+
+<script>
+// ── INCIDENT DATA ──
+const incidents = [
+  {
+    name: "WannaCry Ransomware",
+    year: "2017",
+    type: "Ransomware",
+    overview: "WannaCry was a ransomware worm that spread automatically across networks by exploiting a Windows vulnerability called EternalBlue — a tool originally developed by the NSA that was leaked online months earlier.",
+    scale: "150+ countries, 200,000+ systems",
+    victim: "NHS (UK), FedEx, Telefónica, Deutsche Bahn, and thousands more",
+    cost: "Estimated $4–8 billion in damages globally",
+    classLink: "EternalBlue exploited an unpatched SMB vulnerability. Nmap can detect open SMB ports — a key first step any attacker or defender would take.",
+    resources: "cisa.gov, krebsonsecurity.com, Wikipedia (background only)"
+  },
+  {
+    name: "Colonial Pipeline Attack",
+    year: "2021",
+    type: "Ransomware / Critical Infrastructure",
+    overview: "The DarkSide ransomware group breached Colonial Pipeline's IT systems using a compromised VPN password. The company voluntarily shut down 5,500 miles of pipeline, causing East Coast gas shortages and panic buying.",
+    scale: "5,500 miles of pipeline offline for 6 days",
+    victim: "Colonial Pipeline Company (U.S. fuel infrastructure)",
+    cost: "$4.4 million ransom paid; broader economic disruption estimated in hundreds of millions",
+    classLink: "Initial access was via a VPN credential — exactly the type of credential that Hydra is built to brute force. Strong passwords and multi-factor authentication are the direct defense.",
+    resources: "cisa.gov/news-events, wired.com, theregister.com"
+  },
+  {
+    name: "SolarWinds Supply Chain",
+    year: "2020",
+    type: "Supply Chain Attack",
+    overview: "Nation-state hackers (attributed to Russia's SVR) inserted malicious code into SolarWinds' Orion software update. When organizations installed the update, they unknowingly gave the attackers a backdoor into their networks.",
+    scale: "18,000+ organizations installed the compromised update",
+    victim: "U.S. Treasury, DHS, State Department, Fortune 500 companies",
+    cost: "One of the most significant intelligence breaches in U.S. history; remediation costs in the billions",
+    classLink: "This attack bypassed perimeter defenses entirely — the malware arrived via a trusted software update. Wireshark-style network traffic analysis is one of the few ways to detect unusual outbound communication from trusted software.",
+    resources: "cisa.gov/solarwinds, wired.com, nytimes.com"
+  },
+  {
+    name: "Mirai Botnet",
+    year: "2016",
+    type: "Botnet / DDoS",
+    overview: "The Mirai malware scanned the internet for IoT devices (cameras, routers, DVRs) with default or weak credentials, infected them, and used the combined botnet to launch massive Distributed Denial of Service attacks.",
+    scale: "600,000+ infected devices; 1.2 Tbps DDoS attack on Dyn DNS",
+    victim: "Dyn DNS infrastructure, taking down Twitter, Netflix, Reddit, GitHub",
+    cost: "Millions in downtime losses; highlighted catastrophic IoT security failures",
+    classLink: "Mirai worked by brute-forcing default passwords on IoT devices — exactly what Hydra does. Scanning for open Telnet ports (port 23) with nmap is how you'd find vulnerable devices.",
+    resources: "krebsonsecurity.com, cloudflare.com/learning, wired.com"
+  },
+  {
+    name: "Twitter Bitcoin Hack",
+    year: "2020",
+    type: "Social Engineering",
+    overview: "Attackers called Twitter employees posing as IT support and convinced them to hand over credentials to internal admin tools. They then took over high-profile accounts (Obama, Musk, Gates, Biden) to run a Bitcoin scam.",
+    scale: "130 accounts targeted, 45 hijacked for the scam",
+    victim: "Twitter and its users — scam netted over $100,000 in Bitcoin",
+    cost: "$100,000+ in fraud; massive reputational damage to Twitter; three attackers eventually arrested",
+    classLink: "No technical exploit was needed — only social engineering via phone. This incident demonstrates that human factors often bypass all technical defenses. Connected to OSINT: attackers researched targets before calling.",
+    resources: "nytimes.com, sec.gov/news/press-release, bbc.com/news"
+  },
+  {
+    name: "Heartbleed Bug",
+    year: "2014",
+    type: "Vulnerability / Memory Leak",
+    overview: "A coding mistake in the OpenSSL library — which protects HTTPS connections worldwide — allowed anyone to read 64KB chunks of server memory at a time. This could expose passwords, private keys, and session tokens.",
+    scale: "An estimated 500,000+ servers vulnerable at discovery",
+    victim: "Essentially every website using OpenSSL for HTTPS",
+    cost: "Remediation costs estimated at $500 million+; unquantified data loss during the 2-year window",
+    classLink: "Heartbleed is a memory disclosure vulnerability — similar in concept to why buffer overflows are dangerous. Nmap has a script (ssl-heartbleed) that can test whether a server is vulnerable.",
+    resources: "heartbleed.com, theregister.com, cve.mitre.org"
+  },
+  {
+    name: "Target Data Breach",
+    year: "2013",
+    type: "Third-Party / POS Malware",
+    overview: "Hackers stole credentials from Fazio Mechanical, an HVAC company with remote access to Target's network. They moved laterally through Target's systems and installed malware on point-of-sale terminals, capturing 40 million payment cards.",
+    scale: "40 million credit/debit cards; 70 million customer records",
+    victim: "Target Corporation and its customers",
+    cost: "$18.5 million settlement; estimated $200 million total cost",
+    classLink: "Lateral movement through a network — pivoting from one system to another after initial access — is a core concept in penetration testing. Nmap's network discovery would reveal the flat network that let attackers move freely.",
+    resources: "krebsonsecurity.com, ftc.gov, businessinsider.com"
+  },
+  {
+    name: "Equifax Data Breach",
+    year: "2017",
+    type: "Unpatched Vulnerability",
+    overview: "Attackers exploited a known vulnerability in Apache Struts (a web framework) that had a patch available for months. Equifax had failed to apply it. The attackers spent 76 days inside the network before being detected.",
+    scale: "147 million Americans' personal data exposed",
+    victim: "Equifax and its customers (names, SSNs, birthdates, addresses, driver's licenses)",
+    cost: "$575 million FTC settlement; total costs exceeded $1.4 billion",
+    classLink: "An unpatched web vulnerability is exactly what Burp Suite is built to find. Scanning for known CVEs (Common Vulnerabilities and Exposures) is a fundamental part of vulnerability assessment.",
+    resources: "ftc.gov/equifax, cisa.gov, cnbc.com"
+  }
+];
+
+// ── TAB SWITCHING ──
+function switchTab(id, btn) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  btn.classList.add('active');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ── INCIDENT SELECTION ──
+let selectedIncident = null;
+
+function selectIncident(card, idx) {
+  document.querySelectorAll('.incident-card').forEach(c => c.classList.remove('selected'));
+  card.classList.add('selected');
+  selectedIncident = idx;
+
+  const d = incidents[idx];
+  const detail = document.getElementById('incidentDetail');
+  detail.innerHTML = `
+    <div class="detail-title">${d.name} (${d.year})</div>
+    <p style="color:var(--text2);font-size:13px;">${d.overview}</p>
+    <div class="detail-grid">
+      <div class="detail-box">
+        <div class="detail-box-label">Scale / Scope</div>
+        <p>${d.scale}</p>
+      </div>
+      <div class="detail-box">
+        <div class="detail-box-label">Primary Victim(s)</div>
+        <p>${d.victim}</p>
+      </div>
+      <div class="detail-box">
+        <div class="detail-box-label">Estimated Cost / Impact</div>
+        <p>${d.cost}</p>
+      </div>
+      <div class="detail-box">
+        <div class="detail-box-label">Connection to Class Tools</div>
+        <p style="color:var(--cyan);font-size:12px;">${d.classLink}</p>
+      </div>
+    </div>
+    <p style="font-family:var(--mono);font-size:11px;color:var(--muted);margin-top:16px;margin-bottom:0;">
+      Suggested sources: ${d.resources}
+    </p>
+  `;
+  detail.classList.add('show');
+}
+
+// ── CHECKLIST ──
+const TOTAL_CHECKS = 16;
+
+function toggleCheck(item) {
+  item.classList.toggle('done');
+  updateProgress();
+}
+
+function updateProgress() {
+  const done = document.querySelectorAll('.check-item.done').length;
+  const pct = (done / TOTAL_CHECKS) * 100;
+  document.getElementById('progressBar').style.width = pct + '%';
+  document.getElementById('progressLabel').textContent = done;
+}
+</script>
+</body>
+</html>
