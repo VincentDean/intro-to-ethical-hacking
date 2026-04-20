@@ -1,0 +1,1485 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Self-Guided Assignment — Build Your Ethical Hacking Repository</title>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --navy:   #0d1b2a;
+      --ink:    #1c2e40;
+      --steel:  #2e4d6e;
+      --slate:  #4a6fa5;
+      --sky:    #7eb8d4;
+      --frost:  #d0e8f2;
+      --paper:  #f4f7fa;
+      --white:  #ffffff;
+      --accent: #e84855;
+      --green:  #2a9d50;
+      --amber:  #e8a020;
+      --violet: #7c5cbf;
+      --mono:   'IBM Plex Mono', monospace;
+      --sans:   'IBM Plex Sans', sans-serif;
+      color-scheme: light;
+    }
+
+    html[data-theme="dark"] {
+      --paper:  #080e17;
+      --white:  #111d29;
+      --ink:    #c8dfe8;
+      --frost:  #1e3048;
+      --steel:  #7ab8d4;
+      --border: #1e3048;
+      color-scheme: dark;
+    }
+
+    html[data-theme="light"] { --border: #c4d8ec; }
+    html[data-theme="light"] .header-title { color: var(--frost); }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: var(--sans);
+      background: var(--paper);
+      color: var(--ink);
+      min-height: 100vh;
+      overflow-x: hidden;
+      transition: background 0.3s, color 0.3s;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(74,158,202,0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(74,158,202,0.04) 1px, transparent 1px);
+      background-size: 40px 40px;
+      pointer-events: none;
+      z-index: 0;
+      transition: opacity 0.3s;
+    }
+
+    html[data-theme="light"] body::before {
+      background-image:
+        linear-gradient(rgba(13,27,42,0.05) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(13,27,42,0.05) 1px, transparent 1px);
+    }
+
+    body::after {
+      content: '';
+      position: fixed;
+      top: -100%; left: 0; right: 0;
+      height: 200%;
+      background: linear-gradient(transparent 49.5%, rgba(74,158,202,0.03) 50%, transparent 50.5%);
+      background-size: 100% 4px;
+      animation: scan 8s linear infinite;
+      pointer-events: none;
+      z-index: 0;
+      transition: opacity 0.3s;
+    }
+
+    html[data-theme="light"] body::after { opacity: 0; }
+
+    @keyframes scan {
+      0%   { transform: translateY(0); }
+      100% { transform: translateY(50%); }
+    }
+
+    /* ── HEADER ── */
+    header {
+      background: var(--navy);
+      color: #d0e8f2;
+      padding: 0;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      border-bottom: 3px solid var(--accent);
+      box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+    }
+
+    .header-inner {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 14px 32px;
+      display: flex;
+      align-items: center;
+      gap: 24px;
+      flex-wrap: wrap;
+    }
+
+    .header-week {
+      font-family: var(--mono);
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--sky);
+      border: 1px solid var(--steel);
+      padding: 4px 10px;
+      border-radius: 3px;
+      white-space: nowrap;
+    }
+
+    .header-title { font-size: 18px; font-weight: 700; letter-spacing: -0.01em; flex: 1; }
+
+    .header-meta { display: flex; gap: 16px; flex-wrap: wrap; }
+
+    .meta-chip {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--sky);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .meta-chip::before {
+      content: '';
+      display: inline-block;
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--sky);
+      opacity: 0.7;
+    }
+
+    .header-back {
+      font-family: var(--mono);
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--sky);
+      text-decoration: none;
+      border: 1px solid var(--steel);
+      padding: 4px 10px;
+      border-radius: 3px;
+      white-space: nowrap;
+      transition: border-color 0.15s, color 0.15s;
+    }
+
+    .header-back:hover { border-color: var(--sky); }
+
+    .theme-toggle {
+      flex-shrink: 0;
+      background: rgba(255,255,255,0.08);
+      border: 1px solid var(--steel);
+      color: var(--sky);
+      width: 34px; height: 34px;
+      border-radius: 50%;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 15px;
+      transition: background 0.2s, border-color 0.2s;
+    }
+
+    .theme-toggle:hover { border-color: var(--sky); }
+
+    .progress-bar {
+      position: fixed;
+      top: 0; left: 0;
+      height: 3px;
+      background: var(--accent);
+      z-index: 999;
+      transition: width 0.1s linear;
+    }
+
+    /* ── LAYOUT ── */
+    .layout {
+      max-width: 1100px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 220px 1fr;
+      gap: 0;
+      padding: 0 24px;
+      align-items: start;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* ── SIDEBAR ── */
+    .sidebar {
+      position: sticky;
+      top: 73px;
+      padding: 32px 24px 32px 0;
+    }
+
+    .nav-label {
+      font-family: var(--mono);
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--slate);
+      margin-bottom: 12px;
+      padding-left: 12px;
+    }
+
+    .nav-list { list-style: none; display: flex; flex-direction: column; gap: 2px; }
+
+    .nav-list a {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 12px;
+      border-radius: 6px;
+      text-decoration: none;
+      font-size: 13px;
+      color: var(--steel);
+      transition: all 0.15s ease;
+      border-left: 3px solid transparent;
+      font-weight: 600;
+    }
+
+    .nav-list a:hover, .nav-list a.active {
+      background: var(--frost);
+      color: var(--ink);
+      border-left-color: var(--slate);
+    }
+
+    .nav-list a .nav-day {
+      font-family: var(--mono);
+      font-size: 10px;
+      font-weight: 600;
+      color: var(--slate);
+      min-width: 28px;
+    }
+
+    .nav-divider { height: 1px; background: var(--frost); margin: 8px 12px; }
+
+    /* score widget */
+    .score-widget {
+      margin-top: 20px;
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    .score-widget-head {
+      background: var(--navy);
+      padding: 8px 14px;
+      font-family: var(--mono);
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--sky);
+    }
+
+    .score-widget-body { padding: 14px; }
+
+    .score-num {
+      font-family: var(--mono);
+      font-size: 36px;
+      font-weight: 600;
+      color: var(--green);
+      line-height: 1;
+      text-align: center;
+      transition: color 0.3s;
+    }
+
+    .score-label {
+      font-family: var(--mono);
+      font-size: 10px;
+      color: var(--slate);
+      text-align: center;
+      margin-top: 4px;
+      letter-spacing: 0.08em;
+    }
+
+    .prog-bar-bg {
+      height: 6px;
+      background: var(--frost);
+      border-radius: 3px;
+      overflow: hidden;
+      margin-top: 12px;
+    }
+
+    .prog-bar-fill {
+      height: 100%;
+      background: var(--green);
+      border-radius: 3px;
+      transition: width 0.5s ease;
+      width: 0%;
+    }
+
+    .prog-pct {
+      font-family: var(--mono);
+      font-size: 10px;
+      color: var(--slate);
+      text-align: right;
+      margin-top: 4px;
+    }
+
+    /* ── MAIN ── */
+    main {
+      padding: 32px 0 64px 24px;
+      border-left: 1px solid var(--border);
+      min-width: 0;
+    }
+
+    .section {
+      margin-bottom: 48px;
+      opacity: 0;
+      transform: translateY(16px);
+      transition: opacity 0.4s ease, transform 0.4s ease;
+    }
+
+    .section.visible { opacity: 1; transform: translateY(0); }
+
+    .section-header {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 20px;
+      padding-bottom: 12px;
+      border-bottom: 2px solid var(--frost);
+    }
+
+    .section-icon {
+      width: 40px; height: 40px;
+      background: var(--navy);
+      color: var(--sky);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--mono);
+      font-size: 12px;
+      font-weight: 600;
+      flex-shrink: 0;
+    }
+
+    .section-title {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--navy);
+      letter-spacing: -0.02em;
+      line-height: 1.2;
+    }
+
+    html[data-theme="dark"] .section-title { color: var(--sky); }
+
+    .section-subtitle {
+      font-size: 13px;
+      color: var(--slate);
+      font-style: italic;
+      margin-top: 2px;
+    }
+
+    /* ── OBJECTIVES ── */
+    .obj-list {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      list-style: none;
+    }
+
+    .obj-item {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-left: 4px solid var(--slate);
+      border-radius: 0 8px 8px 0;
+      padding: 12px 16px;
+      font-size: 14px;
+      line-height: 1.45;
+      color: var(--ink);
+      transition: border-left-color 0.2s, box-shadow 0.2s;
+    }
+
+    .obj-item:hover { border-left-color: var(--accent); box-shadow: 0 2px 12px rgba(0,0,0,0.07); }
+
+    /* ── CMD CARDS ── */
+    .cmd-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 16px;
+    }
+
+    .cmd-card {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      overflow: hidden;
+      transition: box-shadow 0.2s;
+    }
+
+    .cmd-card:hover { box-shadow: 0 4px 20px rgba(46,77,110,0.12); }
+
+    .cmd-header {
+      background: var(--navy);
+      padding: 10px 14px;
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      flex-direction: column;
+    }
+
+    .cmd-name { font-family: var(--mono); font-size: 14px; font-weight: 600; color: var(--sky); }
+    .cmd-purpose { font-size: 12px; color: rgba(126,184,212,0.7); }
+    .cmd-body { padding: 12px 14px; }
+
+    .cmd-example {
+      font-family: var(--mono);
+      font-size: 12px;
+      background: var(--navy);
+      color: var(--sky);
+      padding: 8px 10px;
+      border-radius: 4px;
+      margin-bottom: 8px;
+      line-height: 1.7;
+      white-space: pre-wrap;
+      word-break: break-all;
+    }
+
+    .cmd-example .ex-comment { color: rgba(126,184,212,0.45); }
+    .cmd-example .ex-flag    { color: #e8a020; }
+    .cmd-example .ex-out     { color: #c8dfe8; }
+    .cmd-example .ex-match   { color: #2a9d50; }
+
+    .cmd-notes { font-size: 13px; color: var(--slate); line-height: 1.55; }
+
+    /* ── STEP LIST ── */
+    .step-list { list-style: none; display: flex; flex-direction: column; gap: 6px; padding-left: 0; }
+
+    .step-list li {
+      display: flex;
+      gap: 10px;
+      font-size: 14px;
+      line-height: 1.5;
+      color: var(--ink);
+      padding: 6px 10px;
+      border-radius: 5px;
+      transition: background 0.15s;
+    }
+
+    .step-list li:hover { background: var(--paper); }
+
+    .step-list li::before { content: '›'; color: var(--slate); font-weight: 700; flex-shrink: 0; margin-top: 1px; }
+
+    /* ── NOTICE BOXES ── */
+    .notice {
+      display: flex;
+      gap: 0;
+      padding: 14px 16px;
+      border-radius: 8px;
+      margin-bottom: 12px;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    .notice-warn  { background: #fff5e6; border-left: 4px solid var(--amber); }
+    .notice-info  { background: #e8f4fd; border-left: 4px solid var(--slate); }
+    .notice-ok    { background: #e8f8ee; border-left: 4px solid var(--green); }
+    .notice-alert { background: #fdecea; border-left: 4px solid var(--accent); }
+    .notice-bonus { background: #f0ebff; border-left: 4px solid var(--violet); }
+
+    html[data-theme="dark"] .notice-warn  { background: rgba(232,160,32,0.08); }
+    html[data-theme="dark"] .notice-info  { background: rgba(74,111,165,0.12); }
+    html[data-theme="dark"] .notice-ok    { background: rgba(42,157,80,0.10); }
+    html[data-theme="dark"] .notice-alert { background: rgba(232,72,85,0.10); }
+    html[data-theme="dark"] .notice-bonus { background: rgba(124,92,191,0.12); }
+
+    .notice strong { display: block; font-size: 13px; font-weight: 700; margin-bottom: 3px; color: var(--ink); }
+    .notice p { margin: 0; color: var(--steel); font-size: 13px; }
+    html[data-theme="dark"] .notice strong { color: var(--ink); }
+    html[data-theme="dark"] .notice p { color: var(--steel); }
+
+    /* ── LAB BLOCKS ── */
+    .lab-block {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      overflow: hidden;
+      margin-bottom: 16px;
+    }
+
+    .lab-header {
+      background: var(--navy);
+      padding: 12px 18px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .lab-badge {
+      font-family: var(--mono);
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--sky);
+      border: 1px solid rgba(126,184,212,0.3);
+      padding: 3px 8px;
+      border-radius: 3px;
+      white-space: nowrap;
+    }
+
+    .lab-badge.badge-req   { color: #7eb8d4; border-color: rgba(126,184,212,0.3); }
+    .lab-badge.badge-tip   { color: #e8a020; border-color: rgba(232,160,32,0.35); }
+    .lab-badge.badge-eth   { color: #e84855; border-color: rgba(232,72,85,0.35); }
+    .lab-badge.badge-bonus { color: #b09bdf; border-color: rgba(176,155,223,0.35); }
+
+    .lab-title { font-size: 15px; font-weight: 700; color: #d0e8f2; }
+    .lab-body  { padding: 16px 18px; }
+
+    /* ── CHECKLIST ── */
+    .checklist { display: flex; flex-direction: column; gap: 10px; }
+
+    .check-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 14px 16px;
+      cursor: pointer;
+      transition: border-color 0.2s, background 0.2s;
+      user-select: none;
+    }
+
+    .check-item:hover { border-color: var(--slate); }
+
+    .check-item.done {
+      border-color: rgba(42,157,80,0.4);
+      background: rgba(42,157,80,0.04);
+    }
+
+    html[data-theme="dark"] .check-item.done { background: rgba(42,157,80,0.06); }
+
+    .check-item.done .check-text { text-decoration: line-through; color: var(--slate); }
+
+    .check-box {
+      width: 20px; height: 20px;
+      border-radius: 4px;
+      border: 2px solid var(--steel);
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      color: transparent;
+      transition: all 0.2s;
+      margin-top: 1px;
+      font-family: var(--mono);
+    }
+
+    .check-item.done .check-box {
+      background: var(--green);
+      border-color: var(--green);
+      color: #fff;
+    }
+
+    .check-text { font-size: 14px; line-height: 1.5; flex: 1; }
+
+    .check-pts {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--amber);
+      background: rgba(232,160,32,0.1);
+      border: 1px solid rgba(232,160,32,0.25);
+      padding: 2px 8px;
+      border-radius: 3px;
+      white-space: nowrap;
+      align-self: flex-start;
+      flex-shrink: 0;
+    }
+
+    /* ── RUBRIC TABLE ── */
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    .data-table thead tr { background: var(--navy); color: var(--sky); }
+
+    .data-table th {
+      padding: 10px 14px;
+      text-align: left;
+      font-family: var(--mono);
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .data-table td {
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--frost);
+      color: var(--ink);
+      vertical-align: top;
+      line-height: 1.4;
+    }
+
+    .data-table tr:last-child td { border-bottom: none; }
+    .data-table tbody tr:hover td { background: var(--paper); }
+
+    .data-table tfoot tr { background: var(--navy); }
+    .data-table tfoot td {
+      padding: 10px 14px;
+      font-family: var(--mono);
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--sky);
+      border-bottom: none;
+    }
+
+    .data-table tfoot td.total-pts { color: #2a9d50; font-size: 14px; }
+
+    /* ── BONUS GRID ── */
+    .bonus-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .bonus-card {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-left: 4px solid var(--violet);
+      border-radius: 0 8px 8px 0;
+      padding: 14px 16px;
+      font-size: 14px;
+      line-height: 1.45;
+      color: var(--ink);
+      transition: box-shadow 0.2s;
+    }
+
+    .bonus-card:hover { box-shadow: 0 2px 12px rgba(124,92,191,0.12); }
+
+    .bonus-card .bonus-title {
+      font-weight: 700;
+      color: var(--ink);
+      margin-bottom: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .bonus-pts {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: #b09bdf;
+      background: rgba(124,92,191,0.1);
+      border: 1px solid rgba(124,92,191,0.25);
+      padding: 2px 8px;
+      border-radius: 3px;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    .bonus-card p { font-size: 13px; color: var(--slate); line-height: 1.5; }
+
+    /* ── REFLECTION ── */
+    .reflection-list { display: flex; flex-direction: column; gap: 10px; }
+
+    .reflection-item {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 14px 16px 14px 50px;
+      font-size: 14px;
+      color: var(--ink);
+      line-height: 1.5;
+      position: relative;
+    }
+
+    .reflection-item::before {
+      content: attr(data-q);
+      position: absolute;
+      left: 14px; top: 14px;
+      font-family: var(--mono);
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--slate);
+      background: var(--frost);
+      width: 24px; height: 24px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    code {
+      font-family: var(--mono);
+      font-size: 12px;
+      background: var(--navy);
+      color: var(--sky);
+      padding: 2px 7px;
+      border-radius: 4px;
+    }
+
+    p.body-text {
+      font-size: 15px;
+      line-height: 1.7;
+      color: var(--ink);
+      margin-bottom: 16px;
+    }
+
+    .print-btn {
+      position: fixed;
+      bottom: 28px; right: 28px;
+      background: var(--navy);
+      color: var(--sky);
+      border: none;
+      border-radius: 50px;
+      padding: 12px 22px;
+      font-family: var(--mono);
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      cursor: pointer;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.25);
+      transition: background 0.2s, transform 0.15s;
+      z-index: 200;
+    }
+
+    .print-btn:hover { background: var(--steel); transform: translateY(-2px); }
+
+    @media (max-width: 768px) {
+      .layout { grid-template-columns: 1fr; padding: 0 16px; }
+      .sidebar { display: none; }
+      main { border-left: none; padding-left: 0; }
+      .obj-list { grid-template-columns: 1fr; }
+      .header-meta { display: none; }
+      .cmd-grid { grid-template-columns: 1fr; }
+      .bonus-grid { grid-template-columns: 1fr; }
+    }
+
+    @media print {
+      header { position: static; }
+      .sidebar, .print-btn, .theme-toggle { display: none; }
+      .layout { grid-template-columns: 1fr; }
+      main { border-left: none; }
+      .section { opacity: 1; transform: none; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="progress-bar" id="progressBar" style="width:0%"></div>
+
+<header>
+  <div class="header-inner">
+    <a class="header-back" href="index.html">← Home</a>
+    <div class="header-week">Assignment</div>
+    <div class="header-title">Build Your Ethical Hacking Knowledge Repository</div>
+    <div class="header-meta">
+      <span class="meta-chip">HTML / CSS / JS</span>
+      <span class="meta-chip">Self-Guided</span>
+      <span class="meta-chip">Portfolio Project</span>
+    </div>
+    <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">☀</button>
+  </div>
+</header>
+
+<div class="layout">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="nav-label">Contents</div>
+    <ul class="nav-list">
+      <li><a href="index.html"><span class="nav-day">⌂</span> Home</a></li>
+      <div class="nav-divider"></div>
+      <li><a href="#overview" class="active"><span class="nav-day">OVR</span> Overview</a></li>
+      <li><a href="#objectives"><span class="nav-day">OBJ</span> Objectives</a></li>
+      <div class="nav-divider"></div>
+      <li><a href="#ethical-hacking"><span class="nav-day">00</span> Ethical Hacking</a></li>
+      <li><a href="#cli"><span class="nav-day">01</span> CLI</a></li>
+      <li><a href="#ssh"><span class="nav-day">02</span> SSH</a></li>
+      <li><a href="#nmap"><span class="nav-day">03</span> Nmap</a></li>
+      <li><a href="#wireshark"><span class="nav-day">04</span> Wireshark</a></li>
+      <li><a href="#hydra"><span class="nav-day">05</span> Hydra</a></li>
+      <li><a href="#bruteforce"><span class="nav-day">06</span> Brute-Force</a></li>
+      <div class="nav-divider"></div>
+      <li><a href="#checklist"><span class="nav-day">CHK</span> Checklist</a></li>
+      <li><a href="#bonus"><span class="nav-day">★</span> Bonus Points</a></li>
+      <li><a href="#rubric"><span class="nav-day">RBR</span> Rubric</a></li>
+      <li><a href="#selfcheck"><span class="nav-day">Q</span> Self-Check</a></li>
+      <li><a href="#" onclick="window.print(); return false;"><span class="nav-day">PDF</span> Download PDF</a></li>
+    </ul>
+
+    <!-- LIVE SCORE WIDGET -->
+    <div class="score-widget">
+      <div class="score-widget-head">// Your Progress</div>
+      <div class="score-widget-body">
+        <div class="score-num" id="scoreNum">0</div>
+        <div class="score-label">OF 100 BASE POINTS</div>
+        <div class="prog-bar-bg">
+          <div class="prog-bar-fill" id="progFill"></div>
+        </div>
+        <div class="prog-pct" id="progPct">0% complete</div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main>
+
+    <!-- OVERVIEW -->
+    <section class="section visible" id="overview">
+      <div class="section-header">
+        <div class="section-icon">OVR</div>
+        <div>
+          <div class="section-title">What You're Building</div>
+          <div class="section-subtitle">A working website that documents everything you've learned</div>
+        </div>
+      </div>
+
+      <p class="body-text">
+        You are going to design and build a <strong>multi-page website</strong> that works as a personal reference guide for ethical hacking. Think of it as your own knowledge base — the kind of technical documentation that real cybersecurity teams actually maintain.
+      </p>
+
+      <p class="body-text">
+        Your site needs to be <strong>functional, readable, and accurate</strong>. Every section has specific requirements, but how you design it — the layout, colors, and structure — is entirely up to you. The finished product should be something you'd include in a portfolio.
+      </p>
+
+      <div class="notice notice-alert">
+        <div>
+          <strong>Work in your own words</strong>
+          <p>Do not copy definitions from Google or any other website. You have done the labs. You have run the commands. Your own understanding — written clearly — is the entire point of this assignment.</p>
+        </div>
+      </div>
+
+      <div class="cmd-grid" style="grid-template-columns: repeat(auto-fill, minmax(200px,1fr)); margin-top: 16px;">
+        <div class="cmd-card">
+          <div class="cmd-header"><div class="cmd-name">Multi-Page</div><div class="cmd-purpose">One page per tool + homepage</div></div>
+          <div class="cmd-body"><div class="cmd-notes">Build separate HTML files for each tool. Link them together with a consistent navigation menu on every page.</div></div>
+        </div>
+        <div class="cmd-card">
+          <div class="cmd-header"><div class="cmd-name">Styled with CSS</div><div class="cmd-purpose">Not just default browser styles</div></div>
+          <div class="cmd-body"><div class="cmd-notes">Apply a consistent visual theme across all pages. The design is your choice — just make it intentional.</div></div>
+        </div>
+        <div class="cmd-card">
+          <div class="cmd-header"><div class="cmd-name">Portfolio Ready</div><div class="cmd-purpose">Something you'd show an employer</div></div>
+          <div class="cmd-body"><div class="cmd-notes">Write clearly for a reader who is smart but not a cybersecurity expert. Explain, don't just name-drop tools.</div></div>
+        </div>
+        <div class="cmd-card">
+          <div class="cmd-header"><div class="cmd-name">Bonus: JavaScript</div><div class="cmd-purpose">Interactivity = extra credit</div></div>
+          <div class="cmd-body"><div class="cmd-notes">Any JavaScript feature that improves the experience earns bonus points on top of your base score.</div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- OBJECTIVES -->
+    <section class="section" id="objectives">
+      <div class="section-header">
+        <div class="section-icon">OBJ</div>
+        <div>
+          <div class="section-title">Objectives</div>
+          <div class="section-subtitle">What a strong submission demonstrates</div>
+        </div>
+      </div>
+      <ul class="obj-list">
+        <li class="obj-item">Define ethical hacking and explain the role of <strong>authorization</strong></li>
+        <li class="obj-item">Describe each tool's purpose and use it in a <strong>cybersecurity context</strong></li>
+        <li class="obj-item">Write content that is accurate, clear, and <strong>in your own words</strong></li>
+        <li class="obj-item">Build a working multi-page site with <strong>consistent navigation</strong></li>
+        <li class="obj-item">Apply <strong>CSS styling</strong> that makes the site readable and intentional</li>
+        <li class="obj-item">Include at least one <strong>JavaScript feature</strong> for bonus credit</li>
+        <li class="obj-item">Reflect on <strong>ethics and responsibility</strong> in the Hydra and brute-force sections</li>
+        <li class="obj-item">Produce a site that could serve as a <strong>portfolio artifact</strong></li>
+      </ul>
+    </section>
+
+    <!-- ─────────────────────────────────────────
+         REQUIRED SECTIONS
+    ───────────────────────────────────────── -->
+
+    <!-- 00 ETHICAL HACKING -->
+    <section class="section" id="ethical-hacking">
+      <div class="section-header">
+        <div class="section-icon">00</div>
+        <div>
+          <div class="section-title">Homepage — Ethical Hacking</div>
+          <div class="section-subtitle">Your site's introduction and foundation</div>
+        </div>
+      </div>
+
+      <div class="lab-block">
+        <div class="lab-header">
+          <div class="lab-badge badge-req">Required</div>
+          <div class="lab-title">What this page must include</div>
+        </div>
+        <div class="lab-body">
+          <ul class="step-list">
+            <li>A clear, plain-English definition of what ethical hacking is</li>
+            <li>An explanation of how it differs from illegal hacking — focus on <strong>permission and intent</strong></li>
+            <li>A brief explanation of why organizations hire ethical hackers and what they do</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="lab-block">
+        <div class="lab-header">
+          <div class="lab-badge badge-tip">Tip</div>
+          <div class="lab-title">Things to think about</div>
+        </div>
+        <div class="lab-body">
+          <ul class="step-list">
+            <li>This is the first page visitors see — make it look polished. It sets the tone for everything else.</li>
+            <li>The key word is <em>authorization</em>. Same tools, same techniques — different permission. Make sure that idea comes through.</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- 01 CLI -->
+    <section class="section" id="cli">
+      <div class="section-header">
+        <div class="section-icon">01</div>
+        <div>
+          <div class="section-title">CLI — Command-Line Interface</div>
+          <div class="section-subtitle">The foundation of everything you've done in this course</div>
+        </div>
+      </div>
+
+      <div class="lab-block">
+        <div class="lab-header">
+          <div class="lab-badge badge-req">Required</div>
+          <div class="lab-title">What this page must include</div>
+        </div>
+        <div class="lab-body">
+          <ul class="step-list">
+            <li>A definition of what the CLI is and what makes it different from a graphical interface</li>
+            <li>An explanation of why security professionals prefer the CLI — speed, precision, scripting, remote access</li>
+            <li>At least one command you have actually run in lab, with a clear explanation of what it does</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="lab-block">
+        <div class="lab-header">
+          <div class="lab-badge badge-tip">Example</div>
+          <div class="lab-title">The kind of thing your page might show</div>
+        </div>
+        <div class="lab-body">
+          <div class="cmd-example"><span class="ex-comment"># Navigate to a system directory and list all files</span>
+<span style="color:var(--sky)">cd</span> /etc
+<span style="color:var(--sky)">ls</span> <span class="ex-flag">-la</span>
+
+<span class="ex-comment"># Why this matters in ethical hacking:</span>
+<span class="ex-out">During a pentest, we move through a target system quickly
+and quietly. The CLI lets us do things no GUI can match.</span></div>
+          <p style="font-size:13px; color:var(--slate); margin-top:8px;">This is a model — use your own commands and your own explanation.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 02 SSH -->
+    <section class="section" id="ssh">
+      <div class="section-header">
+        <div class="section-icon">02</div>
+        <div>
+          <div class="section-title">SSH — Secure Shell</div>
+          <div class="section-subtitle">Remote access over an encrypted connection</div>
+        </div>
+      </div>
+
+      <div class="lab-block">
+        <div class="lab-header">
+          <div class="lab-badge badge-req">Required</div>
+          <div class="lab-title">What this page must include</div>
+        </div>
+        <div class="lab-body">
+          <ul class="step-list">
+            <li>An explanation of what SSH does and the problem it solves — think about what came before it</li>
+            <li>A description of what you can actually do once an SSH connection is open</li>
+            <li>An example SSH command with each part labeled and explained</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="lab-block">
+        <div class="lab-header">
+          <div class="lab-badge badge-tip">Tip</div>
+          <div class="lab-title">Connect it to your lab work</div>
+        </div>
+        <div class="lab-body">
+          <ul class="step-list">
+            <li>Think about the grade-change lab. You found the Raspberry Pi with nmap, then connected to it via SSH. That is your example.</li>
+            <li>Break down the command: <code>ssh student@192.168.1.100</code> — what is each part doing?</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- 03 NMAP -->
+    <section class="section" id="nmap">
+      <div class="section-header">
+        <div class="section-icon">03</div>
+        <div>
+          <div class="section-title">Nmap — Network Mapper</div>
+          <div class="section-subtitle">Discovering what's on a network and what's running on each host</div>
+        </div>
+      </div>
+
+      <div class="lab-block">
+        <div class="lab-header">
+          <div class="lab-badge badge-req">Required</div>
+          <div class="lab-title">What this page must include</div>
+        </div>
+        <div class="lab-body">
+          <ul class="step-list">
+            <li>A definition of Nmap and what "network scanning" means in plain terms</li>
+            <li>An explanation of what <strong>ports</strong> are and why knowing which ones are open matters to a security tester</li>
+            <li>A real Nmap command you have run, plus a sample of the output with the results explained</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="lab-block">
+        <div class="lab-header">
+          <div class="lab-badge badge-tip">Example</div>
+          <div class="lab-title">The kind of thing your page might show</div>
+        </div>
+        <div class="lab-body">
+          <div class="cmd-example"><span class="ex-comment"># Scan a subnet and detect service versions</span>
+<span style="color:var(--sky)">nmap</span> <span class="ex-flag">-sV</span> 192.168.1.0/24
+
+PORT     STATE  SERVICE  VERSION
+22/tcp   open   ssh      OpenSSH 8.4
+80/tcp   open   http     Apache 2.4.51
+<span class="ex-match">3306/tcp open   mysql    MySQL 5.7.36</span>
+
+<span class="ex-comment"># Port 3306 open = database exposed on the network.
+# That's a finding worth investigating.</span></div>
+          <p style="font-size:13px; color:var(--slate); margin-top:8px;">Use your own commands and your own output. Include an explanation of what the results actually mean.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 04 WIRESHARK -->
+    <section class="section" id="wireshark">
+      <div class="section-header">
+        <div class="section-icon">04</div>
+        <div>
+          <div class="section-title">Wireshark — Packet Analyzer</div>
+          <div class="section-subtitle">Capturing and reading network traffic in real time</div>
+        </div>
+      </div>
+
+      <div class="lab-block">
+        <div class="lab-header">
+          <div class="lab-badge badge-req">Required</div>
+          <div class="lab-title">What this page must include</div>
+        </div>
+        <div class="lab-body">
+          <ul class="step-list">
+            <li>An explanation of what a <strong>packet</strong> is — use an analogy if it helps you explain it clearly</li>
+            <li>A description of what Wireshark lets you see and why that is useful during a security investigation</li>
+            <li>A specific example: what kind of data or traffic could a tester find using Wireshark?</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="lab-block">
+        <div class="lab-header">
+          <div class="lab-badge badge-tip">Tip</div>
+          <div class="lab-title">Think about unencrypted traffic</div>
+        </div>
+        <div class="lab-body">
+          <ul class="step-list">
+            <li>What happens when a user submits a login form over plain HTTP instead of HTTPS? What would Wireshark reveal?</li>
+            <li>Wireshark doesn't use terminal commands — you can describe what a packet capture looks like instead of showing a command.</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- 05 HYDRA -->
+    <section class="section" id="hydra">
+      <div class="section-header">
+        <div class="section-icon">05</div>
+        <div>
+          <div class="section-title">Hydra — Credential Brute-Force Tool</div>
+          <div class="section-subtitle">Automated testing of username and password combinations</div>
+        </div>
+      </div>
+
+      <div class="lab-block">
+        <div class="lab-header">
+          <div class="lab-badge badge-req">Required</div>
+          <div class="lab-title">What this page must include</div>
+        </div>
+        <div class="lab-body">
+          <ul class="step-list">
+            <li>An explanation of what Hydra does and why authorized security testers use it</li>
+            <li>A description of what a <strong>wordlist</strong> is and how Hydra uses it to test credentials</li>
+            <li>The Hydra SSH command from your lab, with each flag explained in plain English</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="lab-block">
+        <div class="lab-header">
+          <div class="lab-badge badge-eth">Ethics — Required</div>
+          <div class="lab-title">This section is not optional</div>
+        </div>
+        <div class="lab-body">
+          <ul class="step-list">
+            <li>Explain clearly why running Hydra against a system without permission is <strong>illegal</strong> — not just against the rules</li>
+            <li>Describe what an organization can do to <strong>defend against</strong> brute-force attacks (account lockouts, rate limiting, MFA)</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="lab-block">
+        <div class="lab-header">
+          <div class="lab-badge badge-tip">Example</div>
+          <div class="lab-title">The kind of thing your page might show</div>
+        </div>
+        <div class="lab-body">
+          <div class="cmd-example"><span class="ex-comment"># Authorized credential test against an SSH service</span>
+<span style="color:var(--sky)">hydra</span> <span class="ex-flag">-l</span> admin <span class="ex-flag">-P</span> /usr/share/wordlists/rockyou.txt ssh://192.168.1.50
+
+<span class="ex-comment"># Flag breakdown:</span>
+<span class="ex-out">-l admin      the username being tested
+-P rockyou    the wordlist of passwords to try
+ssh://...     the protocol and target IP</span>
+
+<span class="ex-match">[22][ssh] host: 192.168.1.50  login: admin  password: password1</span>
+<span class="ex-comment"># Weak password found. Document it. Report it.</span></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 06 BRUTE-FORCE -->
+    <section class="section" id="bruteforce">
+      <div class="section-header">
+        <div class="section-icon">06</div>
+        <div>
+          <div class="section-title">Brute-Force Attacks</div>
+          <div class="section-subtitle">The methodology behind credential-based attacks</div>
+        </div>
+      </div>
+
+      <div class="notice notice-info" style="margin-bottom:16px;">
+        <div>
+          <strong>This is a concept page, not a tool page</strong>
+          <p>Brute-force is an <em>attack method</em>, not a single tool. Your job is to explain the idea itself — then show how tools like Hydra carry it out.</p>
+        </div>
+      </div>
+
+      <div class="lab-block">
+        <div class="lab-header">
+          <div class="lab-badge badge-req">Required</div>
+          <div class="lab-title">What this page must include</div>
+        </div>
+        <div class="lab-body">
+          <ul class="step-list">
+            <li>A definition of a brute-force attack as a <strong>method</strong> — trying every possible combination until one works</li>
+            <li>The difference between a <strong>brute-force attack</strong> (all combinations) and a <strong>dictionary attack</strong> (a known wordlist)</li>
+            <li>An example scenario: where and how this type of attack is used during a penetration test</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="lab-block">
+        <div class="lab-header">
+          <div class="lab-badge badge-eth">Ethics — Required</div>
+          <div class="lab-title">Defenses against brute-force attacks</div>
+        </div>
+        <div class="lab-body">
+          <ul class="step-list">
+            <li>Explain at least <strong>three defenses</strong> organizations use: account lockouts, rate limiting, multi-factor authentication</li>
+            <li>Describe what a penetration tester's finding would look like: what's the risk, and what's the recommendation?</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- CHECKLIST -->
+    <section class="section" id="checklist">
+      <div class="section-header">
+        <div class="section-icon">CHK</div>
+        <div>
+          <div class="section-title">Completion Checklist</div>
+          <div class="section-subtitle">Click each item to mark it done — tracked in your browser</div>
+        </div>
+      </div>
+
+      <div class="checklist" id="checklistEl">
+        <div class="check-item" onclick="toggleCheck(this)">
+          <div class="check-box">✓</div>
+          <div class="check-text">Homepage defines Ethical Hacking clearly and explains how it differs from illegal hacking.</div>
+          <span class="check-pts">10 pts</span>
+        </div>
+        <div class="check-item" onclick="toggleCheck(this)">
+          <div class="check-box">✓</div>
+          <div class="check-text">CLI section includes a definition and at least one command from lab with a clear explanation.</div>
+          <span class="check-pts">10 pts</span>
+        </div>
+        <div class="check-item" onclick="toggleCheck(this)">
+          <div class="check-box">✓</div>
+          <div class="check-text">SSH section explains what SSH does and shows an example command with each part labeled.</div>
+          <span class="check-pts">10 pts</span>
+        </div>
+        <div class="check-item" onclick="toggleCheck(this)">
+          <div class="check-box">✓</div>
+          <div class="check-text">Nmap section explains ports and scanning — includes an example command and sample output with interpretation.</div>
+          <span class="check-pts">10 pts</span>
+        </div>
+        <div class="check-item" onclick="toggleCheck(this)">
+          <div class="check-box">✓</div>
+          <div class="check-text">Wireshark section explains packets and provides a real-world example of what a capture could reveal.</div>
+          <span class="check-pts">10 pts</span>
+        </div>
+        <div class="check-item" onclick="toggleCheck(this)">
+          <div class="check-box">✓</div>
+          <div class="check-text">Hydra section explains the tool, breaks down the lab command by flag, and includes a required ethics note.</div>
+          <span class="check-pts">10 pts</span>
+        </div>
+        <div class="check-item" onclick="toggleCheck(this)">
+          <div class="check-box">✓</div>
+          <div class="check-text">Brute-force section explains the method, distinguishes it from dictionary attacks, and covers defenses.</div>
+          <span class="check-pts">10 pts</span>
+        </div>
+        <div class="check-item" onclick="toggleCheck(this)">
+          <div class="check-box">✓</div>
+          <div class="check-text">Site has working navigation between all pages or sections. No broken links.</div>
+          <span class="check-pts">10 pts</span>
+        </div>
+        <div class="check-item" onclick="toggleCheck(this)">
+          <div class="check-box">✓</div>
+          <div class="check-text">CSS styling is applied consistently — the site has an intentional visual theme, not just default browser styles.</div>
+          <span class="check-pts">10 pts</span>
+        </div>
+        <div class="check-item" onclick="toggleCheck(this)">
+          <div class="check-box">✓</div>
+          <div class="check-text">All content is written in your own words. No copy-paste from the internet.</div>
+          <span class="check-pts">10 pts</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- BONUS -->
+    <section class="section" id="bonus">
+      <div class="section-header">
+        <div class="section-icon">★</div>
+        <div>
+          <div class="section-title">Bonus Points — Interactivity</div>
+          <div class="section-subtitle">JavaScript features that improve the user experience</div>
+        </div>
+      </div>
+
+      <div class="notice notice-bonus" style="margin-bottom: 20px;">
+        <div>
+          <strong>These are not required — but they push your grade higher</strong>
+          <p>Any JavaScript feature that genuinely improves how a user experiences your site can earn bonus points. You may combine multiple ideas. Maximum bonus: +25 points on top of your base score.</p>
+        </div>
+      </div>
+
+      <div class="bonus-grid">
+        <div class="bonus-card">
+          <div class="bonus-title">Command Builder / Explainer <span class="bonus-pts">+5–10 pts</span></div>
+          <p>A form where the user selects flags and sees a generated Nmap or Hydra command explained in real time using JavaScript.</p>
+        </div>
+        <div class="bonus-card">
+          <div class="bonus-title">Fake Terminal Window <span class="bonus-pts">+5–10 pts</span></div>
+          <p>A styled CLI window where users type preset commands and see canned output — simulates a real terminal session.</p>
+        </div>
+        <div class="bonus-card">
+          <div class="bonus-title">Quiz or Flashcards <span class="bonus-pts">+5 pts</span></div>
+          <p>A multiple-choice or flip-card quiz that tests definitions and tool usage — built with JavaScript state logic.</p>
+        </div>
+        <div class="bonus-card">
+          <div class="bonus-title">Dark / Light Mode Toggle <span class="bonus-pts">+5 pts</span></div>
+          <p>A button that switches the entire site between a dark and light color scheme using a JavaScript class toggle and CSS variables.</p>
+        </div>
+        <div class="bonus-card">
+          <div class="bonus-title">Typewriter / Animated Intro <span class="bonus-pts">+5 pts</span></div>
+          <p>A typewriter-style animation on the homepage that types out a command or the definition of ethical hacking character by character.</p>
+        </div>
+        <div class="bonus-card">
+          <div class="bonus-title">Live Search or Filter <span class="bonus-pts">+5–10 pts</span></div>
+          <p>A search bar that filters content or highlights matching terms across your tool sections as the user types.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- RUBRIC -->
+    <section class="section" id="rubric">
+      <div class="section-header">
+        <div class="section-icon">RBR</div>
+        <div>
+          <div class="section-title">Grading Rubric</div>
+          <div class="section-subtitle">How your submission will be evaluated</div>
+        </div>
+      </div>
+
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Category</th>
+            <th>What Is Being Evaluated</th>
+            <th>Points</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Content Accuracy</strong></td>
+            <td>Definitions and examples are technically correct and written in your own words</td>
+            <td>30</td>
+          </tr>
+          <tr>
+            <td><strong>Coverage</strong></td>
+            <td>All 7 required sections are present — Ethical Hacking homepage plus all 6 tool pages</td>
+            <td>20</td>
+          </tr>
+          <tr>
+            <td><strong>Examples</strong></td>
+            <td>Each section includes a real, relevant usage example — not vague or generic</td>
+            <td>20</td>
+          </tr>
+          <tr>
+            <td><strong>Site Structure &amp; Navigation</strong></td>
+            <td>Multi-page layout with working navigation; logical reading order; no broken links</td>
+            <td>15</td>
+          </tr>
+          <tr>
+            <td><strong>CSS &amp; Visual Design</strong></td>
+            <td>A consistent, intentional visual theme applied across all pages</td>
+            <td>15</td>
+          </tr>
+        </tbody>
+        <tfoot>
+          <tr>
+            <td colspan="2">Base Score Total</td>
+            <td class="total-pts">100</td>
+          </tr>
+          <tr>
+            <td colspan="2" style="color: #b09bdf;">Interactivity Bonus (JavaScript features)</td>
+            <td style="color: #b09bdf; font-family: var(--mono); font-size: 12px; font-weight: 600;">Up to +25</td>
+          </tr>
+        </tfoot>
+      </table>
+    </section>
+
+    <!-- SELF-CHECK -->
+    <section class="section" id="selfcheck">
+      <div class="section-header">
+        <div class="section-icon">Q</div>
+        <div>
+          <div class="section-title">Self-Check</div>
+          <div class="section-subtitle">Can you answer each of these before you submit?</div>
+        </div>
+      </div>
+
+      <div class="reflection-list">
+        <div class="reflection-item" data-q="1">What is the single most important difference between ethical hacking and illegal hacking?</div>
+        <div class="reflection-item" data-q="2">Why do security professionals prefer the command line over a graphical interface?</div>
+        <div class="reflection-item" data-q="3">Explain what Nmap's <code>-sV</code> flag does and why version detection matters to a tester.</div>
+        <div class="reflection-item" data-q="4">What could an attacker learn from a Wireshark capture of unencrypted HTTP login traffic?</div>
+        <div class="reflection-item" data-q="5">What is the difference between a brute-force attack and a dictionary attack?</div>
+        <div class="reflection-item" data-q="6">Name three defenses an organization can use to protect against brute-force credential attacks.</div>
+        <div class="reflection-item" data-q="7">If someone found a password with Hydra on a system they didn't have permission to test — what law did they break, and what is the consequence?</div>
+      </div>
+
+      <div class="notice notice-warn" style="margin-top: 20px;">
+        <div>
+          <strong>Common Mistakes to Avoid</strong>
+          <p>
+            Copying definitions from the internet instead of writing your own &nbsp;·&nbsp;
+            Skipping the ethics note on Hydra and brute-force &nbsp;·&nbsp;
+            Submitting unstyled HTML with no CSS applied &nbsp;·&nbsp;
+            Navigation that only works on some pages but not others
+          </p>
+        </div>
+      </div>
+
+      <div class="notice notice-ok" style="margin-top: 12px;">
+        <div>
+          <strong>File Structure Hint</strong>
+          <p>
+            <code>index.html</code> &nbsp;·&nbsp; <code>style.css</code> &nbsp;·&nbsp; <code>script.js</code> &nbsp;·&nbsp;
+            <code>cli.html</code> &nbsp;·&nbsp; <code>ssh.html</code> &nbsp;·&nbsp; <code>nmap.html</code> &nbsp;·&nbsp;
+            <code>wireshark.html</code> &nbsp;·&nbsp; <code>hydra.html</code> &nbsp;·&nbsp; <code>bruteforce.html</code>
+          </p>
+        </div>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<button class="print-btn" onclick="window.print()">Print / PDF</button>
+
+<script>
+  // Progress bar on scroll
+  window.addEventListener('scroll', () => {
+    const doc = document.documentElement;
+    const pct = (doc.scrollTop / (doc.scrollHeight - doc.clientHeight)) * 100;
+    document.getElementById('progressBar').style.width = pct + '%';
+  });
+
+  // Scroll reveal
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+  }, { threshold: 0.08 });
+  document.querySelectorAll('.section').forEach(el => observer.observe(el));
+
+  // Active nav highlight
+  const sections = document.querySelectorAll('section[id]');
+  const navLinks = document.querySelectorAll('.nav-list a[href^="#"]');
+  const navObserver = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        navLinks.forEach(a => a.classList.remove('active'));
+        const link = document.querySelector(`.nav-list a[href="#${e.target.id}"]`);
+        if (link) link.classList.add('active');
+      }
+    });
+  }, { rootMargin: '-30% 0px -60% 0px' });
+  sections.forEach(s => navObserver.observe(s));
+
+  // Theme toggle
+  const toggle = document.getElementById('themeToggle');
+  const stored = localStorage.getItem('lessonTheme') || 'dark';
+  document.documentElement.setAttribute('data-theme', stored);
+  toggle.textContent = stored === 'dark' ? '☀' : '☽';
+  toggle.addEventListener('click', () => {
+    const next = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', next);
+    localStorage.setItem('lessonTheme', next);
+    toggle.textContent = next === 'dark' ? '☀' : '☽';
+  });
+
+  // Checklist + live score
+  function toggleCheck(el) {
+    el.classList.toggle('done');
+    updateScore();
+  }
+
+  function updateScore() {
+    const total = document.querySelectorAll('.check-item').length;
+    const done  = document.querySelectorAll('.check-item.done').length;
+    const score = done * 10;
+    const pct   = Math.round((done / total) * 100);
+
+    document.getElementById('scoreNum').textContent  = score;
+    document.getElementById('progFill').style.width  = pct + '%';
+    document.getElementById('progPct').textContent   = pct + '% complete';
+
+    const num = document.getElementById('scoreNum');
+    if      (pct === 100) { num.style.color = '#2a9d50'; }
+    else if (pct >= 70)   { num.style.color = '#e8a020'; }
+    else if (pct >= 40)   { num.style.color = '#7eb8d4'; }
+    else                  { num.style.color = '#4a6fa5'; }
+  }
+</script>
+
+</body>
+</html>
