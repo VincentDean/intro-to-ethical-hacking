@@ -1,0 +1,1880 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Self-Guided Lesson — Security Reporting</title>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --navy:   #0d1b2a;
+      --ink:    #1c2e40;
+      --steel:  #2e4d6e;
+      --slate:  #4a6fa5;
+      --sky:    #7eb8d4;
+      --frost:  #d0e8f2;
+      --paper:  #f4f7fa;
+      --white:  #ffffff;
+      --accent: #e84855;
+      --green:  #2a9d50;
+      --amber:  #e8a020;
+      --violet: #7c5cbf;
+      --mono:   'IBM Plex Mono', monospace;
+      --sans:   'IBM Plex Sans', sans-serif;
+      color-scheme: light;
+    }
+
+    html[data-theme="dark"] {
+      --paper:  #080e17;
+      --white:  #111d29;
+      --ink:    #c8dfe8;
+      --frost:  #1e3048;
+      --steel:  #7ab8d4;
+      --border: #1e3048;
+      color-scheme: dark;
+    }
+
+    html[data-theme="light"] { --border: #c4d8ec; }
+    html[data-theme="light"] .header-title { color: var(--frost); }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: var(--sans);
+      background: var(--paper);
+      color: var(--ink);
+      min-height: 100vh;
+      overflow-x: hidden;
+      transition: background 0.3s, color 0.3s;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(74,158,202,0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(74,158,202,0.04) 1px, transparent 1px);
+      background-size: 40px 40px;
+      pointer-events: none;
+      z-index: 0;
+      transition: opacity 0.3s;
+    }
+
+    html[data-theme="light"] body::before {
+      background-image:
+        linear-gradient(rgba(13,27,42,0.05) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(13,27,42,0.05) 1px, transparent 1px);
+    }
+
+    body::after {
+      content: '';
+      position: fixed;
+      top: -100%; left: 0; right: 0;
+      height: 200%;
+      background: linear-gradient(transparent 49.5%, rgba(74,158,202,0.03) 50%, transparent 50.5%);
+      background-size: 100% 4px;
+      animation: scan 8s linear infinite;
+      pointer-events: none;
+      z-index: 0;
+      transition: opacity 0.3s;
+    }
+
+    html[data-theme="light"] body::after { opacity: 0; }
+
+    @keyframes scan {
+      0%   { transform: translateY(0); }
+      100% { transform: translateY(50%); }
+    }
+
+    /* HEADER */
+    header {
+      background: var(--navy);
+      color: #d0e8f2;
+      padding: 0;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      border-bottom: 3px solid var(--accent);
+      box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+    }
+
+    .header-inner {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 14px 32px;
+      display: flex;
+      align-items: center;
+      gap: 24px;
+      flex-wrap: wrap;
+    }
+
+    .header-week {
+      font-family: var(--mono);
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--sky);
+      border: 1px solid var(--steel);
+      padding: 4px 10px;
+      border-radius: 3px;
+      white-space: nowrap;
+    }
+
+    .header-title { font-size: 18px; font-weight: 700; letter-spacing: -0.01em; flex: 1; }
+    .header-meta { display: flex; gap: 16px; flex-wrap: wrap; }
+
+    .meta-chip {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--sky);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .meta-chip::before {
+      content: '';
+      display: inline-block;
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--sky);
+      opacity: 0.7;
+    }
+
+    .header-back {
+      font-family: var(--mono);
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--sky);
+      text-decoration: none;
+      border: 1px solid var(--steel);
+      padding: 4px 10px;
+      border-radius: 3px;
+      white-space: nowrap;
+      transition: border-color 0.15s;
+    }
+
+    .header-back:hover { border-color: var(--sky); }
+
+    .theme-toggle {
+      flex-shrink: 0;
+      background: rgba(255,255,255,0.08);
+      border: 1px solid var(--steel);
+      color: var(--sky);
+      width: 34px; height: 34px;
+      border-radius: 50%;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 15px;
+      transition: background 0.2s, border-color 0.2s;
+    }
+
+    .theme-toggle:hover { border-color: var(--sky); }
+
+    .progress-bar {
+      position: fixed;
+      top: 0; left: 0;
+      height: 3px;
+      background: var(--accent);
+      z-index: 999;
+      transition: width 0.1s linear;
+    }
+
+    /* LAYOUT */
+    .layout {
+      max-width: 1100px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 220px 1fr;
+      gap: 0;
+      padding: 0 24px;
+      align-items: start;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* SIDEBAR */
+    .sidebar {
+      position: sticky;
+      top: 73px;
+      padding: 32px 24px 32px 0;
+    }
+
+    .nav-label {
+      font-family: var(--mono);
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--slate);
+      margin-bottom: 12px;
+      padding-left: 12px;
+    }
+
+    .nav-list { list-style: none; display: flex; flex-direction: column; gap: 2px; }
+
+    .nav-list a {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 12px;
+      border-radius: 6px;
+      text-decoration: none;
+      font-size: 13px;
+      color: var(--steel);
+      transition: all 0.15s ease;
+      border-left: 3px solid transparent;
+      font-weight: 600;
+    }
+
+    .nav-list a:hover, .nav-list a.active {
+      background: var(--frost);
+      color: var(--ink);
+      border-left-color: var(--slate);
+    }
+
+    .nav-list a .nav-day {
+      font-family: var(--mono);
+      font-size: 10px;
+      font-weight: 600;
+      color: var(--slate);
+      min-width: 28px;
+    }
+
+    .nav-divider { height: 1px; background: var(--frost); margin: 8px 12px; }
+
+    .score-widget {
+      margin-top: 20px;
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    .score-widget-head {
+      background: var(--navy);
+      padding: 8px 14px;
+      font-family: var(--mono);
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--sky);
+    }
+
+    .score-widget-body { padding: 14px; }
+
+    .score-num {
+      font-family: var(--mono);
+      font-size: 36px;
+      font-weight: 600;
+      color: var(--green);
+      line-height: 1;
+      text-align: center;
+      transition: color 0.3s;
+    }
+
+    .score-label {
+      font-family: var(--mono);
+      font-size: 10px;
+      color: var(--slate);
+      text-align: center;
+      margin-top: 4px;
+      letter-spacing: 0.08em;
+    }
+
+    .prog-bar-bg {
+      height: 6px;
+      background: var(--frost);
+      border-radius: 3px;
+      overflow: hidden;
+      margin-top: 12px;
+    }
+
+    .prog-bar-fill {
+      height: 100%;
+      background: var(--green);
+      border-radius: 3px;
+      transition: width 0.5s ease;
+      width: 0%;
+    }
+
+    .prog-pct {
+      font-family: var(--mono);
+      font-size: 10px;
+      color: var(--slate);
+      text-align: right;
+      margin-top: 4px;
+    }
+
+    /* MAIN */
+    main {
+      padding: 32px 0 64px 24px;
+      border-left: 1px solid var(--border);
+      min-width: 0;
+    }
+
+    .section {
+      margin-bottom: 48px;
+      opacity: 0;
+      transform: translateY(16px);
+      transition: opacity 0.4s ease, transform 0.4s ease;
+    }
+
+    .section.visible { opacity: 1; transform: translateY(0); }
+
+    .section-header {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 20px;
+      padding-bottom: 12px;
+      border-bottom: 2px solid var(--frost);
+    }
+
+    .section-icon {
+      width: 40px; height: 40px;
+      background: var(--navy);
+      color: var(--sky);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--mono);
+      font-size: 12px;
+      font-weight: 600;
+      flex-shrink: 0;
+    }
+
+    .section-title {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--navy);
+      letter-spacing: -0.02em;
+      line-height: 1.2;
+    }
+
+    html[data-theme="dark"] .section-title { color: var(--sky); }
+
+    .section-subtitle {
+      font-size: 13px;
+      color: var(--slate);
+      font-style: italic;
+      margin-top: 2px;
+    }
+
+    /* OBJ LIST */
+    .obj-list {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      list-style: none;
+    }
+
+    .obj-item {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-left: 4px solid var(--slate);
+      border-radius: 0 8px 8px 0;
+      padding: 12px 16px;
+      font-size: 14px;
+      line-height: 1.45;
+      color: var(--ink);
+      transition: border-left-color 0.2s, box-shadow 0.2s;
+    }
+
+    .obj-item:hover { border-left-color: var(--accent); box-shadow: 0 2px 12px rgba(0,0,0,0.07); }
+
+    /* CMD CARDS */
+    .cmd-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 16px;
+    }
+
+    .cmd-card {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      overflow: hidden;
+      transition: box-shadow 0.2s;
+    }
+
+    .cmd-card:hover { box-shadow: 0 4px 20px rgba(46,77,110,0.12); }
+
+    .cmd-header {
+      background: var(--navy);
+      padding: 10px 14px;
+      display: flex;
+      align-items: flex-start;
+      gap: 6px;
+      flex-direction: column;
+    }
+
+    .cmd-name { font-family: var(--mono); font-size: 13px; font-weight: 600; color: var(--sky); }
+    .cmd-purpose { font-size: 12px; color: rgba(126,184,212,0.7); }
+    .cmd-body { padding: 12px 14px; }
+    .cmd-notes { font-size: 13px; color: var(--slate); line-height: 1.55; }
+
+    /* CMD EXAMPLE */
+    .cmd-example {
+      font-family: var(--mono);
+      font-size: 12px;
+      background: var(--navy);
+      color: var(--sky);
+      padding: 10px 12px;
+      border-radius: 4px;
+      margin-bottom: 8px;
+      line-height: 1.7;
+      white-space: pre-wrap;
+      word-break: break-all;
+    }
+
+    .ex-comment { color: rgba(126,184,212,0.45); }
+    .ex-flag    { color: #e8a020; }
+    .ex-out     { color: #c8dfe8; }
+    .ex-match   { color: #2a9d50; }
+
+    /* STEP LIST */
+    .step-list { list-style: none; display: flex; flex-direction: column; gap: 6px; padding-left: 0; }
+
+    .step-list li {
+      display: flex;
+      gap: 10px;
+      font-size: 14px;
+      line-height: 1.5;
+      color: var(--ink);
+      padding: 6px 10px;
+      border-radius: 5px;
+      transition: background 0.15s;
+    }
+
+    .step-list li:hover { background: var(--paper); }
+    .step-list li::before { content: '›'; color: var(--slate); font-weight: 700; flex-shrink: 0; margin-top: 1px; }
+
+    /* NOTICE BOXES */
+    .notice {
+      padding: 14px 16px;
+      border-radius: 8px;
+      margin-bottom: 12px;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    .notice-warn  { background: #fff5e6; border-left: 4px solid var(--amber); }
+    .notice-info  { background: #e8f4fd; border-left: 4px solid var(--slate); }
+    .notice-ok    { background: #e8f8ee; border-left: 4px solid var(--green); }
+    .notice-alert { background: #fdecea; border-left: 4px solid var(--accent); }
+
+    html[data-theme="dark"] .notice-warn  { background: rgba(232,160,32,0.08); }
+    html[data-theme="dark"] .notice-info  { background: rgba(74,111,165,0.12); }
+    html[data-theme="dark"] .notice-ok    { background: rgba(42,157,80,0.10); }
+    html[data-theme="dark"] .notice-alert { background: rgba(232,72,85,0.10); }
+
+    .notice strong { display: block; font-size: 13px; font-weight: 700; margin-bottom: 3px; color: var(--ink); }
+    .notice p { margin: 0; color: var(--steel); font-size: 13px; }
+    html[data-theme="dark"] .notice strong { color: var(--ink); }
+    html[data-theme="dark"] .notice p { color: var(--steel); }
+
+    /* LAB BLOCKS */
+    .lab-block {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      overflow: hidden;
+      margin-bottom: 16px;
+    }
+
+    .lab-header {
+      background: var(--navy);
+      padding: 12px 18px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .lab-badge {
+      font-family: var(--mono);
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      border: 1px solid rgba(126,184,212,0.3);
+      padding: 3px 8px;
+      border-radius: 3px;
+      white-space: nowrap;
+    }
+
+    .badge-req  { color: #7eb8d4; border-color: rgba(126,184,212,0.3); }
+    .badge-tip  { color: #e8a020; border-color: rgba(232,160,32,0.35); }
+    .badge-eth  { color: #e84855; border-color: rgba(232,72,85,0.35); }
+    .badge-scen { color: #b09bdf; border-color: rgba(176,155,223,0.35); }
+
+    .lab-title { font-size: 15px; font-weight: 700; color: #d0e8f2; }
+    .lab-body  { padding: 16px 18px; }
+
+    /* TIMELINE */
+    .timeline { display: flex; flex-direction: column; gap: 0; }
+
+    .tl-item {
+      display: flex;
+      gap: 16px;
+      padding-bottom: 20px;
+    }
+
+    .tl-item:last-child { padding-bottom: 0; }
+
+    .tl-left {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 80px;
+      flex-shrink: 0;
+    }
+
+    .tl-day {
+      font-family: var(--mono);
+      font-size: 10px;
+      font-weight: 600;
+      color: var(--slate);
+      text-align: right;
+      width: 100%;
+      padding-right: 12px;
+      padding-top: 2px;
+      line-height: 1.4;
+    }
+
+    .tl-dot {
+      width: 10px; height: 10px;
+      border-radius: 50%;
+      background: var(--accent);
+      border: 2px solid var(--white);
+      flex-shrink: 0;
+      margin-top: 6px;
+      align-self: flex-end;
+      margin-right: -5px;
+    }
+
+    .tl-item:nth-child(2) .tl-dot { background: var(--green); }
+    .tl-item:nth-child(3) .tl-dot { background: var(--amber); }
+    .tl-item:nth-child(4) .tl-dot { background: var(--sky); }
+    .tl-item:nth-child(5) .tl-dot { background: var(--violet); }
+
+    .tl-right {
+      flex: 1;
+      padding-left: 16px;
+      border-left: 2px solid var(--frost);
+      padding-bottom: 8px;
+    }
+
+    .tl-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--ink);
+      margin-bottom: 4px;
+    }
+
+    .tl-desc {
+      font-size: 13px;
+      color: var(--slate);
+      line-height: 1.55;
+    }
+
+    /* DATA TABLE */
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    .data-table thead tr { background: var(--navy); color: var(--sky); }
+
+    .data-table th {
+      padding: 10px 14px;
+      text-align: left;
+      font-family: var(--mono);
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .data-table td {
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--frost);
+      color: var(--ink);
+      vertical-align: top;
+      line-height: 1.4;
+    }
+
+    .data-table tr:last-child td { border-bottom: none; }
+    .data-table tbody tr:hover td { background: var(--paper); }
+
+    .sev-none   { font-family: var(--mono); font-size: 12px; font-weight: 600; color: var(--slate); }
+    .sev-low    { font-family: var(--mono); font-size: 12px; font-weight: 600; color: var(--green); }
+    .sev-medium { font-family: var(--mono); font-size: 12px; font-weight: 600; color: var(--amber); }
+    .sev-high   { font-family: var(--mono); font-size: 12px; font-weight: 600; color: #e87a20; }
+    .sev-crit   { font-family: var(--mono); font-size: 12px; font-weight: 600; color: var(--accent); }
+
+    /* AUDIENCE GRID */
+    .audience-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .audience-card {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-left: 4px solid var(--slate);
+      border-radius: 0 8px 8px 0;
+      padding: 14px 16px;
+    }
+
+    .audience-card h4 {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--ink);
+      margin-bottom: 8px;
+    }
+
+    .audience-card ul {
+      padding-left: 16px;
+      font-size: 13px;
+      color: var(--slate);
+      line-height: 1.6;
+    }
+
+    .audience-card ul li { margin-bottom: 3px; }
+
+    /* CHECKLIST */
+    .checklist { display: flex; flex-direction: column; gap: 10px; }
+
+    .check-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 14px 16px;
+      cursor: pointer;
+      transition: border-color 0.2s, background 0.2s;
+      user-select: none;
+    }
+
+    .check-item:hover { border-color: var(--slate); }
+
+    .check-item.done {
+      border-color: rgba(42,157,80,0.4);
+      background: rgba(42,157,80,0.04);
+    }
+
+    html[data-theme="dark"] .check-item.done { background: rgba(42,157,80,0.06); }
+    .check-item.done .check-text { text-decoration: line-through; color: var(--slate); }
+
+    .check-box {
+      width: 20px; height: 20px;
+      border-radius: 4px;
+      border: 2px solid var(--steel);
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      color: transparent;
+      transition: all 0.2s;
+      margin-top: 1px;
+      font-family: var(--mono);
+    }
+
+    .check-item.done .check-box {
+      background: var(--green);
+      border-color: var(--green);
+      color: #fff;
+    }
+
+    .check-text { font-size: 14px; line-height: 1.5; flex: 1; }
+
+    .check-pts {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--amber);
+      background: rgba(232,160,32,0.1);
+      border: 1px solid rgba(232,160,32,0.25);
+      padding: 2px 8px;
+      border-radius: 3px;
+      white-space: nowrap;
+      align-self: flex-start;
+      flex-shrink: 0;
+    }
+
+    /* QUIZ */
+    .quiz-block {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      overflow: hidden;
+      margin-bottom: 16px;
+    }
+
+    .quiz-head {
+      background: var(--navy);
+      padding: 10px 18px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .quiz-badge {
+      font-family: var(--mono);
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: #e8a020;
+      border: 1px solid rgba(232,160,32,0.35);
+      padding: 3px 8px;
+      border-radius: 3px;
+    }
+
+    .quiz-label { font-size: 14px; font-weight: 700; color: #d0e8f2; }
+    .quiz-body { padding: 16px 18px; }
+
+    .quiz-q {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--ink);
+      margin-bottom: 12px;
+      line-height: 1.5;
+    }
+
+    .quiz-options { list-style: none; display: flex; flex-direction: column; gap: 6px; }
+
+    .quiz-options li {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 13px;
+      color: var(--ink);
+      padding: 8px 10px;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+
+    .quiz-options li:hover { background: var(--paper); }
+    .quiz-options li input[type=radio] { accent-color: var(--accent); cursor: pointer; flex-shrink: 0; }
+
+    .check-btn {
+      margin-top: 12px;
+      background: var(--navy);
+      color: var(--sky);
+      border: 1px solid var(--steel);
+      padding: 7px 16px;
+      border-radius: 5px;
+      font-family: var(--mono);
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: border-color 0.2s;
+    }
+
+    .check-btn:hover { border-color: var(--sky); }
+
+    .quiz-feedback {
+      margin-top: 10px;
+      font-family: var(--mono);
+      font-size: 12px;
+      font-weight: 600;
+      padding: 8px 12px;
+      border-radius: 5px;
+      display: none;
+    }
+
+    .quiz-feedback.correct { display: block; color: var(--green); background: rgba(42,157,80,0.08); border: 1px solid rgba(42,157,80,0.25); }
+    .quiz-feedback.wrong   { display: block; color: var(--accent); background: rgba(232,72,85,0.08); border: 1px solid rgba(232,72,85,0.25); }
+
+    /* REFLECTION */
+    .reflection-list { display: flex; flex-direction: column; gap: 10px; }
+
+    .reflection-item {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 14px 16px 14px 50px;
+      font-size: 14px;
+      color: var(--ink);
+      line-height: 1.5;
+      position: relative;
+    }
+
+    .reflection-item::before {
+      content: attr(data-q);
+      position: absolute;
+      left: 14px; top: 14px;
+      font-family: var(--mono);
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--slate);
+      background: var(--frost);
+      width: 24px; height: 24px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    code {
+      font-family: var(--mono);
+      font-size: 12px;
+      background: var(--navy);
+      color: var(--sky);
+      padding: 2px 7px;
+      border-radius: 4px;
+    }
+
+    p.body-text {
+      font-size: 15px;
+      line-height: 1.7;
+      color: var(--ink);
+      margin-bottom: 16px;
+    }
+
+    .print-btn {
+      position: fixed;
+      bottom: 28px; right: 28px;
+      background: var(--navy);
+      color: var(--sky);
+      border: none;
+      border-radius: 50px;
+      padding: 12px 22px;
+      font-family: var(--mono);
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      cursor: pointer;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.25);
+      transition: background 0.2s, transform 0.15s;
+      z-index: 200;
+    }
+
+    .print-btn:hover { background: var(--steel); transform: translateY(-2px); }
+
+    @media (max-width: 768px) {
+      .layout { grid-template-columns: 1fr; padding: 0 16px; }
+      .sidebar { display: none; }
+      main { border-left: none; padding-left: 0; }
+      .obj-list, .audience-grid { grid-template-columns: 1fr; }
+      .header-meta { display: none; }
+    }
+
+    @media print {
+      header { position: static; }
+      .sidebar, .print-btn, .theme-toggle { display: none; }
+      .layout { grid-template-columns: 1fr; }
+      main { border-left: none; }
+      .section { opacity: 1; transform: none; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="progress-bar" id="progressBar" style="width:0%"></div>
+
+<header>
+  <div class="header-inner">
+    <a class="header-back" href="index.html">← Home</a>
+    <div class="header-week">Unit — Reporting</div>
+    <div class="header-title">Security Reporting</div>
+    <div class="header-meta">
+      <span class="meta-chip">Self-Guided</span>
+      <span class="meta-chip">All Teams</span>
+      <span class="meta-chip">80 min</span>
+    </div>
+    <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">☀</button>
+  </div>
+</header>
+
+<div class="layout">
+
+  <aside class="sidebar">
+    <div class="nav-label">Contents</div>
+    <ul class="nav-list">
+      <li><a href="index.html"><span class="nav-day">⌂</span> Home</a></li>
+      <div class="nav-divider"></div>
+      <li><a href="#overview" class="active"><span class="nav-day">OVR</span> Overview</a></li>
+      <li><a href="#objectives"><span class="nav-day">OBJ</span> Objectives</a></li>
+      <div class="nav-divider"></div>
+      <li><a href="#why"><span class="nav-day">01</span> Why Reporting</a></li>
+      <li><a href="#disclosure"><span class="nav-day">02</span> Disclosure</a></li>
+      <li><a href="#structure"><span class="nav-day">03</span> Report Structure</a></li>
+      <li><a href="#audiences"><span class="nav-day">04</span> Audiences</a></li>
+      <li><a href="#cvss"><span class="nav-day">05</span> CVSS</a></li>
+      <li><a href="#communication"><span class="nav-day">06</span> Communication</a></li>
+      <li><a href="#legal"><span class="nav-day">07</span> Legal &amp; Ethics</a></li>
+      <div class="nav-divider"></div>
+      <li><a href="#checklist"><span class="nav-day">CHK</span> Checklist</a></li>
+      <li><a href="#assessment"><span class="nav-day">ACT</span> Activities</a></li>
+      <li><a href="#selfcheck"><span class="nav-day">Q</span> Self-Check</a></li>
+      <li><a href="#resources"><span class="nav-day">REF</span> Resources</a></li>
+      <li><a href="#" onclick="window.print(); return false;"><span class="nav-day">PDF</span> Download PDF</a></li>
+    </ul>
+
+    <div class="score-widget">
+      <div class="score-widget-head">// Your Progress</div>
+      <div class="score-widget-body">
+        <div class="score-num" id="scoreNum">0</div>
+        <div class="score-label">OF 100 BASE POINTS</div>
+        <div class="prog-bar-bg">
+          <div class="prog-bar-fill" id="progFill"></div>
+        </div>
+        <div class="prog-pct" id="progPct">0% complete</div>
+      </div>
+    </div>
+  </aside>
+
+  <main>
+
+    <!-- OVERVIEW -->
+    <section class="section visible" id="overview">
+      <div class="section-header">
+        <div class="section-icon">OVR</div>
+        <div>
+          <div class="section-title">What This Unit Is About</div>
+          <div class="section-subtitle">Documenting, communicating, and responsibly reporting security findings</div>
+        </div>
+      </div>
+
+      <p class="body-text">
+        Finding a vulnerability is only half the job. If you can't explain what you found, who it affects, and how to fix it — nobody will act on it. This unit teaches you how real cybersecurity professionals <strong>document, communicate, and report</strong> findings in a responsible and effective way.
+      </p>
+
+      <p class="body-text">
+        Every section has required concepts to learn. Work through them in order. Check your understanding with the quick-check questions at the end of key sections. When you're done, complete the self-check and submit your activities.
+      </p>
+
+      <div class="notice notice-alert">
+        <div>
+          <strong>No terminal required for this unit</strong>
+          <p>This is a reading and writing unit. Your job is to understand the professional reporting workflow. You will apply these skills every time you write a lab report going forward.</p>
+        </div>
+      </div>
+
+      <div class="cmd-grid" style="margin-top:16px;">
+        <div class="cmd-card">
+          <div class="cmd-header"><div class="cmd-name">Responsible Disclosure</div><div class="cmd-purpose">How to report findings safely</div></div>
+          <div class="cmd-body"><div class="cmd-notes">The coordinated disclosure process — timelines, embargo periods, and when public disclosure is appropriate.</div></div>
+        </div>
+        <div class="cmd-card">
+          <div class="cmd-header"><div class="cmd-name">Report Structure</div><div class="cmd-purpose">Anatomy of a professional report</div></div>
+          <div class="cmd-body"><div class="cmd-notes">Executive summary, scope, findings, proof of concept, impact, and remediation — in that order, every time.</div></div>
+        </div>
+        <div class="cmd-card">
+          <div class="cmd-header"><div class="cmd-name">Writing for Audiences</div><div class="cmd-purpose">Same finding, different language</div></div>
+          <div class="cmd-body"><div class="cmd-notes">Developers need exact commands. Executives need business impact. Auditors need chain of custody.</div></div>
+        </div>
+        <div class="cmd-card">
+          <div class="cmd-header"><div class="cmd-name">CVSS Scoring</div><div class="cmd-purpose">Industry severity rating</div></div>
+          <div class="cmd-body"><div class="cmd-notes">Every professional finding gets a CVSS score from 0–10. Learn the factors that determine severity.</div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- OBJECTIVES -->
+    <section class="section" id="objectives">
+      <div class="section-header">
+        <div class="section-icon">OBJ</div>
+        <div>
+          <div class="section-title">Objectives</div>
+          <div class="section-subtitle">What a strong understanding of this unit looks like</div>
+        </div>
+      </div>
+      <ul class="obj-list">
+        <li class="obj-item">Identify the key elements of an <strong>effective security report</strong></li>
+        <li class="obj-item">Follow <strong>responsible disclosure</strong> practices and timelines</li>
+        <li class="obj-item">Communicate vulnerabilities clearly to <strong>technical and non-technical</strong> stakeholders</li>
+        <li class="obj-item">Understand <strong>legal and ethical</strong> responsibilities in vulnerability reporting</li>
+        <li class="obj-item">Format findings for different audiences — <strong>engineers, executives, and compliance</strong></li>
+        <li class="obj-item">Use the <strong>CVSS scoring system</strong> to rate vulnerability severity</li>
+        <li class="obj-item">Apply professional <strong>communication principles</strong> when a client pushes back</li>
+        <li class="obj-item">Recognize legal boundaries set by the <strong>CFAA and bug bounty program rules</strong></li>
+      </ul>
+    </section>
+
+    <!-- 01 WHY REPORTING -->
+    <section class="section" id="why">
+      <div class="section-header">
+        <div class="section-icon">01</div>
+        <div>
+          <div class="section-title">Why Security Reporting Matters</div>
+          <div class="section-subtitle">Vulnerabilities only matter if they are communicated effectively</div>
+        </div>
+      </div>
+
+      <div class="lab-block">
+        <div class="lab-header">
+          <div class="lab-badge badge-scen">Scenario</div>
+          <div class="lab-title">Downtown Donuts — your team found something</div>
+        </div>
+        <div class="lab-body">
+          <p style="font-size:14px;color:var(--ink);line-height:1.6;margin-bottom:8px;">Your team just completed a scan of the Downtown Donuts corporate network. You found an open port on their inventory server — one that lets anyone read customer payment records without a password. You have proof. You have screenshots.</p>
+          <p style="font-size:14px;color:var(--ink);line-height:1.6;"><strong>Now what?</strong> If you can't explain what you found clearly, nothing will get fixed.</p>
+        </div>
+      </div>
+
+      <div class="lab-block">
+        <div class="lab-header">
+          <div class="lab-badge badge-req">Read</div>
+          <div class="lab-title">Three reasons reporting is critical</div>
+        </div>
+        <div class="lab-body">
+          <ul class="step-list">
+            <li><strong>Decision-makers can't act on technical jargon.</strong> Executives and lawyers need risk explained in plain language before they'll fund a fix.</li>
+            <li><strong>Engineers need precision to patch effectively.</strong> Vague descriptions lead to wrong fixes — or none at all. Exact commands, screenshots, and reproduction steps matter.</li>
+            <li><strong>Documentation protects everyone.</strong> Without a paper trail, there's no proof you followed proper procedures, disclosed responsibly, or stayed within scope.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="notice notice-info">
+        <div>
+          <strong>Think About It</strong>
+          <p>Would you trust a doctor who could find your illness but couldn't explain the diagnosis? A security professional who can't communicate findings is the same problem.</p>
+        </div>
+      </div>
+
+      <div class="quiz-block">
+        <div class="quiz-head">
+          <div class="quiz-badge">Quick Check</div>
+          <div class="quiz-label">Section 01</div>
+        </div>
+        <div class="quiz-body">
+          <p class="quiz-q">Which of the following is the best reason security reporting matters?</p>
+          <ul class="quiz-options" id="q1">
+            <li><input type="radio" name="q1" value="a"> It proves to the client that you worked hard</li>
+            <li><input type="radio" name="q1" value="b"> It bridges the gap between what you found and what gets fixed</li>
+            <li><input type="radio" name="q1" value="c"> It lets you charge more for your services</li>
+            <li><input type="radio" name="q1" value="d"> It gives you something to post online</li>
+          </ul>
+          <button class="check-btn" onclick="checkQuiz('q1','b','Correct — reports turn findings into action. Without clear communication, nothing gets patched.','Not quite. Think about the purpose: who needs to act on what you found, and what do they need from you?')">Check Answer</button>
+          <div class="quiz-feedback" id="q1-fb"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 02 DISCLOSURE -->
+    <section class="section" id="disclosure">
+      <div class="section-header">
+        <div class="section-icon">02</div>
+        <div>
+          <div class="section-title">Responsible Disclosure Framework</div>
+          <div class="section-subtitle">How and when to report — and to whom</div>
+        </div>
+      </div>
+
+      <div class="lab-block">
+        <div class="lab-header">
+          <div class="lab-badge badge-req">Definition</div>
+          <div class="lab-title">Coordinated Vulnerability Disclosure (CVD)</div>
+        </div>
+        <div class="lab-body">
+          <p style="font-size:14px;color:var(--ink);line-height:1.6;margin-bottom:10px;"><strong>Responsible disclosure</strong> is the process of informing a vendor or organization about a security issue privately before making it public — giving them time to fix it first.</p>
+          <ul class="step-list">
+            <li>The goal is to protect users — not embarrass companies or make the internet less safe</li>
+            <li>You are on the defensive side of security. Your job is to help, not to expose</li>
+            <li>Publishing details publicly before a patch is released puts real people at risk</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="lab-block">
+        <div class="lab-header">
+          <div class="lab-badge badge-req">Timeline</div>
+          <div class="lab-title">The standard CVD process — step by step</div>
+        </div>
+        <div class="lab-body">
+          <div class="timeline">
+            <div class="tl-item">
+              <div class="tl-left"><div class="tl-day">Day 0</div><div class="tl-dot"></div></div>
+              <div class="tl-right">
+                <div class="tl-title">Vulnerability Discovered</div>
+                <div class="tl-desc">You find a security issue during authorized testing. Document everything immediately — screenshots, commands, timestamps.</div>
+              </div>
+            </div>
+            <div class="tl-item">
+              <div class="tl-left"><div class="tl-day">Days 1–7</div><div class="tl-dot"></div></div>
+              <div class="tl-right">
+                <div class="tl-title">Private Report Sent</div>
+                <div class="tl-desc">Contact the organization's security team privately. Share full technical findings, reproduction steps, and proof of concept.</div>
+              </div>
+            </div>
+            <div class="tl-item">
+              <div class="tl-left"><div class="tl-day">Days 7–14</div><div class="tl-dot"></div></div>
+              <div class="tl-right">
+                <div class="tl-title">Acknowledgment — Embargo Begins</div>
+                <div class="tl-desc">The organization confirms receipt. A 90-day embargo period begins — you agree not to publish details publicly while they patch.</div>
+              </div>
+            </div>
+            <div class="tl-item">
+              <div class="tl-left"><div class="tl-day">Days 14–90</div><div class="tl-dot"></div></div>
+              <div class="tl-right">
+                <div class="tl-title">Vendor Patches the Issue</div>
+                <div class="tl-desc">The organization develops and releases a fix. You may be credited in their security advisory if you want recognition.</div>
+              </div>
+            </div>
+            <div class="tl-item">
+              <div class="tl-left"><div class="tl-day">Day 90+</div><div class="tl-dot"></div></div>
+              <div class="tl-right">
+                <div class="tl-title">Public Disclosure (if necessary)</div>
+                <div class="tl-desc">If the vendor hasn't patched by the deadline, you may publish a limited advisory — not exploit code — to pressure action.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="audience-grid">
+        <div class="audience-card">
+          <h4>Private Disclosure — Preferred</h4>
+          <ul>
+            <li>Report goes only to the vendor first</li>
+            <li>Gives time to patch before attackers know</li>
+            <li>Maintains professional trust</li>
+            <li>Eligible for bug bounty rewards</li>
+          </ul>
+        </div>
+        <div class="audience-card">
+          <h4>Full Public Disclosure — Last Resort</h4>
+          <ul>
+            <li>Used if vendor refused to respond or patch</li>
+            <li>Or if the issue is already being exploited</li>
+            <li>Forces public accountability</li>
+            <li>Carries legal and reputational risk</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="notice notice-warn">
+        <div>
+          <strong>Do not do this</strong>
+          <p>Posting vulnerability details to social media, forums, or GitHub before the vendor patches is not responsible disclosure. It puts users at risk and can expose you to legal liability.</p>
+        </div>
+      </div>
+
+      <div class="quiz-block">
+        <div class="quiz-head">
+          <div class="quiz-badge">Quick Check</div>
+          <div class="quiz-label">Section 02</div>
+        </div>
+        <div class="quiz-body">
+          <p class="quiz-q">What is the standard embargo period used in coordinated vulnerability disclosure?</p>
+          <ul class="quiz-options" id="q2">
+            <li><input type="radio" name="q2" value="a"> 7 days</li>
+            <li><input type="radio" name="q2" value="b"> 30 days</li>
+            <li><input type="radio" name="q2" value="c"> 90 days</li>
+            <li><input type="radio" name="q2" value="d"> 1 year</li>
+          </ul>
+          <button class="check-btn" onclick="checkQuiz('q2','c','Correct — 90 days is the industry standard, though it can vary by program.','Not quite. The industry standard is 90 days — enough time for most vendors to develop and release a patch.')">Check Answer</button>
+          <div class="quiz-feedback" id="q2-fb"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 03 REPORT STRUCTURE -->
+    <section class="section" id="structure">
+      <div class="section-header">
+        <div class="section-icon">03</div>
+        <div>
+          <div class="section-title">Security Report Structure</div>
+          <div class="section-subtitle">Every professional report follows this anatomy</div>
+        </div>
+      </div>
+
+      <p class="body-text">A professional security report follows a consistent structure so every reader — from the CEO to the developer — can find exactly what they need.</p>
+
+      <table class="data-table" style="margin-bottom:16px;">
+        <thead>
+          <tr>
+            <th>Section</th>
+            <th>Written For</th>
+            <th>What It Contains</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Executive Summary</strong></td>
+            <td>Leadership</td>
+            <td>Plain-English overview — what was tested, what was found, what to do next</td>
+          </tr>
+          <tr>
+            <td><strong>Scope &amp; Methodology</strong></td>
+            <td>All readers</td>
+            <td>What systems were in scope, which tools were used, what was explicitly out of scope</td>
+          </tr>
+          <tr>
+            <td><strong>Findings</strong></td>
+            <td>Engineers</td>
+            <td>One entry per vulnerability — name, severity, host, exact reproduction steps, evidence</td>
+          </tr>
+          <tr>
+            <td><strong>Proof of Concept</strong></td>
+            <td>Engineers</td>
+            <td>Screenshot or log output proving the vulnerability is real. Never include full weaponized exploit code.</td>
+          </tr>
+          <tr>
+            <td><strong>Risk &amp; Impact</strong></td>
+            <td>Leadership</td>
+            <td>CVSS score plus plain-language description of what an attacker could actually do</td>
+          </tr>
+          <tr>
+            <td><strong>Remediation</strong></td>
+            <td>Engineers</td>
+            <td>Specific, prioritized steps — immediate fix, short-term hardening, long-term policy</td>
+          </tr>
+          <tr>
+            <td><strong>Conclusion</strong></td>
+            <td>All readers</td>
+            <td>Confirms scope compliance, responsible data handling, and recommends re-test after patching</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="lab-block">
+        <div class="lab-header">
+          <div class="lab-badge badge-req">Required</div>
+          <div class="lab-title">What every AuraLab report must include</div>
+        </div>
+        <div class="lab-body">
+          <ul class="step-list">
+            <li>Clear screenshots with timestamps for every finding</li>
+            <li>Complete command logs copied from terminal history</li>
+            <li>An executive summary written for a non-technical reader</li>
+            <li>Evidence-based conclusions — no assumptions, no guessing</li>
+            <li>A signed ethics statement confirming scope compliance</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="lab-block">
+        <div class="lab-header">
+          <div class="lab-badge badge-tip">Example</div>
+          <div class="lab-title">How a single finding is formatted</div>
+        </div>
+        <div class="lab-body">
+          <div class="cmd-example"><span class="ex-comment">## FINDING-01: Unauthenticated FTP Access</span>
+
+<span class="ex-flag">Severity:</span>  HIGH (CVSS 8.1)
+<span class="ex-flag">Host:</span>      192.168.1.42
+<span class="ex-flag">Service:</span>   FTP / Port 21 / vsftpd 3.0.3
+
+<span class="ex-comment">### What We Found</span>
+<span class="ex-out">The FTP server allows anonymous login with read/write
+access to /var/data/payroll/ — no credentials required.</span>
+
+<span class="ex-comment">### How We Reproduced It</span>
+<span class="ex-out">1. nmap -sV -p 21 192.168.1.42  →  vsftpd 3.0.3 open
+2. ftp 192.168.1.42  →  user=anonymous, password=(blank)
+3. ls -la  →  full directory listing of payroll files</span>
+
+<span class="ex-comment">### What This Means</span>
+<span class="ex-out">Any network user can access payroll records without
+credentials. PCI-DSS violation if payment data is stored
+in the same directory.</span>
+
+<span class="ex-comment">### Recommended Fix</span>
+<span class="ex-match">Immediate: Disable anonymous FTP login.
+Short-term: Replace FTP with SFTP + key-based auth.
+Long-term: Conduct quarterly open-port audits.</span></div>
+          <p style="font-size:13px;color:var(--slate);margin-top:8px;">Use this structure for every finding in every report you write in this course.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 04 AUDIENCES -->
+    <section class="section" id="audiences">
+      <div class="section-header">
+        <div class="section-icon">04</div>
+        <div>
+          <div class="section-title">Writing for Different Audiences</div>
+          <div class="section-subtitle">Same finding — four completely different descriptions</div>
+        </div>
+      </div>
+
+      <p class="body-text">The exact same vulnerability needs to be described differently depending on who is reading. A developer needs commands. An executive needs consequences. An auditor needs evidence.</p>
+
+      <div class="audience-grid">
+        <div class="audience-card">
+          <h4>Technical Report — Developers / Engineers</h4>
+          <ul>
+            <li>Full command syntax and tool output</li>
+            <li>Exact file paths, port numbers, version strings</li>
+            <li>Step-by-step reproduction instructions</li>
+            <li>Specific patch versions or config changes</li>
+          </ul>
+        </div>
+        <div class="audience-card">
+          <h4>Management Summary — Executives</h4>
+          <ul>
+            <li>Plain language — no acronyms without explanation</li>
+            <li>Business risk: money, reputation, compliance</li>
+            <li>Priority levels: fix now vs. schedule later</li>
+            <li>One-paragraph summaries with a clear call to action</li>
+          </ul>
+        </div>
+        <div class="audience-card">
+          <h4>Compliance Report — Legal / Auditors</h4>
+          <ul>
+            <li>Chain of custody for any evidence collected</li>
+            <li>Timestamps for every action taken</li>
+            <li>Proof of authorization — signed scope document</li>
+            <li>Regulatory references: PCI-DSS, HIPAA, etc.</li>
+          </ul>
+        </div>
+        <div class="audience-card">
+          <h4>Public Advisory — After the Patch</h4>
+          <ul>
+            <li>High-level description only — no exploit details</li>
+            <li>CVE identifier if assigned</li>
+            <li>Affected versions and patched versions listed</li>
+            <li>Credit to the researcher (optional)</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="lab-block">
+        <div class="lab-header">
+          <div class="lab-badge badge-scen">Try It</div>
+          <div class="lab-title">Downtown Donuts — write two versions</div>
+        </div>
+        <div class="lab-body">
+          <p style="font-size:14px;color:var(--ink);line-height:1.6;">You found that the Downtown Donuts loyalty app stores customer passwords in plain text. Write two one-sentence descriptions — one for the lead developer, one for the store owner who has no tech background. Notice how they are different.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 05 CVSS -->
+    <section class="section" id="cvss">
+      <div class="section-header">
+        <div class="section-icon">05</div>
+        <div>
+          <div class="section-title">Severity Ratings — CVSS</div>
+          <div class="section-subtitle">The industry standard for scoring how serious a vulnerability is</div>
+        </div>
+      </div>
+
+      <p class="body-text">The <strong>Common Vulnerability Scoring System (CVSS)</strong> is an open standard for rating vulnerability severity. Scores run from 0 to 10. Every professional security report includes a CVSS rating for each finding.</p>
+
+      <table class="data-table" style="margin-bottom:16px;">
+        <thead>
+          <tr>
+            <th>Score</th>
+            <th>Severity</th>
+            <th>What It Means</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="sev-none">0.0</span></td>
+            <td><span class="sev-none">None</span></td>
+            <td>No impact on confidentiality, integrity, or availability</td>
+          </tr>
+          <tr>
+            <td><span class="sev-low">0.1 – 3.9</span></td>
+            <td><span class="sev-low">Low</span></td>
+            <td>Limited impact — usually requires local access or special conditions</td>
+          </tr>
+          <tr>
+            <td><span class="sev-medium">4.0 – 6.9</span></td>
+            <td><span class="sev-medium">Medium</span></td>
+            <td>Moderate impact — some conditions needed for exploitation</td>
+          </tr>
+          <tr>
+            <td><span class="sev-high">7.0 – 8.9</span></td>
+            <td><span class="sev-high">High</span></td>
+            <td>Significant impact — often exploitable without special conditions</td>
+          </tr>
+          <tr>
+            <td><span class="sev-crit">9.0 – 10.0</span></td>
+            <td><span class="sev-crit">Critical</span></td>
+            <td>Maximum impact — no auth required, remote exploit, full system access</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="lab-block">
+        <div class="lab-header">
+          <div class="lab-badge badge-req">Know These</div>
+          <div class="lab-title">Factors that determine the score</div>
+        </div>
+        <div class="lab-body">
+          <ul class="step-list">
+            <li><strong>Attack Vector</strong> — Can the attacker exploit it remotely, or do they need physical access?</li>
+            <li><strong>Attack Complexity</strong> — Is it simple to exploit, or does it require special conditions?</li>
+            <li><strong>Privileges Required</strong> — Does the attacker need an account on the system first?</li>
+            <li><strong>User Interaction</strong> — Does a victim have to click something for the attack to work?</li>
+            <li><strong>Confidentiality / Integrity / Availability Impact</strong> — What data or service is affected, and how badly?</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="notice notice-info">
+        <div>
+          <strong>Real Example — Log4Shell (CVE-2021-44228)</strong>
+          <p>Scored 10.0 Critical. No authentication required, exploitable remotely, and gave attackers full system control. Compare to a vulnerability requiring physical access and a local account — that might score 3.2 Low.</p>
+        </div>
+      </div>
+
+      <div class="quiz-block">
+        <div class="quiz-head">
+          <div class="quiz-badge">Quick Check</div>
+          <div class="quiz-label">Section 05</div>
+        </div>
+        <div class="quiz-body">
+          <p class="quiz-q">A vulnerability requires no authentication, is exploitable over the internet, and lets an attacker read all files on a server. What CVSS range would you expect?</p>
+          <ul class="quiz-options" id="q3">
+            <li><input type="radio" name="q3" value="a"> Low (0.1 – 3.9)</li>
+            <li><input type="radio" name="q3" value="b"> Medium (4.0 – 6.9)</li>
+            <li><input type="radio" name="q3" value="c"> High (7.0 – 8.9)</li>
+            <li><input type="radio" name="q3" value="d"> Critical (9.0 – 10.0)</li>
+          </ul>
+          <button class="check-btn" onclick="checkQuiz('q3','d','Correct — no auth + remote exploit + high data impact = Critical range.','Not quite. Walk through the factors: no auth required, remote access, full data read. Each one pushes the score higher.')">Check Answer</button>
+          <div class="quiz-feedback" id="q3-fb"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 06 COMMUNICATION -->
+    <section class="section" id="communication">
+      <div class="section-header">
+        <div class="section-icon">06</div>
+        <div>
+          <div class="section-title">Communication Best Practices</div>
+          <div class="section-subtitle">Precision, clarity, and handling disagreement professionally</div>
+        </div>
+      </div>
+
+      <div class="lab-block">
+        <div class="lab-header">
+          <div class="lab-badge badge-req">Principles</div>
+          <div class="lab-title">Language rules for professional security writing</div>
+        </div>
+        <div class="lab-body">
+          <ul class="step-list">
+            <li><strong>Be precise, not dramatic.</strong> Write "An attacker could read customer names and emails" — not "This is a catastrophic breach that will destroy the company."</li>
+            <li><strong>Be specific, not vague.</strong> "Port 21/tcp was open and allowed anonymous access" is better than "there was a network issue."</li>
+            <li><strong>Frame impact in business terms.</strong> "This could result in an FTC fine of up to $50,000 per violation" lands harder than "this is a MEDIUM severity finding."</li>
+            <li><strong>Separate observation from interpretation.</strong> Say what you saw, then explain what it means. Never mix the two together.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="lab-block">
+        <div class="lab-header">
+          <div class="lab-badge badge-tip">Tip</div>
+          <div class="lab-title">If the client disagrees with your findings</div>
+        </div>
+        <div class="lab-body">
+          <ul class="step-list">
+            <li>Stay factual and calm — this is a professional conversation, not an argument</li>
+            <li>Let the evidence speak: show screenshots, logs, and step-by-step reproduction</li>
+            <li>Offer to demonstrate the vulnerability again in a controlled setting</li>
+            <li>Document their disagreement in writing — this protects you legally</li>
+            <li>Never exaggerate or invent additional evidence to strengthen your case</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- 07 LEGAL & ETHICS -->
+    <section class="section" id="legal">
+      <div class="section-header">
+        <div class="section-icon">07</div>
+        <div>
+          <div class="section-title">Legal &amp; Ethical Considerations</div>
+          <div class="section-subtitle">CFAA, bug bounty rules, NDAs, and your obligations</div>
+        </div>
+      </div>
+
+      <div class="notice notice-alert">
+        <div>
+          <strong>Core Principle</strong>
+          <p>Ethical hackers operate under explicit written authorization. Without that, every technique you've learned — nmap scans, Hydra brute-force, SSH access — is a federal crime.</p>
+        </div>
+      </div>
+
+      <div class="lab-block">
+        <div class="lab-header">
+          <div class="lab-badge badge-eth">Legal</div>
+          <div class="lab-title">Key laws you need to know</div>
+        </div>
+        <div class="lab-body">
+          <ul class="step-list">
+            <li><strong>Computer Fraud and Abuse Act (CFAA) — USA.</strong> Makes unauthorized computer access a federal crime. "I thought it was okay" is not a legal defense. Authorization must be in writing.</li>
+            <li><strong>Electronic Communications Privacy Act (ECPA).</strong> Prohibits unauthorized interception of communications — including network traffic. Wireshark on unauthorized networks is illegal.</li>
+            <li><strong>New Jersey Computer Crime Laws.</strong> State statutes apply in addition to federal law. You can face charges under both simultaneously.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="lab-block">
+        <div class="lab-header">
+          <div class="lab-badge badge-req">Bug Bounty</div>
+          <div class="lab-title">What program rules actually require</div>
+        </div>
+        <div class="lab-body">
+          <ul class="step-list">
+            <li>You may only test systems explicitly listed in the program scope</li>
+            <li>Social engineering and physical attacks are usually out of scope</li>
+            <li>You must keep findings confidential until the company patches and discloses</li>
+            <li>Attempting to access user data — even to prove a point — voids your legal protection</li>
+            <li>Violating program rules can result in legal action even if you had good intentions</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="notice notice-warn">
+        <div>
+          <strong>NDAs &amp; Confidentiality</strong>
+          <p>Professional security work often requires signing a Non-Disclosure Agreement. This means you cannot share client findings publicly, add them to a portfolio, or discuss them without permission — even after the engagement ends.</p>
+        </div>
+      </div>
+
+      <div class="lab-block">
+        <div class="lab-header">
+          <div class="lab-badge badge-eth">Ethics — Required</div>
+          <div class="lab-title">Your obligations as an ethical hacker</div>
+        </div>
+        <div class="lab-body">
+          <ul class="step-list">
+            <li>Disclose only to the appropriate party first — never go public without coordination</li>
+            <li>Never exploit vulnerabilities beyond proving they exist</li>
+            <li>Never access, retain, or use any real personal data you encounter</li>
+            <li>Report unexpected out-of-scope findings to the client immediately</li>
+            <li>Document everything so your actions can be reviewed and verified at any time</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="quiz-block">
+        <div class="quiz-head">
+          <div class="quiz-badge">Quick Check</div>
+          <div class="quiz-label">Section 07</div>
+        </div>
+        <div class="quiz-body">
+          <p class="quiz-q">During a bug bounty engagement you discover a database outside your listed scope that contains real user data. What should you do?</p>
+          <ul class="quiz-options" id="q4">
+            <li><input type="radio" name="q4" value="a"> Access it to document how serious the risk is</li>
+            <li><input type="radio" name="q4" value="b"> Post about it publicly to pressure the company</li>
+            <li><input type="radio" name="q4" value="c"> Stop, document what you found, and notify the client without accessing the data</li>
+            <li><input type="radio" name="q4" value="d"> Ignore it — it is out of scope and not your problem</li>
+          </ul>
+          <button class="check-btn" onclick="checkQuiz('q4','c','Correct — stop, document, and notify. Never access out-of-scope data, and never ignore a risk affecting real users.','Think about your obligations. Out-of-scope does not mean ignore it. Real user data at risk is always worth notifying the client.')">Check Answer</button>
+          <div class="quiz-feedback" id="q4-fb"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CHECKLIST -->
+    <section class="section" id="checklist">
+      <div class="section-header">
+        <div class="section-icon">CHK</div>
+        <div>
+          <div class="section-title">Completion Checklist</div>
+          <div class="section-subtitle">Click each item to mark it done — tracked in your browser</div>
+        </div>
+      </div>
+
+      <div class="checklist" id="checklistEl">
+        <div class="check-item" onclick="toggleCheck(this)">
+          <div class="check-box">✓</div>
+          <div class="check-text">I can explain why security reporting matters and what happens when vulnerabilities are not communicated clearly.</div>
+          <span class="check-pts">10 pts</span>
+        </div>
+        <div class="check-item" onclick="toggleCheck(this)">
+          <div class="check-box">✓</div>
+          <div class="check-text">I understand coordinated vulnerability disclosure and can describe the standard 90-day timeline.</div>
+          <span class="check-pts">10 pts</span>
+        </div>
+        <div class="check-item" onclick="toggleCheck(this)">
+          <div class="check-box">✓</div>
+          <div class="check-text">I can name every section of a professional security report and explain what belongs in each one.</div>
+          <span class="check-pts">10 pts</span>
+        </div>
+        <div class="check-item" onclick="toggleCheck(this)">
+          <div class="check-box">✓</div>
+          <div class="check-text">I understand how to write the same finding differently for a developer, an executive, and a compliance auditor.</div>
+          <span class="check-pts">10 pts</span>
+        </div>
+        <div class="check-item" onclick="toggleCheck(this)">
+          <div class="check-box">✓</div>
+          <div class="check-text">I can read a CVSS score, identify the severity level, and explain what it means in plain language.</div>
+          <span class="check-pts">10 pts</span>
+        </div>
+        <div class="check-item" onclick="toggleCheck(this)">
+          <div class="check-box">✓</div>
+          <div class="check-text">I understand the CFAA, what unauthorized access means legally, and why written authorization is required.</div>
+          <span class="check-pts">10 pts</span>
+        </div>
+        <div class="check-item" onclick="toggleCheck(this)">
+          <div class="check-box">✓</div>
+          <div class="check-text">I know bug bounty program rules and understand what voids legal protection for security researchers.</div>
+          <span class="check-pts">10 pts</span>
+        </div>
+        <div class="check-item" onclick="toggleCheck(this)">
+          <div class="check-box">✓</div>
+          <div class="check-text">I can apply professional communication principles — precision, business framing, and evidence-based language.</div>
+          <span class="check-pts">10 pts</span>
+        </div>
+        <div class="check-item" onclick="toggleCheck(this)">
+          <div class="check-box">✓</div>
+          <div class="check-text">I completed all four quick-check quiz questions in this lesson.</div>
+          <span class="check-pts">10 pts</span>
+        </div>
+        <div class="check-item" onclick="toggleCheck(this)">
+          <div class="check-box">✓</div>
+          <div class="check-text">I read every section of this lesson and can explain any of it without looking at the page.</div>
+          <span class="check-pts">10 pts</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ACTIVITIES -->
+    <section class="section" id="assessment">
+      <div class="section-header">
+        <div class="section-icon">ACT</div>
+        <div>
+          <div class="section-title">Assessment Activities</div>
+          <div class="section-subtitle">Four activities to demonstrate mastery of this unit</div>
+        </div>
+      </div>
+
+      <div class="lab-block">
+        <div class="lab-header">
+          <div class="lab-badge badge-req">Activity 1</div>
+          <div class="lab-title">Write a Security Report</div>
+        </div>
+        <div class="lab-body">
+          <ul class="step-list">
+            <li>Using the Downtown Donuts vulnerability scenario provided by Mr. Dean, write a complete security report following the structure from Section 03</li>
+            <li>Your report must include an executive summary, at least two findings with CVSS scores, a proof of concept, and remediation recommendations</li>
+            <li>All seven sections from the anatomy table must be present</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="lab-block">
+        <div class="lab-header">
+          <div class="lab-badge badge-req">Activity 2</div>
+          <div class="lab-title">Peer Review Exchange</div>
+        </div>
+        <div class="lab-body">
+          <ul class="step-list">
+            <li>Swap your completed report with another team</li>
+            <li>Using the peer review checklist provided separately, evaluate their report for clarity, completeness, and correct CVSS scoring</li>
+            <li>Write two specific suggestions for improvement and one thing they did well</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="lab-block">
+        <div class="lab-header">
+          <div class="lab-badge badge-req">Activity 3</div>
+          <div class="lab-title">Mixed Audience Presentation</div>
+        </div>
+        <div class="lab-body">
+          <ul class="step-list">
+            <li>Each team presents one finding from their report to a mixed audience in class</li>
+            <li>Two classmates play the "technical engineer" role and two play the "non-technical executive" role</li>
+            <li>You must adapt your explanation to both audiences in the same presentation</li>
+            <li>Mr. Dean will evaluate your ability to switch between technical and plain language on the fly</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="lab-block">
+        <div class="lab-header">
+          <div class="lab-badge badge-req">Activity 4</div>
+          <div class="lab-title">Case Study Analysis</div>
+        </div>
+        <div class="lab-body">
+          <ul class="step-list">
+            <li>Read one assigned real-world vulnerability disclosure case provided by Mr. Dean</li>
+            <li>Answer: What was the vulnerability? How was it disclosed — responsibly or not? What was the outcome?</li>
+            <li>What should have been done differently? Write a half-page response in your own words</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- SELF-CHECK -->
+    <section class="section" id="selfcheck">
+      <div class="section-header">
+        <div class="section-icon">Q</div>
+        <div>
+          <div class="section-title">Self-Check</div>
+          <div class="section-subtitle">Can you answer each of these before you submit?</div>
+        </div>
+      </div>
+
+      <div class="reflection-list">
+        <div class="reflection-item" data-q="1">What is the single most important difference between responsible and irresponsible vulnerability disclosure?</div>
+        <div class="reflection-item" data-q="2">Why does a security report need both an executive summary and a technical findings section — can't you just write one?</div>
+        <div class="reflection-item" data-q="3">A CVSS score of 9.8 means what, in plain English? What factors likely drove it that high?</div>
+        <div class="reflection-item" data-q="4">You find a vulnerability on a system outside your authorized scope. Walk through exactly what you should do, step by step.</div>
+        <div class="reflection-item" data-q="5">The client says your finding is not real because they have never been hacked. How do you respond professionally?</div>
+        <div class="reflection-item" data-q="6">Explain the 90-day embargo period. Why does it exist? Who does it protect?</div>
+        <div class="reflection-item" data-q="7">Why is it illegal to run Hydra against a system without written permission — even if you plan to report the findings afterward?</div>
+      </div>
+
+      <div class="notice notice-warn" style="margin-top:20px;">
+        <div>
+          <strong>Common Mistakes to Avoid</strong>
+          <p>
+            Skipping the executive summary because "it's for non-technical people" &nbsp;·&nbsp;
+            Confusing severity with likelihood — CVSS measures impact, not probability &nbsp;·&nbsp;
+            Thinking responsible disclosure only applies to bug bounty programs &nbsp;·&nbsp;
+            Using vague language like "the system had issues" instead of specific technical findings
+          </p>
+        </div>
+      </div>
+
+      <div class="notice notice-ok" style="margin-top:12px;">
+        <div>
+          <strong>Reference Materials for This Unit</strong>
+          <p>
+            <code>CERT/CC CVD Guidelines</code> &nbsp;·&nbsp;
+            <code>CVSS v3.1 — first.org/cvss/calculator/3.1</code> &nbsp;·&nbsp;
+            <code>HackerOne Public Disclosures</code> &nbsp;·&nbsp;
+            <code>NIST NVD — nvd.nist.gov</code>
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- RESOURCES -->
+    <section class="section" id="resources">
+      <div class="section-header">
+        <div class="section-icon">REF</div>
+        <div>
+          <div class="section-title">References &amp; Resources</div>
+          <div class="section-subtitle">For use when internet access is available outside AuraLab</div>
+        </div>
+      </div>
+
+      <div class="notice notice-info" style="margin-bottom:16px;">
+        <div>
+          <strong>Offline Note</strong>
+          <p>These references require internet access. All core concepts in this lesson are covered above — no internet is needed to complete any section or activity in AuraLab.</p>
+        </div>
+      </div>
+
+      <div class="lab-block">
+        <div class="lab-header">
+          <div class="lab-badge badge-req">External</div>
+          <div class="lab-title">Recommended references</div>
+        </div>
+        <div class="lab-body">
+          <ul class="step-list">
+            <li><strong>CERT/CC Coordinated Vulnerability Disclosure Guidelines</strong> — Carnegie Mellon's definitive guide to responsible disclosure practices</li>
+            <li><strong>CVSS v3.1 Specification and Calculator</strong> — Full scoring methodology from FIRST — <code>first.org/cvss/calculator/3.1</code></li>
+            <li><strong>HackerOne Public Disclosures</strong> — Real-world example reports from bug bounty programs — <code>hackerone.com/hacktivity</code></li>
+            <li><strong>NIST National Vulnerability Database</strong> — Browse real CVE entries to see how professional findings are documented — <code>nvd.nist.gov</code></li>
+            <li><strong>Google Project Zero Disclosure Policy</strong> — A leading example of how professional teams enforce 90-day timelines</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<button class="print-btn" onclick="window.print()">Print / PDF</button>
+
+<script>
+  // Progress bar
+  window.addEventListener('scroll', () => {
+    const doc = document.documentElement;
+    const pct = (doc.scrollTop / (doc.scrollHeight - doc.clientHeight)) * 100;
+    document.getElementById('progressBar').style.width = pct + '%';
+  });
+
+  // Scroll reveal
+  const revealObserver = new IntersectionObserver((entries) => {
+    entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+  }, { threshold: 0.08 });
+  document.querySelectorAll('.section').forEach(el => revealObserver.observe(el));
+
+  // Active nav
+  const sections = document.querySelectorAll('section[id]');
+  const navLinks = document.querySelectorAll('.nav-list a[href^="#"]');
+  const navObserver = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        navLinks.forEach(a => a.classList.remove('active'));
+        const link = document.querySelector(`.nav-list a[href="#${e.target.id}"]`);
+        if (link) link.classList.add('active');
+      }
+    });
+  }, { rootMargin: '-30% 0px -60% 0px' });
+  sections.forEach(s => navObserver.observe(s));
+
+  // Theme toggle
+  const toggle = document.getElementById('themeToggle');
+  const stored = localStorage.getItem('lessonTheme') || 'dark';
+  document.documentElement.setAttribute('data-theme', stored);
+  toggle.textContent = stored === 'dark' ? '☀' : '☽';
+  toggle.addEventListener('click', () => {
+    const next = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', next);
+    localStorage.setItem('lessonTheme', next);
+    toggle.textContent = next === 'dark' ? '☀' : '☽';
+  });
+
+  // Checklist + score
+  function toggleCheck(el) {
+    el.classList.toggle('done');
+    updateScore();
+  }
+
+  function updateScore() {
+    const total = document.querySelectorAll('.check-item').length;
+    const done  = document.querySelectorAll('.check-item.done').length;
+    const score = done * 10;
+    const pct   = Math.round((done / total) * 100);
+    document.getElementById('scoreNum').textContent = score;
+    document.getElementById('progFill').style.width = pct + '%';
+    document.getElementById('progPct').textContent  = pct + '% complete';
+    const num = document.getElementById('scoreNum');
+    if      (pct === 100) { num.style.color = '#2a9d50'; }
+    else if (pct >= 70)   { num.style.color = '#e8a020'; }
+    else if (pct >= 40)   { num.style.color = '#7eb8d4'; }
+    else                  { num.style.color = '#4a6fa5'; }
+  }
+
+  // Quiz
+  function checkQuiz(qId, correct, msgRight, msgWrong) {
+    const selected = document.querySelector(`input[name="${qId}"]:checked`);
+    const fb = document.getElementById(qId + '-fb');
+    if (!selected) { fb.textContent = 'Select an answer first.'; fb.className = 'quiz-feedback wrong'; return; }
+    fb.textContent = selected.value === correct ? msgRight : msgWrong;
+    fb.className = 'quiz-feedback ' + (selected.value === correct ? 'correct' : 'wrong');
+  }
+</script>
+
+</body>
+</html>
