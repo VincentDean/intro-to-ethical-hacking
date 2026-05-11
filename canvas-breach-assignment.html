@@ -1,0 +1,702 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Canvas LMS Breach — Self-Directed Assignment | Ethical Hacking</title>
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=DM+Sans:ital,wght@0,300;0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:       #080e17;
+    --surface:  #0d1820;
+    --card:     #111d29;
+    --border:   #1e3048;
+    --navy:     #0d2137;
+    --slate:    #2a5080;
+    --sky:      #4a9eca;
+    --frost:    #a8d4ec;
+    --white:    #e8f4fc;
+    --dim:      #5a7a96;
+    --accent:   #e84855;
+    --green:    #27c06a;
+    --amber:    #f0a030;
+    --mono:     'Share Tech Mono', monospace;
+    --sans:     'DM Sans', sans-serif;
+    color-scheme: dark;
+  }
+
+  html[data-theme="light"] {
+    --bg:      #f0f6fc;
+    --surface: #e4eef8;
+    --card:    #ffffff;
+    --border:  #c4d8ec;
+    --sky:     #1e6fa0;
+    --frost:   #7ab8d8;
+    --white:   #0d1b2a;
+    --dim:     #4a6882;
+    --green:   #1a8a48;
+    --amber:   #b87018;
+    color-scheme: light;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: var(--sans);
+    background: var(--bg);
+    color: var(--white);
+    min-height: 100vh;
+    overflow-x: hidden;
+    transition: background 0.3s, color 0.3s;
+  }
+
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background-image:
+      linear-gradient(rgba(74,158,202,0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(74,158,202,0.04) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none; z-index: 0;
+    transition: opacity 0.3s;
+  }
+
+  html[data-theme="light"] body::before {
+    background-image:
+      linear-gradient(rgba(13,27,42,0.05) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(13,27,42,0.05) 1px, transparent 1px);
+  }
+
+  body::after {
+    content: '';
+    position: fixed; top: -100%; left: 0; right: 0; height: 200%;
+    background: linear-gradient(transparent 49.5%, rgba(74,158,202,0.03) 50%, transparent 50.5%);
+    background-size: 100% 4px;
+    animation: scan 8s linear infinite;
+    pointer-events: none; z-index: 0; transition: opacity 0.3s;
+  }
+
+  html[data-theme="light"] body::after { opacity: 0; }
+
+  @keyframes scan {
+    0%   { transform: translateY(0); }
+    100% { transform: translateY(50%); }
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(14px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ── HEADER ── */
+  header {
+    position: relative; z-index: 10;
+    padding: 48px 32px 40px;
+    max-width: 960px; margin: 0 auto; text-align: center;
+  }
+
+  .theme-toggle {
+    display: inline-flex; align-items: center; justify-content: center;
+    background: var(--card); border: 1px solid var(--border);
+    color: var(--sky); width: 38px; height: 38px; border-radius: 50%;
+    cursor: pointer; font-size: 17px;
+    transition: background 0.2s, border-color 0.2s;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.25); margin: 0 auto 24px;
+  }
+  .theme-toggle:hover { border-color: var(--sky); }
+
+  .back-bar {
+    display: flex; align-items: center; justify-content: center; gap: 10px;
+    margin-bottom: 20px;
+    opacity: 0; animation: fadeUp 0.6s ease 0.05s forwards;
+  }
+  .back-link {
+    font-family: var(--mono); font-size: 11px; letter-spacing: 0.15em;
+    color: var(--dim); text-decoration: none; transition: color 0.2s;
+  }
+  .back-link:hover { color: var(--sky); }
+  .back-sep { font-family: var(--mono); font-size: 11px; color: var(--border); }
+  .back-crumb { font-family: var(--mono); font-size: 11px; letter-spacing: 0.12em; color: var(--dim); }
+
+  .header-eyebrow {
+    font-family: var(--mono); font-size: 11px; letter-spacing: 0.25em;
+    text-transform: uppercase; color: var(--sky); margin-bottom: 20px;
+    opacity: 0; animation: fadeUp 0.6s ease 0.15s forwards;
+  }
+  .header-eyebrow::before, .header-eyebrow::after { content: '──'; margin: 0 12px; opacity: 0.4; }
+
+  .header-title {
+    font-family: var(--mono); font-size: clamp(26px, 4.5vw, 48px);
+    font-weight: 400; line-height: 1.1; letter-spacing: -0.02em;
+    color: var(--white); margin-bottom: 16px;
+    opacity: 0; animation: fadeUp 0.6s ease 0.3s forwards;
+  }
+  .header-title span { color: var(--accent); }
+
+  .header-sub {
+    font-size: 17px; color: var(--dim); font-weight: 300;
+    max-width: 500px; margin: 0 auto 32px; line-height: 1.6;
+    opacity: 0; animation: fadeUp 0.6s ease 0.45s forwards;
+  }
+
+  .stats-row {
+    display: flex; justify-content: center; gap: 0;
+    border: 1px solid var(--border); border-radius: 10px; overflow: hidden;
+    max-width: 560px; margin: 0 auto;
+    opacity: 0; animation: fadeUp 0.6s ease 0.6s forwards;
+  }
+  .stat {
+    flex: 1; padding: 14px 18px;
+    border-right: 1px solid var(--border); text-align: center;
+  }
+  .stat:last-child { border-right: none; }
+  .stat-value { font-family: var(--mono); font-size: 20px; color: var(--sky); display: block; }
+  .stat-label { font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--dim); margin-top: 3px; display: block; }
+
+  /* ── MAIN ── */
+  main {
+    position: relative; z-index: 10;
+    max-width: 960px; margin: 0 auto; padding: 0 32px 80px;
+  }
+
+  .section-wrap { margin-bottom: 52px; }
+
+  .section-label {
+    font-family: var(--mono); font-size: 11px; letter-spacing: 0.2em;
+    text-transform: uppercase; color: var(--dim);
+    margin-bottom: 20px; display: flex; align-items: center; gap: 12px;
+  }
+  .section-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+  /* ── GENERIC CARD ── */
+  .card {
+    background: var(--card); border: 1px solid var(--border); border-radius: 10px;
+    padding: 24px 28px; margin-bottom: 12px;
+    opacity: 0; transform: translateY(20px);
+    transition: opacity 0.4s ease, transform 0.4s ease, border-color 0.2s, box-shadow 0.2s;
+  }
+  .card.visible { opacity: 1; transform: translateY(0); }
+  .card:hover { border-color: var(--slate); box-shadow: 0 0 24px rgba(74,158,202,0.07); }
+  .card p { font-size: 15px; line-height: 1.7; color: var(--white); margin-bottom: 12px; }
+  .card p:last-child { margin-bottom: 0; }
+
+  /* ── MISSION BANNER ── */
+  .mission-banner {
+    background: var(--card); border: 1px solid rgba(232,72,85,0.25);
+    border-left: 3px solid var(--accent); border-radius: 0 10px 10px 0;
+    padding: 20px 24px; margin-bottom: 12px;
+    opacity: 0; transform: translateY(20px);
+    transition: opacity 0.4s ease, transform 0.4s ease;
+  }
+  .mission-banner.visible { opacity: 1; transform: translateY(0); }
+  .banner-label {
+    font-family: var(--mono); font-size: 10px; letter-spacing: 0.2em;
+    text-transform: uppercase; color: var(--accent); margin-bottom: 8px;
+  }
+  .mission-banner p { font-size: 15px; line-height: 1.65; color: var(--white); margin: 0; }
+
+  /* ── BADGE BLOCKS ── */
+  .badge-block {
+    background: var(--card); border: 1px solid var(--border); border-radius: 10px;
+    padding: 20px 24px; margin-bottom: 12px;
+    opacity: 0; transform: translateY(20px);
+    transition: opacity 0.4s ease, transform 0.4s ease;
+  }
+  .badge-block.visible { opacity: 1; transform: translateY(0); }
+  .badge-block.req    { border-left: 3px solid var(--sky); }
+  .badge-block.tip    { border-left: 3px solid var(--amber); }
+  .badge-block.ethics { border-left: 3px solid var(--accent); }
+
+  .bb-label {
+    font-family: var(--mono); font-size: 10px; letter-spacing: 0.2em;
+    text-transform: uppercase; padding: 2px 8px; border-radius: 3px;
+    display: inline-block; margin-bottom: 10px;
+  }
+  .req    .bb-label { background: rgba(74,158,202,0.15);  color: var(--sky); }
+  .tip    .bb-label { background: rgba(240,160,48,0.15);  color: var(--amber); }
+  .ethics .bb-label { background: rgba(232,72,85,0.15);   color: var(--accent); }
+
+  .badge-block p  { font-size: 14px; line-height: 1.65; color: var(--white); margin-bottom: 8px; }
+  .badge-block p:last-child { margin-bottom: 0; }
+  .badge-block ul { padding-left: 18px; }
+  .badge-block li { font-size: 14px; line-height: 1.65; color: var(--white); margin-bottom: 5px; }
+  .badge-block li:last-child { margin-bottom: 0; }
+
+  /* ── STEP CARDS ── */
+  .step-card {
+    background: var(--card); border: 1px solid var(--border); border-radius: 10px;
+    padding: 24px 28px; margin-bottom: 12px;
+    display: flex; gap: 20px;
+    opacity: 0; transform: translateY(20px);
+    transition: opacity 0.4s ease, transform 0.4s ease, border-color 0.2s;
+  }
+  .step-card.visible { opacity: 1; transform: translateY(0); }
+  .step-card:hover { border-color: var(--slate); }
+
+  .step-num {
+    flex-shrink: 0; font-family: var(--mono); font-size: 24px;
+    color: var(--sky); opacity: 0.4; line-height: 1; padding-top: 2px;
+  }
+  .step-body { flex: 1; }
+  .step-title { font-size: 16px; font-weight: 700; color: var(--white); margin-bottom: 10px; }
+  .step-body p  { font-size: 14px; line-height: 1.65; color: var(--dim); margin-bottom: 10px; }
+  .step-body p:last-child { margin-bottom: 0; }
+  .step-body ul { padding-left: 18px; }
+  .step-body li { font-size: 14px; line-height: 1.65; color: var(--dim); margin-bottom: 5px; }
+  .step-body li:last-child { margin-bottom: 0; }
+  .step-body strong { color: var(--white); }
+
+  /* ── DELIVERABLE GRID ── */
+  .deliverable-grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(168px, 1fr)); gap: 12px;
+  }
+  .deliverable-card {
+    background: var(--card); border: 1px solid var(--border); border-radius: 10px;
+    padding: 20px 18px;
+    opacity: 0; transform: translateY(20px);
+    transition: opacity 0.4s ease, transform 0.4s ease, border-color 0.2s, box-shadow 0.2s;
+  }
+  .deliverable-card.visible { opacity: 1; transform: translateY(0); }
+  .deliverable-card:hover { border-color: var(--slate); box-shadow: 0 0 20px rgba(74,158,202,0.07); }
+  .d-name { font-family: var(--mono); font-size: 13px; color: var(--white); margin-bottom: 6px; }
+  .d-desc { font-size: 13px; color: var(--dim); line-height: 1.5; }
+
+  /* ── CHECKLIST ── */
+  .checklist { list-style: none; padding: 0; }
+  .checklist li {
+    display: flex; align-items: flex-start; gap: 12px;
+    padding: 10px 0; border-bottom: 1px solid var(--border);
+    font-size: 15px; line-height: 1.6; color: var(--white);
+  }
+  .checklist li:last-child { border-bottom: none; }
+  .checklist li::before { content: '▸'; font-family: var(--mono); color: var(--sky); flex-shrink: 0; margin-top: 2px; }
+
+  /* ── EXIT TICKET ── */
+  .exit-card {
+    background: var(--card); border: 1px solid var(--border); border-radius: 10px;
+    padding: 28px 32px;
+    opacity: 0; transform: translateY(20px);
+    transition: opacity 0.4s ease, transform 0.4s ease;
+  }
+  .exit-card.visible { opacity: 1; transform: translateY(0); }
+  .exit-q { display: flex; gap: 16px; padding: 14px 0; border-bottom: 1px solid var(--border); }
+  .exit-q:last-of-type { border-bottom: none; }
+  .exit-num {
+    flex-shrink: 0; font-family: var(--mono); font-size: 13px; color: var(--sky);
+    background: rgba(74,158,202,0.1); border: 1px solid rgba(74,158,202,0.2);
+    width: 28px; height: 28px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .exit-text { font-size: 14px; line-height: 1.6; color: var(--white); padding-top: 3px; }
+  .exit-note {
+    font-family: var(--mono); font-size: 11px; color: var(--dim);
+    margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--border); letter-spacing: 0.05em;
+  }
+
+  /* ── RUBRIC ── */
+  .rubric-wrap {
+    background: var(--card); border: 1px solid var(--border); border-radius: 10px;
+    overflow: hidden; margin-bottom: 12px;
+    opacity: 0; transform: translateY(20px);
+    transition: opacity 0.4s ease, transform 0.4s ease;
+  }
+  .rubric-wrap.visible { opacity: 1; transform: translateY(0); }
+
+  .rubric-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .rubric-table thead tr { border-bottom: 1px solid var(--border); }
+  .rubric-table th {
+    padding: 12px 16px; font-family: var(--mono); font-size: 10px;
+    letter-spacing: 0.15em; text-transform: uppercase; text-align: left; white-space: nowrap;
+  }
+  .rubric-table th:nth-child(1) { color: var(--dim); width: 22%; }
+  .rubric-table th:nth-child(2) { color: var(--green);  background: rgba(39,192,106,0.06); }
+  .rubric-table th:nth-child(3) { color: var(--amber);  background: rgba(240,160,48,0.06); }
+  .rubric-table th:nth-child(4) { color: var(--accent); background: rgba(232,72,85,0.06); }
+  .rubric-table th:nth-child(5) { color: var(--sky); text-align: center; width: 7%; }
+  .rubric-table td {
+    padding: 13px 16px; vertical-align: top;
+    border-bottom: 1px solid var(--border); line-height: 1.55;
+    font-size: 13px; color: var(--dim);
+  }
+  .rubric-table tr:last-child td { border-bottom: none; }
+  .rubric-table td:first-child { font-weight: 700; font-size: 13px; color: var(--white); border-left: 3px solid var(--slate); }
+  .rubric-table td:nth-child(2) { background: rgba(39,192,106,0.03); }
+  .rubric-table td:nth-child(3) { background: rgba(240,160,48,0.03); }
+  .rubric-table td:nth-child(4) { background: rgba(232,72,85,0.03); }
+  .rubric-table td:nth-child(5) { font-family: var(--mono); font-size: 15px; font-weight: 600; color: var(--sky); text-align: center; }
+
+  .rubric-total-row {
+    background: var(--card); border: 1px solid var(--border); border-radius: 10px;
+    padding: 14px 20px; display: flex; justify-content: flex-end; align-items: center; gap: 16px;
+    opacity: 0; transform: translateY(20px);
+    transition: opacity 0.4s ease, transform 0.4s ease;
+  }
+  .rubric-total-row.visible { opacity: 1; transform: translateY(0); }
+  .total-label { font-family: var(--mono); font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--dim); }
+  .total-pts   { font-family: var(--mono); font-size: 26px; color: var(--sky); }
+
+  /* ── RESOURCES ── */
+  .resource-list { list-style: none; padding: 0; }
+  .resource-list li {
+    display: flex; align-items: flex-start; gap: 12px;
+    padding: 11px 0; border-bottom: 1px solid var(--border);
+    font-size: 14px; line-height: 1.6;
+  }
+  .resource-list li:last-child { border-bottom: none; }
+  .resource-list li::before { content: '→'; font-family: var(--mono); color: var(--sky); flex-shrink: 0; margin-top: 1px; }
+  .resource-list a { color: var(--sky); text-decoration: none; transition: color 0.2s; }
+  .resource-list a:hover { color: var(--frost); }
+  .resource-list strong { color: var(--white); }
+
+  /* ── OBJ LIST ── */
+  .obj-list { list-style: none; padding: 0; }
+  .obj-list li {
+    display: flex; align-items: flex-start; gap: 12px;
+    padding: 9px 0; border-bottom: 1px solid var(--border);
+    font-size: 14px; line-height: 1.6; color: var(--white);
+  }
+  .obj-list li:last-child { border-bottom: none; }
+  .obj-list li::before { content: '✓'; font-family: var(--mono); font-size: 12px; color: var(--green); flex-shrink: 0; margin-top: 2px; }
+
+  /* ── FOOTER ── */
+  footer {
+    position: relative; z-index: 10; text-align: center;
+    padding: 24px 32px 40px; border-top: 1px solid var(--border);
+    font-family: var(--mono); font-size: 11px; color: var(--dim); letter-spacing: 0.1em;
+  }
+  footer span { color: var(--sky); }
+
+  @media (max-width: 600px) {
+    header { padding: 32px 20px 28px; }
+    main   { padding: 0 20px 60px; }
+    .stats-row { flex-wrap: wrap; }
+    .deliverable-grid { grid-template-columns: repeat(2, 1fr); }
+    .rubric-table th:nth-child(2), .rubric-table th:nth-child(3), .rubric-table th:nth-child(4),
+    .rubric-table td:nth-child(2), .rubric-table td:nth-child(3), .rubric-table td:nth-child(4) { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">☀</button>
+
+  <div class="back-bar">
+    <a href="index.html" class="back-link">← Course Index</a>
+    <span class="back-sep">/</span>
+    <span class="back-crumb">Self-Directed Assignment</span>
+  </div>
+
+  <div class="header-eyebrow">Week 11 &nbsp;·&nbsp; 100 Points</div>
+  <h1 class="header-title">Canvas <span>LMS</span> Breach</h1>
+  <p class="header-sub">Investigate a real security incident, classify the attack using industry frameworks, and brief your team like a professional analyst.</p>
+
+  <div class="stats-row">
+    <div class="stat">
+      <span class="stat-value">100</span>
+      <span class="stat-label">Points</span>
+    </div>
+    <div class="stat">
+      <span class="stat-value">4</span>
+      <span class="stat-label">Steps</span>
+    </div>
+    <div class="stat">
+      <span class="stat-value">5</span>
+      <span class="stat-label">Formats</span>
+    </div>
+    <div class="stat">
+      <span class="stat-value">3+</span>
+      <span class="stat-label">Sources Req.</span>
+    </div>
+  </div>
+</header>
+
+<main>
+
+  <!-- OVERVIEW -->
+  <div class="section-wrap">
+    <div class="section-label">Overview</div>
+
+    <div class="mission-banner">
+      <div class="banner-label">Mission Brief</div>
+      <p>You are a junior security analyst hired to brief your team on the Canvas breach. Before your organization adopts Canvas district-wide, leadership wants to understand the risk. Your deliverable is the briefing that shapes that decision.</p>
+    </div>
+
+    <div class="card">
+      <p>Canvas, one of the most widely used Learning Management Systems in K-12 and higher education, recently experienced a significant security incident. Your job is to investigate what happened, break it down using the frameworks and vocabulary from this course, and present your findings in a format of your choosing.</p>
+      <p>This is a <strong>self-directed assignment.</strong> You set your pace, choose your deliverable, and own your research process. All formats are graded on the same rubric.</p>
+    </div>
+  </div>
+
+  <!-- OBJECTIVES -->
+  <div class="section-wrap">
+    <div class="section-label">Learning Objectives</div>
+    <div class="card">
+      <ul class="obj-list">
+        <li>Identify the type of vulnerability or attack vector involved in the Canvas breach</li>
+        <li>Classify the incident using a recognized framework — CVE, OWASP Top 10, or MITRE ATT&CK</li>
+        <li>Evaluate the real-world impact on students, educators, and institutions</li>
+        <li>Propose at least two technically grounded remediation strategies</li>
+        <li>Communicate findings clearly for a technical or semi-technical audience</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- INVESTIGATION STEPS -->
+  <div class="section-wrap">
+    <div class="section-label">Investigation Steps</div>
+
+    <div class="step-card">
+      <div class="step-num">01</div>
+      <div class="step-body">
+        <div class="step-title">Research the Breach</div>
+        <p>Using credible sources — security blogs, CVE databases, news outlets, and Instructure's official statements — gather information to answer all of the following:</p>
+        <ul>
+          <li>What happened? Who was affected, when, and how was it discovered?</li>
+          <li>What vulnerability or technique was exploited? (e.g., broken access control, API misconfiguration, credential stuffing)</li>
+          <li>What data or systems were exposed?</li>
+          <li>How did Canvas / Instructure respond?</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="step-card">
+      <div class="step-num">02</div>
+      <div class="step-body">
+        <div class="step-title">Classify the Attack</div>
+        <p>Map the breach to at least one recognized framework. Don't just name it — explain <em>why</em> it fits this specific incident.</p>
+        <ul>
+          <li><strong>OWASP Top 10</strong> — which category applies and why?</li>
+          <li><strong>MITRE ATT&CK</strong> — which tactic or technique matches the attacker behavior?</li>
+          <li><strong>CVE entry</strong> — if one exists, cite it. If not, document that gap and explain what a CVE entry should contain based on what you found.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="step-card">
+      <div class="step-num">03</div>
+      <div class="step-body">
+        <div class="step-title">Analyze the Impact — All Three Layers</div>
+        <p>Strong security analysis considers every layer of impact, not just the technical damage.</p>
+        <ul>
+          <li><strong>Technical:</strong> What systems, APIs, or data were compromised?</li>
+          <li><strong>Institutional:</strong> How does this affect schools or districts using Canvas?</li>
+          <li><strong>Human:</strong> What are the privacy implications for students and staff?</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="step-card">
+      <div class="step-num">04</div>
+      <div class="step-body">
+        <div class="step-title">Recommend Remediations</div>
+        <p>Propose at least two specific remediations. These must be <strong>technically grounded</strong> and feasible — not generic advice like "use stronger passwords."</p>
+        <p>Think about both short-term patches and long-term architectural fixes. The best security teams address both.</p>
+      </div>
+    </div>
+
+    <div class="badge-block ethics">
+      <span class="bb-label">Ethics</span>
+      <p>The human layer matters most. Student data — grades, communications, and personally identifiable information — is protected under FERPA. Consider what obligations a school district has when its tools are breached, and what students are owed in terms of disclosure and remediation.</p>
+    </div>
+  </div>
+
+  <!-- DELIVERABLE MENU -->
+  <div class="section-wrap">
+    <div class="section-label">Deliverable Menu — Choose One</div>
+
+    <div class="deliverable-grid">
+      <div class="deliverable-card">
+        <div class="d-name">Security Brief</div>
+        <div class="d-desc">1–2 page written report structured as a professional incident summary.</div>
+      </div>
+      <div class="deliverable-card">
+        <div class="d-name">Slide Deck</div>
+        <div class="d-desc">8–10 slides presenting the breach, classification, impact, and remediation.</div>
+      </div>
+      <div class="deliverable-card">
+        <div class="d-name">Threat Model</div>
+        <div class="d-desc">Annotated diagram mapping the attack path, assets at risk, and mitigations.</div>
+      </div>
+      <div class="deliverable-card">
+        <div class="d-name">Video Explainer</div>
+        <div class="d-desc">3–5 minute recorded walkthrough — screen share or talking head.</div>
+      </div>
+      <div class="deliverable-card">
+        <div class="d-name">Mock Patch Notes</div>
+        <div class="d-desc">Write the official remediation release as if you were Canvas's security team.</div>
+      </div>
+    </div>
+
+    <div class="badge-block tip" style="margin-top:12px;">
+      <span class="bb-label">Tip</span>
+      <p>All five formats are graded on the same rubric. Pick the one that plays to your strengths, not the one that looks easiest.</p>
+    </div>
+  </div>
+
+  <!-- WHAT TO SUBMIT -->
+  <div class="section-wrap">
+    <div class="section-label">What to Submit</div>
+
+    <div class="card">
+      <ul class="checklist">
+        <li>Your completed artifact in the chosen format, submitted to Canvas</li>
+        <li>A 1-paragraph reflection — what would you have done differently if you were on Canvas's security team?</li>
+        <li>A source list with at least 3 credible references: CVE database entry, vendor advisory, or reputable security publication</li>
+      </ul>
+    </div>
+
+    <div class="badge-block req">
+      <span class="bb-label">Required</span>
+      <p>Credible sources matter. Avoid unverified blogs or social media claims. Security analysis is only as strong as the evidence behind it. Cite everything.</p>
+    </div>
+  </div>
+
+  <!-- EXIT TICKET -->
+  <div class="section-wrap">
+    <div class="section-label">Exit Ticket</div>
+
+    <div class="exit-card">
+      <div class="exit-q">
+        <div class="exit-num">1</div>
+        <div class="exit-text">What OWASP Top 10 category best fits this breach, and why?</div>
+      </div>
+      <div class="exit-q">
+        <div class="exit-num">2</div>
+        <div class="exit-text">Name one thing Canvas did right in their response and one thing they should have done faster.</div>
+      </div>
+      <div class="exit-q">
+        <div class="exit-num">3</div>
+        <div class="exit-text">If this breach happened at our school using Canvas, what is the first action you would take as the IT security lead?</div>
+      </div>
+      <div class="exit-note">// Post all three answers in your Canvas submission comments before submitting — 1–2 sentences each</div>
+    </div>
+  </div>
+
+  <!-- RUBRIC -->
+  <div class="section-wrap">
+    <div class="section-label">Grading Rubric — 100 Points</div>
+
+    <div class="rubric-wrap">
+      <table class="rubric-table">
+        <thead>
+          <tr>
+            <th>Criterion</th>
+            <th>Full Credit</th>
+            <th>Partial Credit</th>
+            <th>No Credit</th>
+            <th>Pts</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Accuracy of Breach Summary</td>
+            <td>Factually correct, sourced with ≥ 2 credible citations</td>
+            <td>Minor inaccuracies or partially sourced</td>
+            <td>Incorrect, unsourced, or missing</td>
+            <td>15</td>
+          </tr>
+          <tr>
+            <td>Framework Classification</td>
+            <td>Correct OWASP / MITRE / CVE mapping with clear explanation of fit</td>
+            <td>Framework named but not meaningfully applied</td>
+            <td>Missing or incorrect framework</td>
+            <td>20</td>
+          </tr>
+          <tr>
+            <td>Impact Analysis</td>
+            <td>All three layers addressed — technical, institutional, and human</td>
+            <td>1–2 layers addressed with partial depth</td>
+            <td>No impact analysis present</td>
+            <td>20</td>
+          </tr>
+          <tr>
+            <td>Remediation Quality</td>
+            <td>≥ 2 specific, technically grounded, and feasible recommendations</td>
+            <td>Recommendations present but generic or vague</td>
+            <td>Remediations missing or unrelated</td>
+            <td>20</td>
+          </tr>
+          <tr>
+            <td>Deliverable Quality</td>
+            <td>Clear, organized, audience-appropriate presentation</td>
+            <td>Incomplete, hard to follow, or missing sections</td>
+            <td>Deliverable not submitted</td>
+            <td>15</td>
+          </tr>
+          <tr>
+            <td>Exit Ticket</td>
+            <td>All 3 questions answered substantively in submission comments</td>
+            <td>1–2 questions answered or answers too brief</td>
+            <td>Exit ticket not completed</td>
+            <td>10</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="rubric-total-row">
+      <span class="total-label">Total</span>
+      <span class="total-pts">100 pts</span>
+    </div>
+  </div>
+
+  <!-- RESOURCES -->
+  <div class="section-wrap">
+    <div class="section-label">Resources</div>
+
+    <div class="card">
+      <ul class="resource-list">
+        <li><div><strong>OWASP Top 10</strong> — <a href="https://owasp.org/www-project-top-ten/" target="_blank">owasp.org/www-project-top-ten</a></div></li>
+        <li><div><strong>MITRE ATT&CK Framework</strong> — <a href="https://attack.mitre.org/" target="_blank">attack.mitre.org</a></div></li>
+        <li><div><strong>NIST NVD / CVE Database</strong> — <a href="https://nvd.nist.gov/" target="_blank">nvd.nist.gov</a></div></li>
+        <li><div><strong>Instructure Security Advisories</strong> — search <em>instructure.com/security</em> for official vendor statements</div></li>
+        <li><div><strong>Krebs on Security</strong> — reliable, detailed breach coverage</div></li>
+        <li><div><strong>BleepingComputer</strong> — well-sourced cybersecurity news and incident reporting</div></li>
+        <li><div><strong>The Hacker News</strong> — breach reporting and technical analysis</div></li>
+      </ul>
+    </div>
+
+    <div class="badge-block tip">
+      <span class="bb-label">Instructor Note</span>
+      <p>Verify that specific breach details are publicly documented before distributing. Update with direct links to the relevant advisory or CVE entry once confirmed.</p>
+    </div>
+  </div>
+
+</main>
+
+<footer>
+  <span>Cybersecurity Fundamentals</span> &nbsp;·&nbsp; Air-gapped Kali Linux Lab &nbsp;·&nbsp; All activities authorized
+</footer>
+
+<script>
+  // ── THEME TOGGLE (matches index.html exactly) ──
+  const toggle = document.getElementById('themeToggle');
+  const stored = localStorage.getItem('indexTheme') || 'dark';
+  document.documentElement.setAttribute('data-theme', stored);
+  toggle.textContent = stored === 'dark' ? '☀' : '☽';
+
+  toggle.addEventListener('click', () => {
+    const next = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', next);
+    localStorage.setItem('indexTheme', next);
+    toggle.textContent = next === 'dark' ? '☀' : '☽';
+  });
+
+  // ── SCROLL REVEAL ──
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach((entry, i) => {
+      if (entry.isIntersecting) {
+        setTimeout(() => entry.target.classList.add('visible'), i * 55);
+      }
+    });
+  }, { threshold: 0.08 });
+
+  document.querySelectorAll(
+    '.card, .mission-banner, .badge-block, .step-card, .deliverable-card, .exit-card, .rubric-wrap, .rubric-total-row'
+  ).forEach(el => observer.observe(el));
+</script>
+
+</body>
+</html>
