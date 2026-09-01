@@ -1,0 +1,689 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ethical Hacking Syllabus</title>
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=DM+Sans:ital,wght@0,300;0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:      #080e17;
+    --surface: #0d1820;
+    --card:    #111d29;
+    --border:  #1e3048;
+    --slate:   #2a5080;
+    --sky:     #4a9eca;
+    --frost:   #a8d4ec;
+    --white:   #e8f4fc;
+    --dim:     #5a7a96;
+    --accent:  #e84855;
+    --green:   #27c06a;
+    --amber:   #f0a030;
+    --mono:    'Share Tech Mono', monospace;
+    --sans:    'DM Sans', sans-serif;
+    color-scheme: dark;
+  }
+
+  html[data-theme="light"] {
+    --bg:      #f0f6fc;
+    --surface: #e4eef8;
+    --card:    #ffffff;
+    --border:  #c4d8ec;
+    --sky:     #1e6fa0;
+    --frost:   #7ab8d8;
+    --white:   #0d1b2a;
+    --dim:     #4a6882;
+    --green:   #1a8a48;
+    --amber:   #b87018;
+    color-scheme: light;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: var(--sans);
+    background: var(--bg);
+    color: var(--white);
+    min-height: 100vh;
+    overflow-x: hidden;
+    transition: background 0.3s, color 0.3s;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(74,158,202,0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(74,158,202,0.04) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+    transition: opacity 0.3s;
+  }
+
+  html[data-theme="light"] body::before {
+    background-image:
+      linear-gradient(rgba(13,27,42,0.05) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(13,27,42,0.05) 1px, transparent 1px);
+  }
+
+  body::after {
+    content: '';
+    position: fixed;
+    top: -100%;
+    left: 0;
+    right: 0;
+    height: 200%;
+    background: linear-gradient(transparent 49.5%, rgba(74,158,202,0.03) 50%, transparent 50.5%);
+    background-size: 100% 4px;
+    animation: scan 8s linear infinite;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  html[data-theme="light"] body::after { opacity: 0; }
+
+  @keyframes scan {
+    0%   { transform: translateY(0); }
+    100% { transform: translateY(50%); }
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(14px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  header {
+    position: relative;
+    z-index: 10;
+    padding: 64px 32px 48px;
+    max-width: 860px;
+    margin: 0 auto;
+    text-align: center;
+  }
+
+  .theme-toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--card);
+    border: 1px solid var(--border);
+    color: var(--sky);
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 17px;
+    transition: background 0.2s, border-color 0.2s;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.25);
+    margin: 0 auto 24px;
+  }
+  .theme-toggle:hover { border-color: var(--sky); }
+
+  .header-eyebrow {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--sky);
+    margin-bottom: 20px;
+    opacity: 0;
+    animation: fadeUp 0.6s ease 0.1s forwards;
+  }
+  .header-eyebrow::before, .header-eyebrow::after {
+    content: '──';
+    margin: 0 12px;
+    opacity: 0.4;
+  }
+
+  .header-title {
+    font-family: var(--mono);
+    font-size: clamp(28px, 4vw, 48px);
+    font-weight: 400;
+    line-height: 1.15;
+    letter-spacing: -0.02em;
+    color: var(--white);
+    margin-bottom: 12px;
+    opacity: 0;
+    animation: fadeUp 0.6s ease 0.25s forwards;
+  }
+  .header-title span { color: var(--accent); }
+
+  .header-sub {
+    font-family: var(--mono);
+    font-size: 13px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--dim);
+    opacity: 0;
+    animation: fadeUp 0.6s ease 0.4s forwards;
+  }
+
+  main {
+    position: relative;
+    z-index: 10;
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 0 32px 80px;
+  }
+
+  .section-label {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--dim);
+    margin: 48px 0 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .section-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 28px 32px;
+    margin-bottom: 16px;
+  }
+
+  .card p {
+    font-size: 16px;
+    line-height: 1.75;
+    color: var(--dim);
+  }
+
+  .card p + p { margin-top: 14px; }
+
+  .meta-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+
+  .meta-item {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px 20px;
+  }
+
+  .meta-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--dim);
+    margin-bottom: 6px;
+  }
+
+  .meta-value {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--white);
+  }
+
+  .workflow-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .workflow-list li {
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+    padding: 14px 18px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-size: 15px;
+    color: var(--dim);
+    line-height: 1.5;
+  }
+
+  .workflow-list li .day {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--sky);
+    white-space: nowrap;
+    padding-top: 2px;
+    min-width: 60px;
+  }
+
+  .systems-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 12px;
+  }
+
+  .system-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px;
+  }
+
+  .system-name {
+    font-family: var(--mono);
+    font-size: 13px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--sky);
+    margin-bottom: 6px;
+  }
+
+  .system-desc {
+    font-size: 14px;
+    color: var(--dim);
+    line-height: 1.5;
+  }
+
+  .grade-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 18px;
+    border-bottom: 1px solid var(--border);
+    font-size: 15px;
+  }
+  .grade-row:last-child { border-bottom: none; }
+  .grade-pct {
+    font-family: var(--mono);
+    font-size: 16px;
+    color: var(--sky);
+  }
+
+  .ethics-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .ethics-list li {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    font-size: 15px;
+    color: var(--dim);
+    line-height: 1.5;
+  }
+  .ethics-list li::before {
+    content: '▸';
+    color: var(--accent);
+    font-family: var(--mono);
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+
+  .violation-note {
+    margin-top: 16px;
+    padding: 12px 18px;
+    border-left: 3px solid var(--accent);
+    background: rgba(232,72,85,0.06);
+    border-radius: 0 6px 6px 0;
+    font-size: 14px;
+    color: var(--dim);
+  }
+
+  .cycle-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .cycle-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+
+  .cycle-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface);
+  }
+
+  .cycle-num {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--sky);
+    white-space: nowrap;
+  }
+
+  .cycle-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--white);
+  }
+
+  .cycle-weeks {
+    margin-left: auto;
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--dim);
+    white-space: nowrap;
+  }
+
+  .cycle-body {
+    padding: 16px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .cycle-row {
+    display: flex;
+    gap: 12px;
+    font-size: 14px;
+    color: var(--dim);
+    line-height: 1.5;
+  }
+
+  .cycle-row-label {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--sky);
+    white-space: nowrap;
+    min-width: 64px;
+    padding-top: 2px;
+  }
+
+  .cycle-card.final {
+    border-color: rgba(232,72,85,0.35);
+  }
+
+  .cycle-card.final .cycle-header {
+    background: rgba(232,72,85,0.06);
+    border-color: rgba(232,72,85,0.2);
+  }
+
+  .cycle-card.final .cycle-num { color: var(--accent); }
+
+  .final-deliverable {
+    margin-top: 8px;
+    padding: 12px 16px;
+    background: rgba(232,72,85,0.06);
+    border: 1px solid rgba(232,72,85,0.2);
+    border-radius: 6px;
+    font-size: 14px;
+    color: var(--dim);
+    line-height: 1.6;
+  }
+
+  .final-deliverable strong {
+    display: block;
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 4px;
+  }
+
+  .philosophy-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 28px 32px;
+  }
+
+  .philosophy-card p {
+    font-size: 16px;
+    line-height: 1.8;
+    color: var(--dim);
+  }
+
+  footer {
+    position: relative;
+    z-index: 10;
+    text-align: center;
+    padding: 24px 32px 40px;
+    border-top: 1px solid var(--border);
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--dim);
+    letter-spacing: 0.1em;
+  }
+  footer span { color: var(--sky); }
+
+  @media (max-width: 600px) {
+    header { padding: 40px 20px 32px; }
+    main   { padding: 0 20px 60px; }
+    .card, .philosophy-card { padding: 20px; }
+    .cycle-header { flex-wrap: wrap; gap: 8px; }
+    .cycle-weeks { margin-left: 0; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <button class="theme-toggle" id="themeToggle" aria-label="Toggle light/dark mode">☀</button>
+  <div class="header-eyebrow">Senior CTE Cybersecurity</div>
+  <h1 class="header-title">Ethical <span>Hacking</span> Syllabus</h1>
+  <p class="header-sub">Offense-first · Air-gapped lab · 18 weeks</p>
+</header>
+
+<main>
+
+  <div class="section-label">Course Overview</div>
+  <div class="card">
+    <p>This advanced, senior-level Career and Technical Education (CTE) course simulates real-world cybersecurity operations through an offense-first model. Students operate as professional security analysts, testing and evaluating the security of a fictional but production-realistic company and its core product, a marketing intelligence platform.</p>
+    <p>Rather than surveying multiple disconnected systems, students engage with a persistent enterprise environment where vulnerabilities, exploits, and mitigations directly affect system integrity and business outcomes. Defensive strategies are introduced and validated through instructor-led demonstrations and AI-assisted defensive analysis, allowing students to focus on mastering ethical offensive security techniques while understanding how defenses are designed and enforced.</p>
+    <p>The course is conducted entirely within a fully air-gapped lab, using only synthetic data and instructor-controlled systems.</p>
+  </div>
+
+  <div class="section-label">Course Structure</div>
+  <div class="meta-grid">
+    <div class="meta-item">
+      <div class="meta-label">Duration</div>
+      <div class="meta-value">18 Weeks</div>
+    </div>
+    <div class="meta-item">
+      <div class="meta-label">Schedule</div>
+      <div class="meta-value">80 min / day</div>
+    </div>
+    <div class="meta-item">
+      <div class="meta-label">Team Model</div>
+      <div class="meta-value">4 Teams / 6 Cycles</div>
+    </div>
+    <div class="meta-item">
+      <div class="meta-label">Approach</div>
+      <div class="meta-value">Offense-first</div>
+    </div>
+  </div>
+
+  <div class="section-label">Weekly SOC Workflow</div>
+  <ul class="workflow-list">
+    <li><span class="day">Day 1</span>SOC briefing and instructor-led live threat demonstration (defensive perspective)</li>
+    <li><span class="day">Day 2</span>Student teams conduct detection and controlled exploitation</li>
+    <li><span class="day">Days 3–4</span>Instructor- and AI-guided remediation walkthroughs and verification testing</li>
+    <li><span class="day">Day 5</span>Submission of SOC Incident Report</li>
+  </ul>
+
+  <div class="section-label">Air-Gapped Lab Environment</div>
+  <div class="card" style="margin-bottom:16px">
+    <p>All activities occur within a fully isolated network. Network range: <strong style="color:var(--sky);font-family:var(--mono)">192.168.1.0/24</strong>. Internet access: none.</p>
+  </div>
+  <div class="systems-grid">
+    <div class="system-card">
+      <div class="system-name">Core System</div>
+      <div class="system-desc">Windows-based signal generation system</div>
+    </div>
+    <div class="system-card">
+      <div class="system-name">Studio System</div>
+      <div class="system-desc">Windows-based trend aggregation and analysis system</div>
+    </div>
+    <div class="system-card">
+      <div class="system-name">Dashboard System</div>
+      <div class="system-desc">Raspberry Pi running a Flask-based executive dashboard</div>
+    </div>
+  </div>
+
+  <div class="section-label">Assessment &amp; Grading</div>
+  <div class="card" style="padding:0;overflow:hidden">
+    <div class="grade-row">
+      <span>Six SOC Cycle Reports</span>
+      <span class="grade-pct">70%</span>
+    </div>
+    <div class="grade-row">
+      <span>Midterm Practical Exam (Cycle 3)</span>
+      <span class="grade-pct">15%</span>
+    </div>
+    <div class="grade-row">
+      <span>Final Capture-the-Flag (Cycle 6)</span>
+      <span class="grade-pct">15%</span>
+    </div>
+  </div>
+  <div class="card" style="margin-top:0;border-top:none;border-radius:0 0 10px 10px;padding:16px 20px">
+    <p style="font-size:14px">All assessments require screenshots, command logs, verification evidence, and professional reporting.</p>
+  </div>
+
+  <div class="section-label">Safety, Ethics &amp; Scope</div>
+  <div class="card">
+    <ul class="ethics-list">
+      <li>No internet connectivity is permitted</li>
+      <li>Only synthetic, instructor-generated data is used</li>
+      <li>Students may interact only with the three approved systems</li>
+      <li>All activity must be logged and documented</li>
+      <li>A signed Ethics and Acceptable Use Agreement is required before lab access</li>
+    </ul>
+    <div class="violation-note">Violations result in immediate suspension from lab activities.</div>
+  </div>
+
+  <div class="section-label">Six Attack–Defense Cycles</div>
+  <p style="font-size:14px;color:var(--dim);margin-bottom:20px;position:relative;z-index:10">Each cycle spans three weeks and follows the same structured progression: <strong style="color:var(--white)">Detect → Exploit → Validate → Report.</strong></p>
+
+  <div class="cycle-grid">
+
+    <div class="cycle-card">
+      <div class="cycle-header">
+        <span class="cycle-num">Cycle 1</span>
+        <span class="cycle-title">Network Security</span>
+        <span class="cycle-weeks">Weeks 1–3</span>
+      </div>
+      <div class="cycle-body">
+        <div class="cycle-row"><span class="cycle-row-label">Detect</span>Enterprise network mapping and baseline analysis</div>
+        <div class="cycle-row"><span class="cycle-row-label">Exploit</span>ARP spoofing between the Studio and Dashboard systems to manipulate trend delivery</div>
+        <div class="cycle-row"><span class="cycle-row-label">Validate</span>Instructor-led static ARP remediation and traffic verification</div>
+      </div>
+    </div>
+
+    <div class="cycle-card">
+      <div class="cycle-header">
+        <span class="cycle-num">Cycle 2</span>
+        <span class="cycle-title">Application Security</span>
+        <span class="cycle-weeks">Weeks 4–6</span>
+      </div>
+      <div class="cycle-body">
+        <div class="cycle-row"><span class="cycle-row-label">Detect</span>Service enumeration and Flask application risk analysis</div>
+        <div class="cycle-row"><span class="cycle-row-label">Exploit</span>SQL injection against the Dashboard system</div>
+        <div class="cycle-row"><span class="cycle-row-label">Validate</span>Parameterized queries and application re-testing</div>
+      </div>
+    </div>
+
+    <div class="cycle-card">
+      <div class="cycle-header">
+        <span class="cycle-num">Cycle 3</span>
+        <span class="cycle-title">Authentication &amp; Identity</span>
+        <span class="cycle-weeks">Weeks 7–9</span>
+      </div>
+      <div class="cycle-body">
+        <div class="cycle-row"><span class="cycle-row-label">Detect</span>User and account enumeration across Windows systems</div>
+        <div class="cycle-row"><span class="cycle-row-label">Exploit</span>Password spraying against the Core and Studio systems</div>
+        <div class="cycle-row"><span class="cycle-row-label">Validate</span>Account lockout policies and credential hardening</div>
+        <div class="cycle-row"><span class="cycle-row-label">Midterm</span>Live authentication attack demonstration</div>
+      </div>
+    </div>
+
+    <div class="cycle-card">
+      <div class="cycle-header">
+        <span class="cycle-num">Cycle 4</span>
+        <span class="cycle-title">Data in Transit</span>
+        <span class="cycle-weeks">Weeks 10–12</span>
+      </div>
+      <div class="cycle-body">
+        <div class="cycle-row"><span class="cycle-row-label">Detect</span>Traffic analysis and session pattern identification</div>
+        <div class="cycle-row"><span class="cycle-row-label">Exploit</span>Session hijacking to gain unauthorized dashboard access</div>
+        <div class="cycle-row"><span class="cycle-row-label">Validate</span>TLS enforcement and secure session validation</div>
+      </div>
+    </div>
+
+    <div class="cycle-card">
+      <div class="cycle-header">
+        <span class="cycle-num">Cycle 5</span>
+        <span class="cycle-title">Local Privilege Escalation</span>
+        <span class="cycle-weeks">Weeks 13–15</span>
+      </div>
+      <div class="cycle-body">
+        <div class="cycle-row"><span class="cycle-row-label">Detect</span>Configuration audits and privilege baseline documentation</div>
+        <div class="cycle-row"><span class="cycle-row-label">Exploit</span>Windows local privilege escalation</div>
+        <div class="cycle-row"><span class="cycle-row-label">Validate</span>Least-privilege enforcement and capability controls</div>
+      </div>
+    </div>
+
+    <div class="cycle-card final">
+      <div class="cycle-header">
+        <span class="cycle-num">Cycle 6</span>
+        <span class="cycle-title">Full Enterprise Assessment</span>
+        <span class="cycle-weeks">Weeks 16–18</span>
+      </div>
+      <div class="cycle-body">
+        <div class="cycle-row"><span class="cycle-row-label">Scope</span>Multi-vector assessment across all systems</div>
+        <div class="cycle-row"><span class="cycle-row-label">Format</span>Time-bound testing under operational constraints</div>
+        <div class="cycle-row"><span class="cycle-row-label">Review</span>Instructor- and AI-guided defensive review</div>
+        <div class="final-deliverable">
+          <strong>Final Deliverable</strong>
+          Enterprise Security Assessment — an executive-grade report including attack chains, verified mitigations, risk-to-revenue mapping, and a remediation roadmap.
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="section-label">Instructional Philosophy</div>
+  <div class="philosophy-card">
+    <p>This course prioritizes realism, accountability, and ethical practice. Students do not simply run tools; they think like security professionals, document like analysts, and communicate like consultants. By combining offensive skill development with guided defensive insight, this course prepares students for postsecondary cybersecurity programs and entry-level industry roles while maintaining strict safety and ethical standards.</p>
+  </div>
+
+</main>
+
+<footer>
+  <span>Cybersecurity Fundamentals</span> &nbsp;·&nbsp; Air-gapped Kali Linux Lab &nbsp;·&nbsp; All activities authorized
+</footer>
+
+<script>
+  const toggle = document.getElementById('themeToggle');
+  const stored = localStorage.getItem('syllabusTheme') || 'dark';
+  document.documentElement.setAttribute('data-theme', stored);
+  toggle.textContent = stored === 'dark' ? '☀' : '☽';
+
+  toggle.addEventListener('click', () => {
+    const next = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', next);
+    localStorage.setItem('syllabusTheme', next);
+    toggle.textContent = next === 'dark' ? '☀' : '☽';
+  });
+</script>
+
+</body>
+</html>
