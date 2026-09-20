@@ -620,33 +620,6 @@
 
   .notice p { margin: 0; color: var(--steel); font-size: 13px; }
 
-  /* ── TEAM CARDS ── */
-  .team-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
-    gap: 12px;
-  }
-
-  .team-card {
-    background: var(--white);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 14px 16px;
-  }
-
-  .team-name {
-    font-family: var(--mono);
-    font-size: 13px;
-    font-weight: 600;
-    color: var(--sky);
-    margin-bottom: 4px;
-  }
-
-  .team-role {
-    font-size: 12px;
-    color: var(--slate);
-  }
-
   /* ── REFLECTION / SELF-CHECK ── */
   .reflection-list {
     display: flex;
@@ -749,7 +722,6 @@
     .obj-list { grid-template-columns: 1fr; }
     .header-meta { display: none; }
     .vocab-grid { grid-template-columns: 1fr 1fr; }
-    .team-grid { grid-template-columns: 1fr 1fr; }
   }
 
   @media print {
@@ -872,25 +844,6 @@
       <p style="font-size:14px; line-height:1.7; color:var(--ink); margin-bottom:16px;">
         Natas is your training range for the same categories of bugs (leaked secrets, weak cookies, sloppy file handling, unfiltered input) that a sloppy web developer could ship into any real production site.
       </p>
-
-      <div class="team-grid" style="margin-bottom:16px;">
-        <div class="team-card">
-          <div class="team-name">Ghost: Researcher</div>
-          <div class="team-role">Reads the page, the docs, and the level hints before anyone touches a tool.</div>
-        </div>
-        <div class="team-card">
-          <div class="team-name">Shadow: Coder / Tester</div>
-          <div class="team-role">Builds the request, edits the header or cookie, runs the payload.</div>
-        </div>
-        <div class="team-card">
-          <div class="team-name">Fantom: Analyst</div>
-          <div class="team-role">Interprets what came back and decides what it means for the exploit.</div>
-        </div>
-        <div class="team-card">
-          <div class="team-name">Cipher: Organizer</div>
-          <div class="team-role">Keeps the password log current and keeps the team moving on pace.</div>
-        </div>
-      </div>
 
       <div class="notice notice-info">
         <div class="notice-icon">ℹ</div>
@@ -1067,34 +1020,6 @@
               <li>Teams take over levels 1 through 3 independently, using the same View Source / DevTools approach.</li>
               <li class="sub">Level 2 hint: an image is loading from somewhere. Where does that path lead if you visit it directly?</li>
               <li class="sub">Level 3 hint: search engines are told to stay out of certain folders. That file is public.</li>
-              <li><strong>Feynman check:</strong> before logging a password, one team member explains out loud why right-clicking being disabled on level 1 did not actually stop you.</li>
-            </ul>
-          </div>
-
-          <div class="time-block">
-            <div class="time-label">Closing</div>
-            <ul class="step-list">
-              <li>Exit ticket: name one place on a real website where a developer might accidentally leave sensitive information in the page source.</li>
-              <li>Confidence check: Very Confident / Somewhat Confident / Struggling: reading raw HTML source to find hidden data.</li>
-              <li>Open-ended: what part of today, if any, would you want walked through again tomorrow?</li>
-            </ul>
-          </div>
-
-          <div class="time-block">
-            <div class="time-label">Interventions, Accommodations &amp; Modifications</div>
-            <ul class="step-list">
-              <li><strong>Struggling:</strong> pair with a stronger reader for Ctrl+U; provide a printed annotated screenshot of level 0's source with the comment circled as a model before they attempt level 1 solo.</li>
-              <li><strong>Advanced:</strong> after finishing level 3, have them explain why <code>robots.txt</code> is not a security control and sketch how they would find a hidden path on a site with no robots.txt at all.</li>
-              <li>Scaffolds narrow where to look, never the answer itself, rigor stays the same for every team.</li>
-            </ul>
-          </div>
-
-          <div class="time-block">
-            <div class="time-label">Materials</div>
-            <ul class="step-list">
-              <li>Chromebook or laptop with internet access and a modern browser</li>
-              <li>Team password log (see LAB section below)</li>
-              <li>Projector for instructor modeling</li>
             </ul>
           </div>
 
@@ -1143,34 +1068,6 @@
               <li>Teacher models on level 4: opens the Network tab, resends the request with an edited <code>Referer</code> header, shows the page unlock.</li>
               <li>Teams complete level 4 independently, then move to level 5 with less guidance.</li>
               <li class="sub">Level 5 hint: the page says you are not logged in. Somewhere, something is tracking that state, and you can see it.</li>
-              <li><strong>Feynman check:</strong> a team member explains, without reading from notes, why the server believed the edited Referer header instead of catching the lie.</li>
-            </ul>
-          </div>
-
-          <div class="time-block">
-            <div class="time-label">Closing</div>
-            <ul class="step-list">
-              <li>Exit ticket: what is one header or cookie value a real website should never fully trust from the visitor's browser, and why?</li>
-              <li>Confidence check: Very Confident / Somewhat Confident / Struggling: editing headers and cookies in DevTools.</li>
-              <li>Open-ended: what would help you feel more confident with DevTools before tomorrow's lesson?</li>
-            </ul>
-          </div>
-
-          <div class="time-block">
-            <div class="time-label">Interventions, Accommodations &amp; Modifications</div>
-            <ul class="step-list">
-              <li><strong>Struggling:</strong> provide a labeled screenshot showing exactly where the Referer header field lives in the resend-request panel; walk the cookie edit step live at their station before releasing them.</li>
-              <li><strong>Advanced:</strong> ask them to find and edit the cookie using only the Console tab (<code>document.cookie</code>) instead of the Application tab's graphical editor.</li>
-              <li>Every team edits the actual header or cookie themselves, no team is handed a pre-made request.</li>
-            </ul>
-          </div>
-
-          <div class="time-block">
-            <div class="time-label">Materials</div>
-            <ul class="step-list">
-              <li>Chromebook or laptop with internet access and a modern browser</li>
-              <li>Team password log</li>
-              <li>Projector for instructor modeling of the Network and Application tabs</li>
             </ul>
           </div>
 
@@ -1219,34 +1116,6 @@
               <li>Teams work level 6 independently with the source-reading skills from Day 1.</li>
               <li>Teams then attempt level 7, where a URL parameter chooses which page to display.</li>
               <li class="sub">Level 7 hint: if a parameter controls which file loads, what happens if you point it at a file on the server that has nothing to do with this website?</li>
-              <li><strong>Feynman check:</strong> a team member explains the difference between what happened on level 6 (a file that was simply reachable) and level 7 (a parameter that let them choose the file).</li>
-            </ul>
-          </div>
-
-          <div class="time-block">
-            <div class="time-label">Closing</div>
-            <ul class="step-list">
-              <li>Exit ticket: in your own words, define Local File Inclusion and give one reason it is dangerous on a real server.</li>
-              <li>Confidence check: Very Confident / Somewhat Confident / Struggling: explaining how LFI works.</li>
-              <li>Open-ended: which of the two levels today felt more difficult, and what specifically made it hard?</li>
-            </ul>
-          </div>
-
-          <div class="time-block">
-            <div class="time-label">Interventions, Accommodations &amp; Modifications</div>
-            <ul class="step-list">
-              <li><strong>Struggling:</strong> provide the exact path syntax pattern for well-known Linux system files as a fill-in-the-blank scaffold rather than the full path; pair-program level 7 with a stronger team.</li>
-              <li><strong>Advanced:</strong> have them research and briefly present one real-world CVE or breach that involved Local File Inclusion, connecting the classroom exercise to an actual incident.</li>
-              <li>All teams still perform the request themselves, the scaffold shortens the search, not the exploit.</li>
-            </ul>
-          </div>
-
-          <div class="time-block">
-            <div class="time-label">Materials</div>
-            <ul class="step-list">
-              <li>Chromebook or laptop with internet access and a modern browser</li>
-              <li>Team password log</li>
-              <li>Optional: a short reference sheet of common Linux file paths (no answers, just format)</li>
             </ul>
           </div>
 
@@ -1296,34 +1165,6 @@
               <li>Teacher briefly models level 9's form, showing how a normal search term gets passed to a command behind the scenes.</li>
               <li>Teams attempt level 9, testing what a search-style input field actually does with unexpected characters.</li>
               <li class="sub">Level 9 hint: the form runs a search tool against a file. What if your input told the shell to run a second, unrelated command right after?</li>
-              <li><strong>Feynman check:</strong> a team member explains, step by step, the order they reversed the encoding on level 8, and separately explains why their level 9 input caused a second command to execute.</li>
-            </ul>
-          </div>
-
-          <div class="time-block">
-            <div class="time-label">Closing</div>
-            <ul class="step-list">
-              <li>Exit ticket: explain the difference between encoding and encryption using your own example, not the one from class.</li>
-              <li>Confidence check: Very Confident / Somewhat Confident / Struggling: command injection.</li>
-              <li>Open-ended: what question about today's material do you still have that you did not get to ask?</li>
-            </ul>
-          </div>
-
-          <div class="time-block">
-            <div class="time-label">Interventions, Accommodations &amp; Modifications</div>
-            <ul class="step-list">
-              <li><strong>Struggling:</strong> supply a labeled diagram of the level 8 encoding chain in the correct order (names of the functions only, not the reversed value) and an online decoder tool link for each step; for level 9, provide a worked non-solution example showing the injection syntax pattern with different placeholder text.</li>
-              <li><strong>Advanced:</strong> after level 9, ask them to predict what the developer could add to block their exact input, before Day 5 reveals the actual filter.</li>
-              <li>Predictions and diagrams scaffold the thinking; every team still types the payload and reads the result themselves.</li>
-            </ul>
-          </div>
-
-          <div class="time-block">
-            <div class="time-label">Materials</div>
-            <ul class="step-list">
-              <li>Chromebook or laptop with internet access and a modern browser</li>
-              <li>Team password log</li>
-              <li>Access to a Base64 / hex decoder website</li>
             </ul>
           </div>
 
@@ -1371,35 +1212,7 @@
               <li>Teacher models the filter itself on level 10, showing that the semicolon, pipe, and ampersand payload from level 9 now fails.</li>
               <li>Teams work level 10 independently, testing how the underlying search tool can be pointed at a second file without any of the blocked characters.</li>
               <li class="sub">Hint: the tool searches a file for a pattern. What if part of your input was not a search pattern at all, but a second filename?</li>
-              <li><strong>Feynman check:</strong> a team member explains why the level 9 payload was blocked on level 10, and why their new payload still works despite the filter.</li>
               <li>Remaining time: teams draft their team audit-summary write-up (see Deliverable below).</li>
-            </ul>
-          </div>
-
-          <div class="time-block">
-            <div class="time-label">Closing</div>
-            <ul class="step-list">
-              <li>Exit ticket: name one vulnerability from this week that you think would be easiest for a real company to accidentally ship, and why.</li>
-              <li>Confidence check: Very Confident / Somewhat Confident / Struggling: bypassing an input filter.</li>
-              <li>Open-ended: which level this week taught you the most, and what made it stick?</li>
-            </ul>
-          </div>
-
-          <div class="time-block">
-            <div class="time-label">Interventions, Accommodations &amp; Modifications</div>
-            <ul class="step-list">
-              <li><strong>Struggling:</strong> provide a worked example of a filter-bypass technique using an unrelated command (not the level's actual answer) so the pattern is visible without handing over the solution; allow the write-up to be dictated or bulleted rather than full prose.</li>
-              <li><strong>Advanced:</strong> challenge them to identify a second, different way to bypass the same filter besides the one they used first.</li>
-              <li>The audit write-up rubric is identical for every team, accommodations change the support, not the expected depth of understanding.</li>
-            </ul>
-          </div>
-
-          <div class="time-block">
-            <div class="time-label">Materials</div>
-            <ul class="step-list">
-              <li>Chromebook or laptop with internet access and a modern browser</li>
-              <li>Team password log, completed through level 10</li>
-              <li>Audit write-up template (team name, levels completed, one paragraph per level naming the vulnerability and the fix a real developer should make)</li>
             </ul>
           </div>
 
