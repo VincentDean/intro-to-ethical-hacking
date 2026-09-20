@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Week 3 Teacher Key: Natas Walkthrough</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy:    #0d1b2a;
+    --ink:     #1c2e40;
+    --steel:   #2e4d6e;
+    --slate:   #4a6fa5;
+    --sky:     #7eb8d4;
+    --frost:   #d0e8f2;
+    --paper:   #f4f7fa;
+    --white:   #ffffff;
+    --accent:  #e84855;
+    --green:   #2a9d50;
+    --amber:   #e8a020;
+    --mono:    'IBM Plex Mono', monospace;
+    --sans:    'IBM Plex Sans', sans-serif;
+    color-scheme: light;
+  }
+
+  html[data-theme="dark"] {
+    --paper:  #080e17;
+    --white:  #111d29;
+    --ink:    #c8dfe8;
+    --frost:  #1e3048;
+    --steel:  #7ab8d4;
+    --border: #1e3048;
+    color-scheme: dark;
+  }
+
+  html[data-theme="light"] {
+    --border: #c4d8ec;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: var(--sans);
+    background: var(--paper);
+    color: var(--ink);
+    min-height: 100vh;
+    overflow-x: hidden;
+    transition: background 0.3s, color 0.3s;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(74,158,202,0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(74,158,202,0.04) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+    transition: opacity 0.3s;
+  }
+
+  html[data-theme="light"] body::before {
+    background-image:
+      linear-gradient(rgba(13,27,42,0.05) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(13,27,42,0.05) 1px, transparent 1px);
+  }
+
+  body::after {
+    content: '';
+    position: fixed;
+    top: -100%;
+    left: 0;
+    right: 0;
+    height: 200%;
+    background: linear-gradient(transparent 49.5%, rgba(74,158,202,0.03) 50%, transparent 50.5%);
+    background-size: 100% 4px;
+    animation: scan 8s linear infinite;
+    pointer-events: none;
+    z-index: 0;
+    transition: opacity 0.3s;
+  }
+
+  html[data-theme="light"] body::after { opacity: 0; }
+
+  @keyframes scan {
+    0%   { transform: translateY(0); }
+    100% { transform: translateY(50%); }
+  }
+
+  header {
+    background: var(--navy);
+    color: #d0e8f2;
+    padding: 0;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    border-bottom: 3px solid var(--accent);
+    box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+  }
+
+  .header-inner {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 14px 32px;
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    flex-wrap: wrap;
+  }
+
+  .header-week {
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--sky);
+    border: 1px solid var(--steel);
+    padding: 4px 10px;
+    border-radius: 3px;
+    white-space: nowrap;
+  }
+
+  .header-title {
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    flex: 1;
+  }
+
+  .header-back {
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--sky);
+    text-decoration: none;
+    border: 1px solid var(--steel);
+    padding: 4px 10px;
+    border-radius: 3px;
+    white-space: nowrap;
+    transition: border-color 0.15s, color 0.15s;
+  }
+
+  .header-back:hover { border-color: var(--sky); color: var(--white); }
+
+  .theme-toggle {
+    flex-shrink: 0;
+    background: rgba(255,255,255,0.08);
+    border: 1px solid var(--steel);
+    color: var(--sky);
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 15px;
+    transition: background 0.2s, border-color 0.2s;
+  }
+
+  .theme-toggle:hover { border-color: var(--sky); }
+
+  main {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 32px 24px 64px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .teacher-flag {
+    display: inline-block;
+    font-family: var(--mono);
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--accent);
+    border: 1px solid var(--accent);
+    padding: 3px 10px;
+    border-radius: 3px;
+    margin-bottom: 18px;
+  }
+
+  .page-title {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--navy);
+    margin-bottom: 4px;
+    letter-spacing: -0.02em;
+  }
+
+  html[data-theme="dark"] .page-title { color: var(--sky); }
+
+  .page-subtitle {
+    font-size: 13px;
+    color: var(--slate);
+    font-style: italic;
+    margin-bottom: 24px;
+  }
+
+  .notice {
+    display: flex;
+    gap: 14px;
+    padding: 14px 16px;
+    border-radius: 8px;
+    margin-bottom: 24px;
+    font-size: 14px;
+    line-height: 1.5;
+    background: #fdeaea;
+    border-left: 4px solid var(--accent);
+  }
+
+  html[data-theme="dark"] .notice { background: rgba(232,72,85,0.10); }
+
+  .notice-icon { font-size: 18px; flex-shrink: 0; line-height: 1.4; }
+
+  .notice strong {
+    display: block;
+    font-size: 13px;
+    font-weight: 700;
+    margin-bottom: 3px;
+    color: var(--ink);
+  }
+
+  .notice p { margin: 0; color: var(--steel); font-size: 13px; }
+
+  .data-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+    margin-bottom: 24px;
+  }
+
+  .data-table thead tr { background: var(--navy); color: var(--sky); }
+
+  .data-table th {
+    padding: 10px 14px;
+    text-align: left;
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .data-table td {
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--frost);
+    color: var(--ink);
+    vertical-align: top;
+    line-height: 1.4;
+  }
+
+  .data-table tr:last-child td { border-bottom: none; }
+  .data-table tbody tr:hover td { background: var(--paper); }
+
+  code {
+    font-family: var(--mono);
+    font-size: 12px;
+    background: var(--navy);
+    color: var(--sky);
+    padding: 2px 7px;
+    border-radius: 4px;
+  }
+
+  @media (max-width: 640px) {
+    main { padding: 24px 16px 48px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <a class="header-back" href="week_3.html">← Week 3</a>
+    <div class="header-week">Week 03</div>
+    <div class="header-title">Teacher Key: Natas Walkthrough</div>
+    <button class="theme-toggle" id="themeToggle" aria-label="Toggle light/dark mode">☀</button>
+  </div>
+</header>
+
+<main>
+
+  <div class="teacher-flag">Teacher-Only Page, Not Linked From Student Materials</div>
+
+  <div class="page-title">Natas Answer Key, Levels 0-10</div>
+  <div class="page-subtitle">Instructor reference only. This page is intentionally not linked from week_3.html or index.html.</div>
+
+  <div class="notice">
+    <div class="notice-icon">⚠</div>
+    <div>
+      <strong>Passwords reset when OverTheWire resets the game</strong>
+      <p>Do not hardcode any password value into student materials or memorize it as permanent. Recover every password live, in class, from the actual current state of the game.</p>
+    </div>
+  </div>
+
+  <table class="data-table">
+    <thead>
+      <tr><th>Level</th><th>Path to the next level's password</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>0</td><td>View Source (Ctrl+U), the password for natas1 sits in an HTML comment.</td></tr>
+      <tr><td>1</td><td>Right-click is disabled via JavaScript. Use Ctrl+U or DevTools to read the same HTML comment.</td></tr>
+      <tr><td>2</td><td>The page loads an image from <code>/files/</code>. Browse that directory directly to find <code>users.txt</code>.</td></tr>
+      <tr><td>3</td><td>The page hints "not even Google can find this". Check <code>/robots.txt</code>, it disallows <code>/s3cr3t/</code>. Open <code>/s3cr3t/users.txt</code>.</td></tr>
+      <tr><td>4</td><td>Resend the request with header <code>Referer: http://natas5.natas.labs.overthewire.org/</code></td></tr>
+      <tr><td>5</td><td>In DevTools → Application → Cookies, change <code>loggedin</code> from <code>0</code> to <code>1</code>, then reload.</td></tr>
+      <tr><td>6</td><td>Source shows an include of <code>includes/secret.inc</code>. Open that file directly to read the secret value <code>FOEIUWGHFEEUHOFUOIU</code>, then submit it back into the form.</td></tr>
+      <tr><td>7</td><td>The URL uses <code>?page=</code>. Set it to <code>?page=/etc/natas_webpass/natas8</code> (Local File Inclusion).</td></tr>
+      <tr><td>8</td><td>Source shows the secret is stored as <code>bin2hex(strrev(base64_encode($secret)))</code>. Reverse it in order: hex-decode, then reverse the string, then Base64-decode. Result: <code>oubWYf2kBq</code>. Submit that value.</td></tr>
+      <tr><td>9</td><td>The form runs <code>grep</code> via <code>passthru()</code>. Input <code>; cat /etc/natas_webpass/natas10 ;</code></td></tr>
+      <tr><td>10</td><td>The characters <code>;</code>, <code>|</code>, and <code>&amp;</code> are filtered, but the input still reaches <code>grep</code>. Enter <code>.* /etc/natas_webpass/natas11</code> so grep takes the password file as a second file argument.</td></tr>
+    </tbody>
+  </table>
+
+</main>
+
+<script>
+  const toggle = document.getElementById('themeToggle');
+  const stored = localStorage.getItem('indexTheme') || 'dark';
+  document.documentElement.setAttribute('data-theme', stored);
+  toggle.textContent = stored === 'dark' ? '☀' : '☽';
+  toggle.addEventListener('click', () => {
+    const next = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', next);
+    localStorage.setItem('indexTheme', next);
+    toggle.textContent = next === 'dark' ? '☀' : '☽';
+  });
+</script>
+
+</body>
+</html>

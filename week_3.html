@@ -599,12 +599,10 @@
   .notice-warn  { background: #fff5e6; border-left: 4px solid var(--amber); }
   .notice-info  { background: #e8f4fd; border-left: 4px solid var(--slate); }
   .notice-ok    { background: #e8f8ee; border-left: 4px solid var(--green); }
-  .notice-key   { background: #fdeaea; border-left: 4px solid var(--accent); }
 
   html[data-theme="dark"] .notice-warn { background: rgba(232,160,32,0.08); }
   html[data-theme="dark"] .notice-info { background: rgba(74,111,165,0.12); }
   html[data-theme="dark"] .notice-ok   { background: rgba(42,157,80,0.10); }
-  html[data-theme="dark"] .notice-key  { background: rgba(232,72,85,0.10); }
 
   .notice-icon {
     font-size: 18px;
@@ -722,28 +720,6 @@
 
   .lab-body { padding: 16px 18px; }
 
-  /* ── TEACHER KEY SECTION ── */
-  .teacher-section {
-    border: 2px dashed var(--accent);
-    border-radius: 10px;
-    padding: 20px 22px;
-    background: var(--white);
-  }
-
-  .teacher-flag {
-    display: inline-block;
-    font-family: var(--mono);
-    font-size: 10px;
-    font-weight: 600;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    color: var(--accent);
-    border: 1px solid var(--accent);
-    padding: 3px 10px;
-    border-radius: 3px;
-    margin-bottom: 14px;
-  }
-
   /* ── PRINT BUTTON ── */
   .print-btn {
     position: fixed;
@@ -811,6 +787,7 @@
     <ul class="nav-list" id="navList">
       <li><a href="index.html"><span class="nav-day">⌂</span> Home</a></li>
       <div class="nav-divider"></div>
+      <li><a href="#tldr"><span class="nav-day">TL</span> Executive TL;DR</a></li>
       <li><a href="#objectives"><span class="nav-day">OBJ</span> Objectives</a></li>
       <li><a href="#ethics"><span class="nav-day">00</span> Ethics &amp; Teams</a></li>
       <div class="nav-divider"></div>
@@ -828,13 +805,32 @@
       <li><a href="#cheatsheet"><span class="nav-day">REF</span> Cheat Sheet</a></li>
       <li><a href="#lab"><span class="nav-day">LAB</span> Password Log</a></li>
       <li><a href="#selfcheck"><span class="nav-day">CHK</span> Self-Check</a></li>
-      <li><a href="#teacherkey"><span class="nav-day">KEY</span> Teacher Answer Key</a></li>
       <li><a href="#" onclick="window.print(); return false;"><span class="nav-day">PDF</span> Download PDF</a></li>
     </ul>
   </aside>
 
   <!-- MAIN -->
   <main>
+
+    <!-- EXECUTIVE TL;DR -->
+    <section class="section" id="tldr">
+      <div class="section-header">
+        <div class="section-icon">TL</div>
+        <div>
+          <div class="section-title">Executive TL;DR</div>
+          <div class="section-subtitle">The whole week, explained like you have thirty seconds</div>
+        </div>
+      </div>
+
+      <ul class="obj-list">
+        <li class="obj-item"><strong>What is this?</strong> Students break into a website on purpose, but it is a legal practice website built just for this.</li>
+        <li class="obj-item"><strong>Why bother?</strong> Real websites get hacked because of small, sloppy mistakes. Students learn to spot those mistakes before a criminal does.</li>
+        <li class="obj-item"><strong>Is it dangerous?</strong> No. It is the same idea as a locked practice room. Nobody touches a real company's website.</li>
+        <li class="obj-item"><strong>What do they do all day?</strong> Solve one small puzzle at a time. Each solved puzzle unlocks the next, harder one. Eleven puzzles this week.</li>
+        <li class="obj-item"><strong>What tools do they need?</strong> A web browser. Nothing more. No special software, no coding required.</li>
+        <li class="obj-item"><strong>What do they walk away with?</strong> A working sense of how websites get broken into, and why that matters for anyone who runs one.</li>
+      </ul>
+    </section>
 
     <!-- OBJECTIVES -->
     <section class="section" id="objectives">
@@ -874,7 +870,7 @@
       </div>
 
       <p style="font-size:14px; line-height:1.7; color:var(--ink); margin-bottom:16px;">
-        Downtown Donuts just relaunched its online ordering site, and corporate wants a web security shakedown before it goes live for real. Natas is your training range for that shakedown: same categories of bugs (leaked secrets, weak cookies, sloppy file handling, unfiltered input) that a sloppy web developer could ship into the real Downtown Donuts site.
+        Natas is your training range for the same categories of bugs (leaked secrets, weak cookies, sloppy file handling, unfiltered input) that a sloppy web developer could ship into any real production site.
       </p>
 
       <div class="team-grid" style="margin-bottom:16px;">
@@ -1411,7 +1407,7 @@
             <div class="notice-icon">✓</div>
             <div>
               <strong>Summative deliverable, Team Audit Summary</strong>
-              <p>For each level your team completed (0 through 10), write one short paragraph: the vulnerability category, how you found it, and the one fix a Downtown Donuts developer should make to close it. This write-up is graded, not the raw passwords.</p>
+              <p>For each level your team completed (0 through 10), write one short paragraph: the vulnerability category, how you found it, and the one fix a real developer should make to close it. This write-up is graded, not the raw passwords.</p>
             </div>
           </div>
 
@@ -1519,47 +1515,6 @@
       </div>
     </section>
 
-    <!-- TEACHER ANSWER KEY -->
-    <section class="section" id="teacherkey">
-      <div class="section-header">
-        <div class="section-icon">KEY</div>
-        <div>
-          <div class="section-title">Teacher Answer Key</div>
-          <div class="section-subtitle">Instructor reference only, do not display or distribute to students</div>
-        </div>
-      </div>
-
-      <div class="teacher-section">
-        <div class="teacher-flag">Teacher-Only Section</div>
-
-        <div class="notice notice-key" style="margin-bottom:16px;">
-          <div class="notice-icon">⚠</div>
-          <div>
-            <strong>Passwords reset when OverTheWire resets the game</strong>
-            <p>Do not hardcode any password value into student materials or memorize it as permanent. Recover every password live, in class, from the actual current state of the game.</p>
-          </div>
-        </div>
-
-        <table class="data-table">
-          <thead>
-            <tr><th>Level</th><th>Path to the next level's password</th></tr>
-          </thead>
-          <tbody>
-            <tr><td>0</td><td>View Source (Ctrl+U), the password for natas1 sits in an HTML comment.</td></tr>
-            <tr><td>1</td><td>Right-click is disabled via JavaScript. Use Ctrl+U or DevTools to read the same HTML comment.</td></tr>
-            <tr><td>2</td><td>The page loads an image from <code>/files/</code>. Browse that directory directly to find <code>users.txt</code>.</td></tr>
-            <tr><td>3</td><td>The page hints "not even Google can find this". Check <code>/robots.txt</code>, it disallows <code>/s3cr3t/</code>. Open <code>/s3cr3t/users.txt</code>.</td></tr>
-            <tr><td>4</td><td>Resend the request with header <code>Referer: http://natas5.natas.labs.overthewire.org/</code></td></tr>
-            <tr><td>5</td><td>In DevTools → Application → Cookies, change <code>loggedin</code> from <code>0</code> to <code>1</code>, then reload.</td></tr>
-            <tr><td>6</td><td>Source shows an include of <code>includes/secret.inc</code>. Open that file directly to read the secret value <code>FOEIUWGHFEEUHOFUOIU</code>, then submit it back into the form.</td></tr>
-            <tr><td>7</td><td>The URL uses <code>?page=</code>. Set it to <code>?page=/etc/natas_webpass/natas8</code> (Local File Inclusion).</td></tr>
-            <tr><td>8</td><td>Source shows the secret is stored as <code>bin2hex(strrev(base64_encode($secret)))</code>. Reverse it in order: hex-decode, then reverse the string, then Base64-decode. Result: <code>oubWYf2kBq</code>. Submit that value.</td></tr>
-            <tr><td>9</td><td>The form runs <code>grep</code> via <code>passthru()</code>. Input <code>; cat /etc/natas_webpass/natas10 ;</code></td></tr>
-            <tr><td>10</td><td>The characters <code>;</code>, <code>|</code>, and <code>&amp;</code> are filtered, but the input still reaches <code>grep</code>. Enter <code>.* /etc/natas_webpass/natas11</code> so grep takes the password file as a second file argument.</td></tr>
-          </tbody>
-        </table>
-      </div>
-    </section>
 
   </main>
 </div>
