@@ -3,72 +3,85 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Week 4 Worksheet — Network Forensics | Ethical Hacking</title>
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:ital,wght@0,300;0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<title>Week 4 Worksheet: Network Forensics</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg:        #07111a;
-    --surface:   #0d1b27;
-    --card:      #112030;
-    --border:    #1a3048;
-    --navy:      #0d2137;
-    --sky:       #3ab0de;
-    --frost:     #a0cfe8;
-    --white:     #dff0fa;
-    --dim:       #4e7090;
-    --green:     #20c070;
-    --amber:     #f0a030;
-    --mono:      'IBM Plex Mono', monospace;
-    --sans:      'IBM Plex Sans', sans-serif;
-    --radius:    6px;
+    --navy:    #0d1b2a;
+    --ink:     #1c2e40;
+    --steel:   #2e4d6e;
+    --slate:   #4a6fa5;
+    --sky:     #7eb8d4;
+    --frost:   #d0e8f2;
+    --paper:   #f4f7fa;
+    --white:   #ffffff;
+    --accent:  #e84855;
+    --green:   #2a9d50;
+    --amber:   #e8a020;
+    --mono:    'IBM Plex Mono', monospace;
+    --sans:    'IBM Plex Sans', sans-serif;
+    color-scheme: light;
+  }
+
+  html[data-theme="dark"] {
+    --paper:  #080e17;
+    --white:  #111d29;
+    --ink:    #c8dfe8;
+    --frost:  #1e3048;
+    --steel:  #7ab8d4;
+    --border: #1e3048;
     color-scheme: dark;
   }
+
   html[data-theme="light"] {
-    --bg:      #eef5fc;
-    --surface: #e0ecf8;
-    --card:    #ffffff;
-    --border:  #b8d0e8;
-    --sky:     #1478aa;
-    --frost:   #1a3a5c;
-    --white:   #0a1828;
-    --dim:     #3a6080;
-    --green:   #0e9050;
-    --amber:   #a86010;
-    color-scheme: light;
-    --navy: #c8dff0;
+    --border: #c4d8ec;
   }
 
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
   html { scroll-behavior: smooth; }
 
   body {
     font-family: var(--sans);
-    background: var(--bg);
-    color: var(--white);
+    background: var(--paper);
+    color: var(--ink);
     min-height: 100vh;
-    transition: background .3s, color .3s;
+    overflow-x: hidden;
+    transition: background 0.3s, color 0.3s;
   }
 
   body::before {
     content: '';
-    position: fixed; inset: 0; pointer-events: none; z-index: 0;
+    position: fixed;
+    inset: 0;
     background-image:
-      linear-gradient(rgba(58,176,222,.03) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(58,176,222,.03) 1px, transparent 1px);
-    background-size: 32px 32px;
+      linear-gradient(rgba(74,158,202,0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(74,158,202,0.04) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+    transition: opacity 0.3s;
+  }
+
+  html[data-theme="light"] body::before {
+    background-image:
+      linear-gradient(rgba(13,27,42,0.05) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(13,27,42,0.05) 1px, transparent 1px);
   }
 
   header {
     background: var(--navy);
+    color: #d0e8f2;
     padding: 0;
     position: sticky;
     top: 0;
-    z-index: 200;
-    border-bottom: 3px solid var(--sky);
+    z-index: 100;
+    border-bottom: 3px solid var(--accent);
     box-shadow: 0 4px 20px rgba(0,0,0,0.3);
   }
+
   .header-inner {
-    max-width: 880px;
+    max-width: 900px;
     margin: 0 auto;
     padding: 14px 32px;
     display: flex;
@@ -76,6 +89,7 @@
     gap: 24px;
     flex-wrap: wrap;
   }
+
   .header-week {
     font-family: var(--mono);
     font-size: 11px;
@@ -83,12 +97,19 @@
     letter-spacing: 0.15em;
     text-transform: uppercase;
     color: var(--sky);
-    border: 1px solid var(--dim);
+    border: 1px solid var(--steel);
     padding: 4px 10px;
     border-radius: 3px;
     white-space: nowrap;
   }
-  .header-title { font-size: 18px; font-weight: 700; letter-spacing: -0.01em; color: var(--white); flex: 1; }
+
+  .header-title {
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    flex: 1;
+  }
+
   .header-back {
     font-family: var(--mono);
     font-size: 11px;
@@ -97,36 +118,57 @@
     text-transform: uppercase;
     color: var(--sky);
     text-decoration: none;
-    border: 1px solid var(--dim);
+    border: 1px solid var(--steel);
     padding: 4px 10px;
     border-radius: 3px;
     white-space: nowrap;
     transition: border-color 0.15s, color 0.15s;
   }
-  .header-back:hover { border-color: var(--sky); }
+
+  .header-back:hover { border-color: var(--sky); color: var(--white); }
+
   .theme-toggle {
     flex-shrink: 0;
-    background: rgba(255,255,255,0.05);
-    border: 1px solid var(--dim);
+    background: rgba(255,255,255,0.08);
+    border: 1px solid var(--steel);
     color: var(--sky);
-    width: 34px; height: 34px;
+    width: 34px;
+    height: 34px;
     border-radius: 50%;
     cursor: pointer;
-    display: flex; align-items: center; justify-content: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     font-size: 15px;
     transition: background 0.2s, border-color 0.2s;
   }
+
   .theme-toggle:hover { border-color: var(--sky); }
 
   main {
-    max-width: 880px;
+    max-width: 900px;
     margin: 0 auto;
-    padding: 2.5rem 1.5rem 5rem;
-    position: relative; z-index: 1;
+    padding: 32px 24px 96px;
+    position: relative;
+    z-index: 1;
   }
 
-  .ws-title { font-size: 1.6rem; font-weight: 700; color: var(--white); margin-bottom: .3rem; }
-  .ws-sub { font-size: .9rem; color: var(--dim); margin-bottom: 2rem; }
+  .page-title {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--navy);
+    margin-bottom: 4px;
+    letter-spacing: -0.02em;
+  }
+
+  html[data-theme="dark"] .page-title { color: var(--sky); }
+
+  .page-subtitle {
+    font-size: 13px;
+    color: var(--slate);
+    font-style: italic;
+    margin-bottom: 24px;
+  }
 
   .id-grid {
     display: grid;
@@ -134,90 +176,180 @@
     gap: 1px;
     background: var(--border);
     border: 1px solid var(--border);
-    border-radius: var(--radius);
+    border-radius: 8px;
     overflow: hidden;
-    margin-bottom: 2rem;
+    margin-bottom: 28px;
   }
-  .id-field { background: var(--card); padding: .8rem 1rem; }
+
+  .id-field { background: var(--white); padding: 10px 14px; }
+
   .id-label {
-    font-family: var(--mono); font-size: .62rem;
-    letter-spacing: .1em; text-transform: uppercase;
-    color: var(--dim); margin-bottom: .4rem;
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--slate);
+    margin-bottom: 6px;
   }
-  .id-line { border-bottom: 1px solid var(--border); min-height: 22px; }
+
+  .id-line { border-bottom: 1px solid var(--frost); min-height: 22px; }
+
   @media (max-width: 640px) { .id-grid { grid-template-columns: 1fr 1fr; } }
 
-  .ws-section { margin-bottom: 2.25rem; }
-  .ws-section-head {
-    display: flex; align-items: center; gap: .75rem;
-    padding-bottom: .6rem;
-    margin-bottom: 1rem;
-    border-bottom: 2px solid var(--navy);
+  .ws-section { margin-bottom: 32px; }
+
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+    border-bottom: 2px solid var(--frost);
   }
-  .ws-num {
-    font-family: var(--mono); font-size: .7rem;
-    background: var(--sky); color: #07111a;
-    width: 24px; height: 24px; border-radius: 50%;
-    display: flex; align-items: center; justify-content: center;
-    font-weight: 600; flex-shrink: 0;
+
+  .section-icon {
+    width: 36px;
+    height: 36px;
+    background: var(--navy);
+    color: var(--sky);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--mono);
+    font-size: 12px;
+    font-weight: 600;
+    flex-shrink: 0;
   }
-  .ws-section-title { font-family: var(--mono); font-size: .95rem; font-weight: 600; color: var(--white); }
-  .ws-note { font-size: .85rem; color: var(--dim); margin-bottom: .8rem; line-height: 1.6; }
+
+  .section-title {
+    font-size: 17px;
+    font-weight: 700;
+    color: var(--navy);
+    letter-spacing: -0.01em;
+  }
+
+  html[data-theme="dark"] .section-title { color: var(--sky); }
+
+  .ws-note {
+    font-size: 13px;
+    color: var(--slate);
+    margin-bottom: 10px;
+    line-height: 1.5;
+  }
 
   table.fill {
-    width: 100%; border-collapse: collapse;
-    font-size: .85rem;
-  }
-  table.fill th {
-    background: var(--navy);
-    color: var(--sky); font-family: var(--mono);
-    font-size: .68rem; letter-spacing: .06em; text-transform: uppercase;
-    padding: .55rem .8rem; text-align: left;
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    background: var(--white);
     border: 1px solid var(--border);
-  }
-  table.fill td {
-    padding: .6rem .8rem;
-    border: 1px solid var(--border);
-    min-height: 34px;
-    color: var(--white);
-  }
-  table.fill tr:nth-child(even) td { background: rgba(58,176,222,.03); }
-
-  .reflection {
-    display: flex; flex-direction: column; gap: 1rem;
-  }
-  .reflection-item {
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
+    border-radius: 8px;
     overflow: hidden;
   }
+
+  table.fill th {
+    background: var(--navy);
+    color: var(--sky);
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 10px 14px;
+    text-align: left;
+  }
+
+  table.fill td {
+    padding: 14px 14px;
+    border-bottom: 1px solid var(--frost);
+    border-right: 1px solid var(--frost);
+    color: var(--ink);
+    min-height: 18px;
+  }
+
+  table.fill td:last-child { border-right: none; }
+  table.fill tr:last-child td { border-bottom: none; }
+
+  code {
+    font-family: var(--mono);
+    font-size: 12px;
+    background: var(--navy);
+    color: var(--sky);
+    padding: 2px 7px;
+    border-radius: 4px;
+  }
+
+  .reflection-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .reflection-item {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+
   .reflection-q {
     background: var(--navy);
-    padding: .7rem 1rem;
-    font-size: .85rem; font-weight: 600; color: var(--frost);
-    display: flex; gap: .6rem; align-items: flex-start;
+    padding: 10px 16px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--frost);
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
   }
-  .reflection-q .q-num { font-family: var(--mono); font-size: .68rem; color: var(--sky); flex-shrink: 0; margin-top: .1rem; }
-  .reflection-a { min-height: 70px; padding: .8rem 1rem; }
 
-  .checklist { display: grid; grid-template-columns: 1fr 1fr; gap: .6rem; }
-  @media (max-width: 560px) { .checklist { grid-template-columns: 1fr; } }
-  .check-item {
-    display: flex; align-items: center; gap: .6rem;
-    border: 1px solid var(--border); border-radius: var(--radius);
-    padding: .6rem .8rem; font-size: .82rem; color: var(--frost);
+  .reflection-q .q-num {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--sky);
+    flex-shrink: 0;
+    margin-top: 1px;
   }
+
+  .reflection-a { min-height: 64px; padding: 12px 16px; }
+
+  .checklist {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+
+  @media (max-width: 560px) { .checklist { grid-template-columns: 1fr; } }
+
+  .check-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--slate);
+    border-radius: 0 8px 8px 0;
+    padding: 10px 14px;
+    font-size: 13px;
+    color: var(--ink);
+  }
+
   .check-box {
-    width: 16px; height: 16px; flex-shrink: 0;
-    border: 1px solid var(--dim); border-radius: 3px;
+    width: 16px;
+    height: 16px;
+    flex-shrink: 0;
+    border: 1px solid var(--steel);
+    border-radius: 3px;
   }
 
   .print-btn {
     position: fixed;
-    bottom: 24px; right: 24px;
+    bottom: 28px;
+    right: 28px;
     background: var(--navy);
     color: var(--sky);
-    border: 1px solid var(--sky);
+    border: none;
     border-radius: 50px;
     padding: 12px 22px;
     font-family: var(--mono);
@@ -225,18 +357,21 @@
     font-weight: 600;
     letter-spacing: 0.08em;
     cursor: pointer;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+    box-shadow: 0 4px 20px rgba(0,0,0,0.25);
     transition: background 0.2s, transform 0.15s;
     z-index: 200;
   }
-  .print-btn:hover { background: var(--sky); color: #07111a; transform: translateY(-2px); }
+
+  .print-btn:hover { background: var(--steel); transform: translateY(-2px); }
+
+  @media (max-width: 640px) {
+    main { padding: 24px 16px 96px; }
+  }
 
   @media print {
-    body::before { display: none; }
     header, .print-btn, .theme-toggle { display: none !important; }
     main { padding: 0; max-width: 100%; }
-    table.fill { break-inside: avoid; }
-    .ws-section { break-inside: avoid; }
+    table.fill, .ws-section { break-inside: avoid; }
   }
 </style>
 </head>
@@ -252,8 +387,9 @@
 </header>
 
 <main>
-  <div class="ws-title">Network Forensics Worksheet</div>
-  <div class="ws-sub">Fill this in as you work through the Network Discovery &amp; Host Forensics lesson. Turn in at the end of class.</div>
+
+  <div class="page-title">Network Forensics Worksheet</div>
+  <div class="page-subtitle">Fill this in as you work through the Network Discovery &amp; Host Forensics lesson. Turn in at the end of class.</div>
 
   <div class="id-grid">
     <div class="id-field"><div class="id-label">Team</div><div class="id-line"></div></div>
@@ -264,13 +400,13 @@
 
   <!-- STEP 1 -->
   <div class="ws-section">
-    <div class="ws-section-head">
-      <div class="ws-num">1</div>
-      <div class="ws-section-title">Connect &amp; Orient</div>
+    <div class="section-header">
+      <div class="section-icon">S1</div>
+      <div class="section-title">Connect &amp; Orient</div>
     </div>
     <table class="fill">
       <tbody>
-        <tr><td style="width:40%;">My IP address (from <code>ip a</code>)</td><td></td></tr>
+        <tr><td style="width:45%;">My IP address (from <code>ip a</code>)</td><td></td></tr>
         <tr><td>Network range (e.g. <code>192.168.1.0/24</code>)</td><td></td></tr>
       </tbody>
     </table>
@@ -278,9 +414,9 @@
 
   <!-- STEP 2 -->
   <div class="ws-section">
-    <div class="ws-section-head">
-      <div class="ws-num">2</div>
-      <div class="ws-section-title">Ping Sweep Results</div>
+    <div class="section-header">
+      <div class="section-icon">S2</div>
+      <div class="section-title">Ping Sweep Results</div>
     </div>
     <div class="ws-note">Record every IP and MAC address returned by <code>nmap -sn 192.168.1.0/24</code>.</div>
     <table class="fill">
@@ -299,11 +435,11 @@
 
   <!-- STEP 3 -->
   <div class="ws-section">
-    <div class="ws-section-head">
-      <div class="ws-num">3</div>
-      <div class="ws-section-title">Sort the Noise</div>
+    <div class="section-header">
+      <div class="section-icon">S3</div>
+      <div class="section-title">Sort the Noise</div>
     </div>
-    <div class="ws-note">Cross off your own IP first. For every host left, decide: another team's Kali box, or something else — and why.</div>
+    <div class="ws-note">Cross off your own IP first. For every host left, decide: another team's Kali box, or something else, and why.</div>
     <table class="fill">
       <thead><tr><th>IP Address</th><th>TTL</th><th>Guess</th><th>Why</th></tr></thead>
       <tbody>
@@ -317,9 +453,9 @@
 
   <!-- STEP 4 -->
   <div class="ws-section">
-    <div class="ws-section-head">
-      <div class="ws-num">4</div>
-      <div class="ws-section-title">Open Port Findings</div>
+    <div class="section-header">
+      <div class="section-icon">S4</div>
+      <div class="section-title">Open Port Findings</div>
     </div>
     <div class="ws-note">For each host still unaccounted for, run <code>nmap &lt;target-ip&gt;</code> and record what's open.</div>
     <table class="fill">
@@ -334,13 +470,13 @@
 
   <!-- STEP 5 -->
   <div class="ws-section">
-    <div class="ws-section-head">
-      <div class="ws-num">5</div>
-      <div class="ws-section-title">Re-Sweep Comparison</div>
+    <div class="section-header">
+      <div class="section-icon">S5</div>
+      <div class="section-title">Re-Sweep Comparison</div>
     </div>
     <table class="fill">
       <tbody>
-        <tr><td style="width:40%;">Same hosts both times? (Yes / No)</td><td></td></tr>
+        <tr><td style="width:45%;">Same hosts both times? (Yes / No)</td><td></td></tr>
         <tr><td>If not, what changed?</td><td></td></tr>
       </tbody>
     </table>
@@ -348,11 +484,11 @@
 
   <!-- STEP 6 — REFLECTION -->
   <div class="ws-section">
-    <div class="ws-section-head">
-      <div class="ws-num">6</div>
-      <div class="ws-section-title">Reflection</div>
+    <div class="section-header">
+      <div class="section-icon">S6</div>
+      <div class="section-title">Reflection</div>
     </div>
-    <div class="reflection">
+    <div class="reflection-list">
       <div class="reflection-item">
         <div class="reflection-q"><span class="q-num">Q1</span>Before anything is confirmed: how many devices do you believe are on this network, and how confident are you?</div>
         <div class="reflection-a"></div>
@@ -370,9 +506,9 @@
 
   <!-- CHECKLIST -->
   <div class="ws-section">
-    <div class="ws-section-head">
-      <div class="ws-num">✓</div>
-      <div class="ws-section-title">Before You Turn This In</div>
+    <div class="section-header">
+      <div class="section-icon">✓</div>
+      <div class="section-title">Before You Turn This In</div>
     </div>
     <div class="checklist">
       <div class="check-item"><span class="check-box"></span>Own IP and subnet recorded</div>
@@ -386,19 +522,20 @@
 
 </main>
 
-<button class="print-btn" onclick="window.print()">PRINT WORKSHEET</button>
+<button class="print-btn" onclick="window.print()">Print Worksheet</button>
 
 <script>
   const themeToggle = document.getElementById('themeToggle');
-  const storedTheme = localStorage.getItem('netscanTheme') || 'dark';
+  const storedTheme = localStorage.getItem('indexTheme') || 'dark';
   document.documentElement.setAttribute('data-theme', storedTheme);
   themeToggle.textContent = storedTheme === 'dark' ? '☀' : '☽';
   themeToggle.addEventListener('click', () => {
     const next = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
     document.documentElement.setAttribute('data-theme', next);
-    localStorage.setItem('netscanTheme', next);
+    localStorage.setItem('indexTheme', next);
     themeToggle.textContent = next === 'dark' ? '☀' : '☽';
   });
 </script>
+
 </body>
 </html>
