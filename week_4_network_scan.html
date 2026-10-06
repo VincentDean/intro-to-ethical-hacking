@@ -1,0 +1,1173 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Week 4 — Network Discovery &amp; Host Forensics</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy:    #0d1b2a;
+    --ink:     #1c2e40;
+    --steel:   #2e4d6e;
+    --slate:   #4a6fa5;
+    --sky:     #7eb8d4;
+    --frost:   #d0e8f2;
+    --paper:   #f4f7fa;
+    --white:   #ffffff;
+    --accent:  #e84855;
+    --green:   #2a9d50;
+    --amber:   #e8a020;
+    --mono:    'IBM Plex Mono', monospace;
+    --sans:    'IBM Plex Sans', sans-serif;
+    color-scheme: light;
+  }
+
+  html[data-theme="dark"] {
+    --paper:  #080e17;
+    --white:  #111d29;
+    --ink:    #c8dfe8;
+    --frost:  #1e3048;
+    --steel:  #7ab8d4;
+    --border: #1e3048;
+    color-scheme: dark;
+  }
+
+  html[data-theme="dark"] .reflection-q { color: var(--ink); }
+
+  html[data-theme="light"] {
+    --border: #c5d8e8;
+  }
+
+  html[data-theme="light"] .header-title { color: var(--frost); }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: var(--sans);
+    background: var(--paper);
+    color: var(--ink);
+    min-height: 100vh;
+    overflow-x: hidden;
+    transition: background 0.3s, color 0.3s;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(74,158,202,0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(74,158,202,0.04) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+    transition: opacity 0.3s;
+  }
+
+  html[data-theme="light"] body::before {
+    background-image:
+      linear-gradient(rgba(13,27,42,0.05) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(13,27,42,0.05) 1px, transparent 1px);
+  }
+
+  body::after {
+    content: '';
+    position: fixed;
+    top: -100%;
+    left: 0;
+    right: 0;
+    height: 200%;
+    background: linear-gradient(transparent 49.5%, rgba(74,158,202,0.03) 50%, transparent 50.5%);
+    background-size: 100% 4px;
+    animation: scan 8s linear infinite;
+    pointer-events: none;
+    z-index: 0;
+    transition: opacity 0.3s;
+  }
+
+  html[data-theme="light"] body::after { opacity: 0; }
+
+  @keyframes scan {
+    0%   { transform: translateY(0); }
+    100% { transform: translateY(50%); }
+  }
+
+  /* ── HEADER ── */
+  header {
+    background: var(--navy);
+    color: #d0e8f2;
+    padding: 0;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    border-bottom: 3px solid var(--accent);
+    box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+  }
+
+  #progressBar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 3px;
+    width: 0%;
+    background: var(--sky);
+    z-index: 999;
+    transition: width 0.1s linear;
+  }
+
+  .header-inner {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 14px 32px;
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    flex-wrap: wrap;
+  }
+
+  .header-week {
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--sky);
+    border: 1px solid var(--steel);
+    padding: 4px 10px;
+    border-radius: 3px;
+    white-space: nowrap;
+  }
+
+  .header-title {
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    flex: 1;
+  }
+
+  .header-meta {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+
+  .meta-chip {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--sky);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .meta-chip::before {
+    content: '';
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--sky);
+    opacity: 0.7;
+  }
+
+  .header-back {
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--sky);
+    text-decoration: none;
+    border: 1px solid var(--steel);
+    padding: 4px 10px;
+    border-radius: 3px;
+    white-space: nowrap;
+    transition: border-color 0.15s, color 0.15s;
+  }
+
+  .header-back:hover { border-color: var(--sky); color: var(--white); }
+
+  .theme-toggle {
+    flex-shrink: 0;
+    background: rgba(255,255,255,0.08);
+    border: 1px solid var(--steel);
+    color: var(--sky);
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 15px;
+    transition: background 0.2s, border-color 0.2s;
+  }
+
+  .theme-toggle:hover { border-color: var(--sky); }
+
+  /* ── LAYOUT ── */
+  .layout {
+    display: grid;
+    grid-template-columns: 220px 1fr;
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 32px 32px 64px;
+    gap: 40px;
+    position: relative;
+    z-index: 1;
+  }
+
+  @media (max-width: 768px) {
+    .layout { grid-template-columns: 1fr; }
+    .sidebar { display: none; }
+  }
+
+  /* ── SIDEBAR ── */
+  .sidebar {
+    position: sticky;
+    top: 72px;
+    height: fit-content;
+  }
+
+  .nav-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--slate);
+    margin-bottom: 12px;
+  }
+
+  .nav-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .nav-list a {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--slate);
+    text-decoration: none;
+    display: block;
+    padding: 6px 10px;
+    border-left: 2px solid transparent;
+    border-radius: 0 3px 3px 0;
+    transition: color 0.15s, border-color 0.15s, background 0.15s;
+  }
+
+  .nav-list a:hover,
+  .nav-list a.active {
+    color: var(--sky);
+    border-left-color: var(--sky);
+    background: rgba(126,184,212,0.06);
+  }
+
+  /* ── MAIN ── */
+  main { min-width: 0; }
+
+  .section {
+    margin-bottom: 48px;
+    opacity: 0;
+    transform: translateY(18px);
+    transition: opacity 0.5s ease, transform 0.5s ease;
+  }
+
+  .section.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .section-header {
+    display: flex;
+    align-items: baseline;
+    gap: 14px;
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .section-num {
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--accent);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  .section-title {
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: var(--ink);
+  }
+
+  /* ── MISSION BLOCK ── */
+  .mission-block {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--sky);
+    border-radius: 6px;
+    padding: 20px 24px;
+    margin-bottom: 20px;
+  }
+
+  .mission-block p {
+    font-size: 14px;
+    color: var(--slate);
+    line-height: 1.7;
+  }
+
+  /* ── ALERT / NOTICE ── */
+  .notice {
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+    padding: 16px 20px;
+    border-radius: 6px;
+    margin: 20px 0;
+    font-size: 13px;
+    line-height: 1.6;
+  }
+
+  .notice-icon {
+    font-size: 16px;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+
+  .notice-warn {
+    background: rgba(232,160,32,0.1);
+    border: 1px solid rgba(232,160,32,0.3);
+    color: var(--ink);
+  }
+
+  .notice-warn .notice-icon { color: var(--amber); }
+
+  .notice-danger {
+    background: rgba(232,72,85,0.08);
+    border: 1px solid rgba(232,72,85,0.3);
+    color: var(--ink);
+  }
+
+  .notice-danger .notice-icon { color: var(--accent); }
+
+  .notice-info {
+    background: rgba(126,184,212,0.08);
+    border: 1px solid rgba(126,184,212,0.2);
+    color: var(--ink);
+  }
+
+  .notice-info .notice-icon { color: var(--sky); }
+
+  .notice-green {
+    background: rgba(42,157,80,0.08);
+    border: 1px solid rgba(42,157,80,0.25);
+    color: var(--ink);
+  }
+
+  .notice-green .notice-icon { color: var(--green); }
+
+  /* ── TEAM TAG ── */
+  .team-badge {
+    display: inline-flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin: 10px 0;
+  }
+
+  .badge {
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 4px 10px;
+    border-radius: 3px;
+    border: 1px solid;
+  }
+
+  .badge-ghost  { color: #a0c4d4; border-color: #a0c4d4; }
+  .badge-shadow { color: #b0a0d4; border-color: #b0a0d4; }
+  .badge-fantom { color: #d4c0a0; border-color: #d4c0a0; }
+  .badge-cipher { color: #a0d4b0; border-color: #a0d4b0; }
+
+  /* ── ROLE CARDS ── */
+  .role-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin: 16px 0;
+  }
+
+  @media (max-width: 520px) { .role-grid { grid-template-columns: 1fr; } }
+
+  .role-card {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 18px 20px;
+  }
+
+  .role-card .role-title {
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--sky);
+    margin-bottom: 6px;
+  }
+
+  .role-card .role-desc {
+    font-size: 13px;
+    color: var(--slate);
+    line-height: 1.6;
+  }
+
+  /* ── STEP LIST ── */
+  .step-list {
+    list-style: none;
+    margin: 10px 0;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .step-list li {
+    font-size: 13px;
+    color: var(--slate);
+    padding-left: 20px;
+    position: relative;
+    line-height: 1.6;
+  }
+
+  .step-list li::before {
+    content: '›';
+    position: absolute;
+    left: 4px;
+    color: var(--sky);
+    font-weight: 700;
+  }
+
+  /* ── NUMBERED STEPS ── */
+  .numbered-steps {
+    counter-reset: step-counter;
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin: 12px 0;
+  }
+
+  .numbered-steps li {
+    counter-increment: step-counter;
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+    font-size: 13px;
+    color: var(--slate);
+    line-height: 1.6;
+  }
+
+  .numbered-steps li::before {
+    content: counter(step-counter);
+    font-family: var(--mono);
+    font-size: 10px;
+    font-weight: 600;
+    background: var(--navy);
+    border: 1px solid var(--steel);
+    color: var(--sky);
+    min-width: 22px;
+    height: 22px;
+    border-radius: 3px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+
+  /* ── CODE / TERMINAL ── */
+  code {
+    font-family: var(--mono);
+    font-size: 12px;
+    background: rgba(126,184,212,0.1);
+    border: 1px solid rgba(126,184,212,0.2);
+    color: var(--sky);
+    padding: 1px 6px;
+    border-radius: 3px;
+  }
+
+  .terminal-block {
+    background: #060d14;
+    border: 1px solid var(--border);
+    border-top: 3px solid var(--accent);
+    border-radius: 6px;
+    padding: 20px 24px;
+    margin: 14px 0;
+    position: relative;
+    overflow: hidden;
+  }
+
+  html[data-theme="light"] .terminal-block {
+    background: #1a2535;
+  }
+
+  .terminal-block::before {
+    content: 'TERMINAL';
+    font-family: var(--mono);
+    font-size: 9px;
+    font-weight: 600;
+    letter-spacing: 0.2em;
+    color: var(--accent);
+    position: absolute;
+    top: 8px;
+    right: 14px;
+    opacity: 0.7;
+  }
+
+  .terminal-block code {
+    display: block;
+    background: none;
+    border: none;
+    color: #7eb8d4;
+    font-size: 14px;
+    padding: 0;
+    margin-bottom: 4px;
+    line-height: 1.8;
+  }
+
+  .terminal-block code.prompt::before {
+    content: '$ ';
+    color: var(--green);
+    font-weight: 600;
+  }
+
+  /* ── TROUBLE TABLE ── */
+  .trouble-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    margin: 16px 0;
+  }
+
+  .trouble-table th {
+    font-family: var(--mono);
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--sky);
+    padding: 10px 14px;
+    background: var(--white);
+    border: 1px solid var(--border);
+    text-align: left;
+  }
+
+  .trouble-table td {
+    padding: 10px 14px;
+    border: 1px solid var(--border);
+    color: var(--slate);
+    vertical-align: top;
+    line-height: 1.6;
+  }
+
+  .trouble-table tr:nth-child(even) td {
+    background: rgba(126,184,212,0.03);
+  }
+
+  .trouble-table td.problem {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--amber);
+    white-space: nowrap;
+  }
+
+  /* ── DATA TABLE ── */
+  .data-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    margin: 16px 0;
+  }
+
+  .data-table th {
+    font-family: var(--mono);
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--sky);
+    padding: 10px 14px;
+    background: var(--white);
+    border: 1px solid var(--border);
+    text-align: left;
+  }
+
+  .data-table td {
+    padding: 10px 14px;
+    border: 1px solid var(--border);
+    color: var(--slate);
+    line-height: 1.6;
+    vertical-align: top;
+  }
+
+  .data-table tr:nth-child(even) td {
+    background: rgba(126,184,212,0.03);
+  }
+
+  .data-table td.tool-name {
+    font-family: var(--mono);
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--sky);
+    white-space: nowrap;
+  }
+
+  .data-table td.blank-field {
+    color: var(--steel);
+    font-style: italic;
+    font-size: 12px;
+  }
+
+  /* ── TIME BLOCK ── */
+  .time-block {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 20px 24px;
+    margin-bottom: 16px;
+  }
+
+  .time-label {
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--sky);
+    margin-bottom: 14px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  /* ── COMMAND RESULT BOX ── */
+  .cmd-result-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    margin: 14px 0;
+  }
+
+  .cmd-result-row {
+    display: grid;
+    grid-template-columns: 160px 1fr;
+    gap: 0;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    overflow: hidden;
+  }
+
+  @media (max-width: 520px) {
+    .cmd-result-row { grid-template-columns: 1fr; }
+  }
+
+  .cmd-result-label {
+    background: var(--navy);
+    border-right: 1px solid var(--border);
+    padding: 14px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .cmd-result-label code {
+    font-size: 14px;
+    background: none;
+    border: none;
+    padding: 0;
+    color: var(--sky);
+  }
+
+  .cmd-result-label span {
+    font-size: 11px;
+    color: var(--slate);
+    font-family: var(--mono);
+  }
+
+  .cmd-result-value {
+    background: var(--white);
+    padding: 14px 16px;
+    font-size: 13px;
+    color: var(--slate);
+    display: flex;
+    align-items: center;
+  }
+
+  .cmd-result-value em {
+    font-style: italic;
+    font-size: 12px;
+    opacity: 0.6;
+  }
+
+  /* ── DELIVERABLE BOX ── */
+  .deliverable-list {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin: 14px 0;
+  }
+
+  @media (max-width: 520px) {
+    .deliverable-list { grid-template-columns: 1fr; }
+  }
+
+  .deliverable-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    padding: 10px 14px;
+    font-size: 13px;
+    color: var(--slate);
+  }
+
+  .deliverable-item::before {
+    content: '';
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--green);
+    flex-shrink: 0;
+  }
+
+  /* ── REFLECTION ── */
+  .reflection-list {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    margin: 14px 0;
+  }
+
+  .reflection-item {
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    overflow: hidden;
+  }
+
+  .reflection-q {
+    background: var(--navy);
+    padding: 12px 16px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--frost);
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+  }
+
+  .reflection-q .q-num {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--sky);
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+
+  .reflection-a {
+    background: var(--white);
+    padding: 12px 16px;
+    min-height: 48px;
+    font-size: 13px;
+    color: var(--steel);
+    font-style: italic;
+  }
+
+  /* ── FOOTER ── */
+  footer {
+    background: var(--navy);
+    color: var(--slate);
+    text-align: center;
+    padding: 20px 32px;
+    font-family: var(--mono);
+    font-size: 11px;
+    border-top: 1px solid var(--border);
+    position: relative;
+    z-index: 1;
+  }
+</style>
+</head>
+<body>
+
+<div id="progressBar"></div>
+<header>
+  <div class="header-inner">
+    <a class="header-back" href="index.html">← Home</a>
+    <div class="header-week">Week 04</div>
+    <div class="header-title">Network Discovery &amp; Host Forensics</div>
+    <div class="header-meta">
+      <span class="meta-chip">Ethical Hacking</span>
+      <span class="meta-chip">Team Challenge</span>
+      <span class="meta-chip">80 min</span>
+    </div>
+    <button class="theme-toggle" id="themeToggle" aria-label="Toggle light/dark mode">☀</button>
+  </div>
+</header>
+
+<div class="layout">
+
+  <!-- ── SIDEBAR ── -->
+  <aside class="sidebar">
+    <div class="nav-label">On This Page</div>
+    <ul class="nav-list">
+      <li><a href="#mission">Mission</a></li>
+      <li><a href="#part1">Part 1 — Connect &amp; Orient</a></li>
+      <li><a href="#part2">Part 2 — Run the Sweep</a></li>
+      <li><a href="#part3">Part 3 — Sort the Noise</a></li>
+      <li><a href="#part4">Part 4 — Isolate the Targets</a></li>
+      <li><a href="#part5">Part 5 — Re-Sweep</a></li>
+      <li><a href="#part6">Part 6 — Reflection</a></li>
+      <li><a href="#reference">Field Reference</a></li>
+      <li><a href="#deliverable">Deliverable</a></li>
+    </ul>
+  </aside>
+
+  <!-- ── MAIN CONTENT ── -->
+  <main>
+
+    <!-- MISSION -->
+    <section id="mission" class="section">
+      <div class="section-header">
+        <span class="section-num">Overview</span>
+        <h2 class="section-title">Mission</h2>
+      </div>
+      <div class="mission-block">
+        <p>Now that your team can boot and operate Kali, it's time to use it. Your job this session is to interrogate the AuraLab network: find out how many devices are really on it, and build a case for what each one is.</p>
+        <p style="margin-top:10px;">A single scan only shows who happens to answer in that moment. Real network reconnaissance is about turning a list of addresses into evidence — and knowing how confident you actually are in your conclusions.</p>
+      </div>
+      <div class="notice notice-info">
+        <div class="notice-icon">◈</div>
+        <div><strong>Downtown Donuts Context</strong><br>Before any security testing begins, a consultant has to map the environment. You're building that map now — who's on the network, and what kind of device each host is.</div>
+      </div>
+      <div class="team-badge">
+        <span class="badge badge-ghost">Ghost</span>
+        <span class="badge badge-shadow">Shadow</span>
+        <span class="badge badge-fantom">Fantom</span>
+        <span class="badge badge-cipher">Cipher</span>
+      </div>
+      <div class="role-grid" style="margin-top:12px;">
+        <div class="role-card">
+          <div class="role-title">Driver</div>
+          <div class="role-desc">Controls the keyboard and runs the commands. Reads output carefully before moving on.</div>
+        </div>
+        <div class="role-card">
+          <div class="role-title">Navigator</div>
+          <div class="role-desc">Tracks findings in the deliverable table as they come in. Challenges the Driver's conclusions.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- PART 1 -->
+    <section id="part1" class="section">
+      <div class="section-header">
+        <span class="section-num">Part 1</span>
+        <h2 class="section-title">Connect &amp; Orient</h2>
+      </div>
+
+      <div class="time-block">
+        <div class="time-label">Join the Network and Find Yourself</div>
+        <ol class="numbered-steps">
+          <li>Connect your Kali machine to the AuraLab Wi-Fi using the password given to you in class.</li>
+          <li>Open a terminal.</li>
+          <li>Run <code>ip a</code> to find your own IP address and network interface.</li>
+          <li>Write down your own IP address before doing anything else — you'll need to cross it off your results.</li>
+          <li>From your IP, identify the network range. An address like <code>192.168.1.42</code> means the network is <code>192.168.1.0/24</code>.</li>
+        </ol>
+      </div>
+
+      <div class="notice notice-warn">
+        <div class="notice-icon">◈</div>
+        <div><strong>You will show up in your own scan.</strong> Every team's sweep includes their own Kali machine. Don't mistake yourself for a mystery device.</div>
+      </div>
+    </section>
+
+    <!-- PART 2 -->
+    <section id="part2" class="section">
+      <div class="section-header">
+        <span class="section-num">Part 2</span>
+        <h2 class="section-title">Run the Sweep</h2>
+      </div>
+
+      <div class="time-block">
+        <div class="time-label">Ping Sweep — Find Every Live Host</div>
+        <div class="terminal-block">
+          <code class="prompt">nmap -sn 192.168.1.0/24</code>
+        </div>
+        <p style="font-size:13px;color:var(--slate);margin-bottom:14px;">This scan does not check ports — it only asks "are you there?" Record every IP address and MAC address that answers.</p>
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>IP Address</th>
+              <th>MAC Address</th>
+              <th>Notes</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td class="blank-field">Record here</td><td class="blank-field">Record here</td><td class="blank-field">—</td></tr>
+            <tr><td class="blank-field">Record here</td><td class="blank-field">Record here</td><td class="blank-field">—</td></tr>
+            <tr><td class="blank-field">Record here</td><td class="blank-field">Record here</td><td class="blank-field">—</td></tr>
+            <tr><td class="blank-field">Record here</td><td class="blank-field">Record here</td><td class="blank-field">—</td></tr>
+            <tr><td class="blank-field">Record here</td><td class="blank-field">Record here</td><td class="blank-field">—</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="notice notice-info">
+        <div class="notice-icon">◈</div>
+        <div>Cross off your own IP from Part 1 before moving on. Everything left is unidentified — that's the puzzle.</div>
+      </div>
+    </section>
+
+    <!-- PART 3 -->
+    <section id="part3" class="section">
+      <div class="section-header">
+        <span class="section-num">Part 3</span>
+        <h2 class="section-title">Sort the Noise</h2>
+      </div>
+
+      <div class="time-block">
+        <div class="time-label">Not Everything Is a Mystery</div>
+        <p style="font-size:13px;color:var(--slate);margin-bottom:14px;">Four teams are running Kali on similar hardware at the same time as you. Most of what showed up in your sweep is probably another team's machine, not a hidden device. For each remaining host, use the Field Reference below to make a call: <strong>another team's Kali box</strong>, or <strong>something else</strong>.</p>
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>IP Address</th>
+              <th>TTL</th>
+              <th>Guess</th>
+              <th>Why</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td class="blank-field">—</td><td class="blank-field">—</td><td class="blank-field">—</td><td class="blank-field">One-line justification</td></tr>
+            <tr><td class="blank-field">—</td><td class="blank-field">—</td><td class="blank-field">—</td><td class="blank-field">One-line justification</td></tr>
+            <tr><td class="blank-field">—</td><td class="blank-field">—</td><td class="blank-field">—</td><td class="blank-field">One-line justification</td></tr>
+            <tr><td class="blank-field">—</td><td class="blank-field">—</td><td class="blank-field">—</td><td class="blank-field">One-line justification</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- PART 4 -->
+    <section id="part4" class="section">
+      <div class="section-header">
+        <span class="section-num">Part 4</span>
+        <h2 class="section-title">Isolate the Real Targets</h2>
+      </div>
+
+      <div class="time-block">
+        <div class="time-label">Default Scan — Find Open Ports</div>
+        <p style="font-size:13px;color:var(--slate);margin-bottom:10px;">Set aside the hosts you identified as other teams' machines. For each host still unaccounted for, run a default scan and record the open ports.</p>
+        <div class="terminal-block">
+          <code class="prompt">nmap &lt;target-ip&gt;</code>
+        </div>
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>IP Address</th>
+              <th>Open Ports</th>
+              <th>Best Guess</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td class="blank-field">—</td><td class="blank-field">—</td><td class="blank-field">—</td></tr>
+            <tr><td class="blank-field">—</td><td class="blank-field">—</td><td class="blank-field">—</td></tr>
+            <tr><td class="blank-field">—</td><td class="blank-field">—</td><td class="blank-field">—</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- PART 5 -->
+    <section id="part5" class="section">
+      <div class="section-header">
+        <span class="section-num">Part 5</span>
+        <h2 class="section-title">Re-Sweep for Consistency</h2>
+      </div>
+
+      <div class="time-block">
+        <div class="time-label">Run the Sweep a Second Time</div>
+        <p style="font-size:13px;color:var(--slate);margin-bottom:14px;">A single sweep is a snapshot, not proof. Wait a few minutes, then run the same ping sweep again and compare.</p>
+        <div class="terminal-block">
+          <code class="prompt">nmap -sn 192.168.1.0/24</code>
+        </div>
+        <div class="cmd-result-grid">
+          <div class="cmd-result-row">
+            <div class="cmd-result-label">
+              <code>2nd sweep</code>
+              <span>Same hosts both times?</span>
+            </div>
+            <div class="cmd-result-value"><em>Record what changed, if anything</em></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- PART 6 -->
+    <section id="part6" class="section">
+      <div class="section-header">
+        <span class="section-num">Part 6</span>
+        <h2 class="section-title">Reflection</h2>
+      </div>
+
+      <div class="time-block">
+        <div class="time-label">Team Discussion — Write Short Answers</div>
+        <p style="font-size:13px;color:var(--slate);margin-bottom:16px;">Discuss each question with your team before writing anything down below.</p>
+        <div class="reflection-list">
+          <div class="reflection-item">
+            <div class="reflection-q">
+              <span class="q-num">Q1</span>
+              Before anything is confirmed: how many devices do you believe are on this network, and how confident are you?
+            </div>
+            <div class="reflection-a">Write your team's answer here.</div>
+          </div>
+          <div class="reflection-item">
+            <div class="reflection-q">
+              <span class="q-num">Q2</span>
+              What would make you more or less confident in that number?
+            </div>
+            <div class="reflection-a">Write your team's answer here.</div>
+          </div>
+          <div class="reflection-item">
+            <div class="reflection-q">
+              <span class="q-num">Q3</span>
+              What's the difference between a host that didn't answer and a host that isn't there?
+            </div>
+            <div class="reflection-a">Write your team's answer here.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- FIELD REFERENCE -->
+    <section id="reference" class="section">
+      <div class="section-header">
+        <span class="section-num">Reference</span>
+        <h2 class="section-title">Field Reference</h2>
+      </div>
+
+      <div class="time-block">
+        <div class="time-label">What Each Clue Tells You</div>
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Clue</th>
+              <th>What It Tells You</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td class="tool-name">TTL</td><td>Linux-family systems default to 64. Windows defaults to 128. Network gear and some embedded devices default to 255.</td></tr>
+            <tr><td class="tool-name">MAC vendor prefix</td><td>The first three bytes of a MAC address (the OUI) identify the manufacturer of the network card.</td></tr>
+            <tr><td class="tool-name">Hostname</td><td>If a device broadcasts a name, it can be a direct giveaway.</td></tr>
+            <tr><td class="tool-name">Open ports</td><td>Port 22 alone suggests a lean Linux box. Port 631 suggests a printer. Ports 135, 139, and 445 together suggest Windows.</td></tr>
+            <tr><td class="tool-name">Host count</td><td>A single sweep only shows who answered right then. A missing device may just be filtering ping requests, not be absent.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- DELIVERABLE -->
+    <section id="deliverable" class="section">
+      <div class="section-header">
+        <span class="section-num">Submit</span>
+        <h2 class="section-title">Deliverable — Network Forensics Report</h2>
+      </div>
+
+      <div class="time-block">
+        <div class="time-label">Your submission must include all of the following</div>
+        <div class="deliverable-list">
+          <div class="deliverable-item">Your own IP and subnet</div>
+          <div class="deliverable-item">Full ping sweep results</div>
+          <div class="deliverable-item">Sorted noise vs. real targets (Part 3)</div>
+          <div class="deliverable-item">Open port findings (Part 4)</div>
+          <div class="deliverable-item">Re-sweep comparison (Part 5)</div>
+          <div class="deliverable-item">Reflection answers</div>
+          <div class="deliverable-item">Team name &amp; roles</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- LEGAL NOTICE -->
+    <div class="notice notice-warn">
+      <div class="notice-icon">⚠</div>
+      <div><strong>Authorized Use Only — For Academic and Lab Purposes</strong>
+      <p style="margin-top:4px;">All techniques described in this document are to be applied only in authorized, air-gapped lab environments. Unauthorized access to computer networks is a federal crime under the Computer Fraud and Abuse Act (CFAA). Intro to Ethical Hacking Curriculum — Downtown Donuts Scenario.</p></div>
+    </div>
+
+  </main>
+</div>
+
+<footer>
+  Intro to Ethical Hacking · Week 4 · Network Discovery &amp; Host Forensics · Downtown Donuts Security Engagement
+</footer>
+
+<script>
+  // Scroll progress bar
+  window.addEventListener('scroll', () => {
+    const scrollTop = window.scrollY;
+    const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+    const pct = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
+    document.getElementById('progressBar').style.width = pct + '%';
+  });
+
+  // Intersection observer for section fade-in
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) entry.target.classList.add('visible');
+    });
+  }, { threshold: 0.08 });
+
+  document.querySelectorAll('.section').forEach(s => observer.observe(s));
+
+  // Active nav highlight on scroll
+  const sections = document.querySelectorAll('section[id]');
+  const navLinks = document.querySelectorAll('.nav-list a');
+
+  window.addEventListener('scroll', () => {
+    let current = '';
+    sections.forEach(sec => {
+      if (window.scrollY >= sec.offsetTop - 120) current = sec.id;
+    });
+    navLinks.forEach(link => {
+      link.classList.remove('active');
+      if (link.getAttribute('href') === '#' + current) link.classList.add('active');
+    });
+  }, { passive: true });
+
+  // Theme toggle
+  const themeToggle = document.getElementById('themeToggle');
+  const storedTheme = localStorage.getItem('indexTheme') || 'dark';
+  document.documentElement.setAttribute('data-theme', storedTheme);
+  themeToggle.textContent = storedTheme === 'dark' ? '☀' : '☽';
+
+  themeToggle.addEventListener('click', () => {
+    const next = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', next);
+    localStorage.setItem('indexTheme', next);
+    themeToggle.textContent = next === 'dark' ? '☀' : '☽';
+  });
+
+  // Expand all on print
+  window.addEventListener('beforeprint', () => {
+    document.querySelectorAll('.section').forEach(s => s.classList.add('visible'));
+  });
+</script>
+</body>
+</html>
