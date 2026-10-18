@@ -3,86 +3,113 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Hydra Reference & Troubleshooting | Ethical Hacking</title>
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:ital,wght@0,300;0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<title>Week 5: Brute Force Hydra</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
 <style>
-  /* ── TOKENS ─────────────────────────────────────────── */
   :root {
-    --bg:        #07111a;
-    --surface:   #0d1b27;
-    --card:      #112030;
-    --border:    #1a3048;
-    --navy:      #0d2137;
-    --sky:       #3ab0de;
-    --frost:     #a0cfe8;
-    --white:     #dff0fa;
-    --dim:       #4e7090;
-    --green:     #20c070;
-    --amber:     #f0a030;
-    --red:       #e84040;
-    --mono:      'IBM Plex Mono', monospace;
-    --sans:      'IBM Plex Sans', sans-serif;
-    --radius:    6px;
+    --navy:    #0d1b2a;
+    --ink:     #1c2e40;
+    --steel:   #2e4d6e;
+    --slate:   #4a6fa5;
+    --sky:     #7eb8d4;
+    --frost:   #d0e8f2;
+    --paper:   #f4f7fa;
+    --white:   #ffffff;
+    --accent:  #e84855;
+    --green:   #2a9d50;
+    --amber:   #e8a020;
+    --mono:    'IBM Plex Mono', monospace;
+    --sans:    'IBM Plex Sans', sans-serif;
+    color-scheme: light;
+  }
+
+  /* ── DARK THEME ── */
+  html[data-theme="dark"] {
+    --paper:  #080e17;
+    --white:  #111d29;
+    --ink:    #c8dfe8;
+    --frost:  #1e3048;
+    --steel:  #7ab8d4;
+    --border: #1e3048;
     color-scheme: dark;
   }
+
   html[data-theme="light"] {
-    --bg:      #eef5fc;
-    --surface: #e0ecf8;
-    --card:    #ffffff;
-    --border:  #b8d0e8;
-    --sky:     #1478aa;
-    --frost:   #1a3a5c;
-    --white:   #0a1828;
-    --dim:     #3a6080;
-    --green:   #0e9050;
-    --amber:   #a86010;
-    --red:     #c03030;
-    color-scheme: light;
-      --navy: #c8dff0;
+    --border: #c4d8ec;
   }
 
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
   html { scroll-behavior: smooth; }
 
   body {
     font-family: var(--sans);
-    background: var(--bg);
-    color: var(--white);
+    background: var(--paper);
+    color: var(--ink);
     min-height: 100vh;
     overflow-x: hidden;
-    transition: background .3s, color .3s;
+    transition: background 0.3s, color 0.3s;
   }
 
+  /* ── GRID BACKGROUND ── */
   body::before {
     content: '';
-    position: fixed; inset: 0; pointer-events: none; z-index: 0;
+    position: fixed;
+    inset: 0;
     background-image:
-      linear-gradient(rgba(58,176,222,.03) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(58,176,222,.03) 1px, transparent 1px);
-    background-size: 32px 32px;
+      linear-gradient(rgba(74,158,202,0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(74,158,202,0.04) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+    transition: opacity 0.3s;
   }
 
-  /* ── PROGRESS BAR ───────────────────────────────────── */
-  #progressBar {
-    position: fixed; top: 0; left: 0; height: 3px;
-    width: 0%; background: var(--sky);
-    z-index: 1000; transition: width .1s linear;
-    box-shadow: 0 0 8px var(--sky);
+  html[data-theme="light"] body::before {
+    background-image:
+      linear-gradient(rgba(13,27,42,0.05) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(13,27,42,0.05) 1px, transparent 1px);
   }
 
-  /* ── HEADER ─────────────────────────────────────────── */
+  /* ── SCAN LINE ANIMATION ── */
+  body::after {
+    content: '';
+    position: fixed;
+    top: -100%;
+    left: 0;
+    right: 0;
+    height: 200%;
+    background: linear-gradient(transparent 49.5%, rgba(74,158,202,0.03) 50%, transparent 50.5%);
+    background-size: 100% 4px;
+    animation: scan 8s linear infinite;
+    pointer-events: none;
+    z-index: 0;
+    transition: opacity 0.3s;
+  }
+
+  html[data-theme="light"] body::after {
+    opacity: 0;
+  }
+
+  @keyframes scan {
+    0%   { transform: translateY(0); }
+    100% { transform: translateY(50%); }
+  }
+
+  /* ── HEADER ── */
   header {
     background: var(--navy);
+    color: #d0e8f2;
     padding: 0;
     position: sticky;
     top: 0;
-    z-index: 200;
-    border-bottom: 3px solid transparent;
-    border-image: linear-gradient(90deg, var(--sky), var(--red)) 1;
+    z-index: 100;
+    border-bottom: 3px solid var(--accent);
     box-shadow: 0 4px 20px rgba(0,0,0,0.3);
   }
+
   .header-inner {
-    max-width: 1200px;
+    max-width: 1100px;
     margin: 0 auto;
     padding: 14px 32px;
     display: flex;
@@ -90,6 +117,7 @@
     gap: 24px;
     flex-wrap: wrap;
   }
+
   .header-week {
     font-family: var(--mono);
     font-size: 11px;
@@ -97,23 +125,25 @@
     letter-spacing: 0.15em;
     text-transform: uppercase;
     color: var(--sky);
-    border: 1px solid var(--dim);
+    border: 1px solid var(--steel);
     padding: 4px 10px;
     border-radius: 3px;
     white-space: nowrap;
   }
+
   .header-title {
     font-size: 18px;
     font-weight: 700;
     letter-spacing: -0.01em;
-    color: var(--white);
     flex: 1;
   }
+
   .header-meta {
     display: flex;
     gap: 16px;
     flex-wrap: wrap;
   }
+
   .meta-chip {
     font-family: var(--mono);
     font-size: 11px;
@@ -122,14 +152,17 @@
     align-items: center;
     gap: 6px;
   }
+
   .meta-chip::before {
     content: '';
     display: inline-block;
-    width: 6px; height: 6px;
+    width: 6px;
+    height: 6px;
     border-radius: 50%;
     background: var(--sky);
     opacity: 0.7;
   }
+
   .header-back {
     font-family: var(--mono);
     font-size: 11px;
@@ -138,19 +171,25 @@
     text-transform: uppercase;
     color: var(--sky);
     text-decoration: none;
-    border: 1px solid var(--dim);
+    border: 1px solid var(--steel);
     padding: 4px 10px;
     border-radius: 3px;
     white-space: nowrap;
     transition: border-color 0.15s, color 0.15s;
   }
-  .header-back:hover { border-color: var(--sky); }
+
+  .header-back:hover {
+    border-color: var(--sky);
+    color: var(--white);
+  }
+
   .theme-toggle {
     flex-shrink: 0;
-    background: rgba(255,255,255,0.05);
-    border: 1px solid var(--dim);
+    background: rgba(255,255,255,0.08);
+    border: 1px solid var(--steel);
     color: var(--sky);
-    width: 34px; height: 34px;
+    width: 34px;
+    height: 34px;
     border-radius: 50%;
     cursor: pointer;
     display: flex;
@@ -159,567 +198,865 @@
     font-size: 15px;
     transition: background 0.2s, border-color 0.2s;
   }
+
   .theme-toggle:hover { border-color: var(--sky); }
 
-  /* ── LAYOUT ─────────────────────────────────────────── */
+  .progress-bar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 3px;
+    background: var(--accent);
+    z-index: 999;
+    transition: width 0.1s linear;
+  }
+
+  /* ── LAYOUT ── */
   .layout {
-    max-width: 860px;
+    max-width: 1100px;
     margin: 0 auto;
-    padding: 2.5rem 1.5rem 4rem;
+    display: grid;
+    grid-template-columns: 220px 1fr;
+    gap: 0;
+    padding: 0 24px;
+    align-items: start;
     position: relative;
     z-index: 1;
   }
 
-  /* ── STAKES BANNER ──────────────────────────────────── */
-  .stakes {
-    background: linear-gradient(135deg, rgba(58,176,222,0.07), rgba(32,192,112,0.04));
-    border: 1px solid rgba(58,176,222,0.3);
-    border-left: 3px solid var(--sky);
-    padding: 1rem 1.25rem;
-    margin-bottom: 2.5rem;
-    border-radius: 0 var(--radius) var(--radius) 0;
-  }
-  .stakes-label {
-    font-family: var(--mono);
-    font-size: 0.68rem;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    color: var(--sky);
-    margin-bottom: 0.3rem;
-  }
-  .stakes p {
-    font-size: 0.95rem;
-    color: var(--white);
-    line-height: 1.6;
+  .sidebar {
+    position: sticky;
+    top: 73px;
+    padding: 32px 24px 32px 0;
   }
 
-  /* ── SECTION LABEL ──────────────────────────────────── */
-  .section-label {
+  .nav-label {
     font-family: var(--mono);
-    font-size: 0.68rem;
+    font-size: 10px;
+    font-weight: 600;
     letter-spacing: 0.15em;
     text-transform: uppercase;
-    color: var(--sky);
-    margin-bottom: 0.65rem;
-    display: flex;
-    align-items: center;
-    gap: 0.6rem;
-  }
-  .section-label::after {
-    content: '';
-    flex: 1;
-    height: 1px;
-    background: var(--border);
+    color: var(--slate);
+    margin-bottom: 12px;
+    padding-left: 12px;
   }
 
-  section { margin-bottom: 2.5rem; }
-
-  p {
-    font-size: 0.95rem;
-    color: var(--frost);
-    line-height: 1.75;
-    margin-bottom: 0.75rem;
-  }
-  p:last-child { margin-bottom: 0; }
-
-  /* ── DEFINITION CARD ────────────────────────────────── */
-  .definition-card {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-left: 3px solid var(--amber);
-    border-radius: 0 var(--radius) var(--radius) 0;
-    padding: 1.1rem 1.25rem;
-  }
-  .definition-card .def-term {
-    font-family: var(--mono);
-    font-size: 0.7rem;
-    color: var(--amber);
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    margin-bottom: 0.4rem;
-  }
-  .definition-card p {
-    font-size: 0.9rem;
-    color: var(--frost);
-    margin: 0;
-  }
-
-  /* ── OBJECTIVE LIST ─────────────────────────────────── */
-  .objective-list {
+  .nav-list {
     list-style: none;
     display: flex;
     flex-direction: column;
-    gap: 0.45rem;
+    gap: 2px;
   }
-  .objective-list li {
+
+  .nav-list a {
     display: flex;
-    align-items: flex-start;
-    gap: 0.75rem;
-    padding: 0.6rem 1rem;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    font-size: 0.9rem;
-    color: var(--frost);
+    align-items: center;
+    gap: 10px;
+    padding: 8px 12px;
+    border-radius: 6px;
+    text-decoration: none;
+    font-size: 13px;
+    color: var(--steel);
+    transition: all 0.15s ease;
+    border-left: 3px solid transparent;
+    font-weight: 600;
   }
-  .objective-list li .icon {
+
+  .nav-list a:hover, .nav-list a.active {
+    background: var(--frost);
+    color: var(--ink);
+    border-left-color: var(--slate);
+  }
+
+  .nav-list a .nav-day {
     font-family: var(--mono);
-    font-size: 0.75rem;
-    color: var(--green);
-    margin-top: 0.15rem;
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--slate);
+    min-width: 28px;
+  }
+
+  .nav-divider {
+    height: 1px;
+    background: var(--frost);
+    margin: 8px 12px;
+  }
+
+  main {
+    padding: 32px 0 64px 24px;
+    border-left: 1px solid var(--border);
+    min-width: 0;
+  }
+
+  /* ── SECTIONS ── */
+  .section {
+    margin-bottom: 48px;
+    opacity: 0;
+    transform: translateY(16px);
+    transition: opacity 0.4s ease, transform 0.4s ease;
+  }
+
+  .section.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 20px;
+    padding-bottom: 12px;
+    border-bottom: 2px solid var(--frost);
+  }
+
+  .section-icon {
+    width: 40px;
+    height: 40px;
+    background: var(--navy);
+    color: var(--sky);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--mono);
+    font-size: 13px;
+    font-weight: 600;
     flex-shrink: 0;
   }
 
-  /* ── STEPS ──────────────────────────────────────────── */
-  .steps { display: flex; flex-direction: column; gap: 0.65rem; }
-  .step {
-    display: grid;
-    grid-template-columns: 2.75rem 1fr;
-    gap: 1rem;
-    align-items: start;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 1rem 1.1rem;
-    transition: border-color 0.2s;
-  }
-  .step:hover { border-color: rgba(58,176,222,0.4); }
-  .step-num {
-    font-family: var(--mono);
-    font-size: 1.3rem;
-    font-weight: 600;
-    color: var(--sky);
-    line-height: 1;
-    padding-top: 0.05rem;
-  }
-  .step-title {
-    font-weight: 600;
-    font-size: 0.9rem;
-    color: var(--white);
-    margin-bottom: 0.25rem;
-  }
-  .step-desc { font-size: 0.85rem; color: var(--dim); line-height: 1.6; }
-  .step-desc code {
-    font-family: var(--mono);
-    font-size: 0.8rem;
-    color: var(--green);
-    background: rgba(32,192,112,0.07);
-    padding: 0.15rem 0.4rem;
-    border-radius: 3px;
+  .section-title {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--navy);
+    letter-spacing: -0.02em;
+    line-height: 1.2;
   }
 
-  /* ── PRIMER GRID ────────────────────────────────────── */
-  .primer-grid {
+  html[data-theme="dark"] .section-title { color: var(--sky); }
+
+  .section-subtitle {
+    font-size: 13px;
+    color: var(--slate);
+    font-style: italic;
+    margin-top: 2px;
+  }
+
+  .obj-list {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 1rem;
+    gap: 12px;
+    list-style: none;
   }
-  @media (max-width: 580px) { .primer-grid { grid-template-columns: 1fr; } }
 
-  .primer-card {
-    background: var(--card);
+  .obj-item {
+    background: var(--white);
     border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 1.1rem 1.2rem;
+    border-left: 4px solid var(--slate);
+    border-radius: 0 8px 8px 0;
+    padding: 12px 16px;
+    font-size: 14px;
+    line-height: 1.45;
+    color: var(--ink);
+    transition: border-left-color 0.2s, box-shadow 0.2s;
   }
-  .primer-card h3 {
-    font-family: var(--mono);
-    font-size: 0.7rem;
+
+  .obj-item:hover {
+    border-left-color: var(--accent);
+    box-shadow: 0 2px 12px rgba(0,0,0,0.07);
+  }
+
+  /* ── DAY CARDS (troubleshooting steps) ── */
+  .day-card {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+    margin-bottom: 20px;
+    transition: box-shadow 0.2s ease;
+  }
+
+  .day-card:hover {
+    box-shadow: 0 4px 20px rgba(46, 77, 110, 0.12);
+  }
+
+  .day-header {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    cursor: pointer;
+    user-select: none;
+  }
+
+  .day-number {
+    background: var(--navy);
     color: var(--sky);
-    text-transform: uppercase;
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 600;
     letter-spacing: 0.1em;
-    margin-bottom: 0.8rem;
+    text-transform: uppercase;
+    padding: 14px 16px;
+    min-width: 80px;
+    text-align: center;
+    flex-shrink: 0;
   }
-  .cmd-list { list-style: none; display: flex; flex-direction: column; gap: 0.55rem; }
-  .cmd-list li { display: flex; flex-direction: column; gap: 0.15rem; }
+
+  .day-title-block {
+    flex: 1;
+    padding: 14px 20px;
+  }
+
+  .day-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--navy);
+    letter-spacing: -0.01em;
+  }
+
+  html[data-theme="dark"] .day-title { color: var(--sky); }
+
+  .day-focus {
+    font-size: 12px;
+    color: var(--slate);
+    font-style: italic;
+    margin-top: 2px;
+  }
+
+  .day-toggle {
+    padding: 14px 20px;
+    color: var(--slate);
+    font-size: 18px;
+    transition: transform 0.25s ease;
+    flex-shrink: 0;
+  }
+
+  .day-card.open .day-toggle {
+    transform: rotate(180deg);
+  }
+
+  .day-body {
+    display: none;
+    padding: 0 20px 20px;
+    border-top: 1px solid var(--frost);
+  }
+
+  .day-card.open .day-body {
+    display: block;
+  }
+
+  .time-block {
+    margin-top: 16px;
+  }
+
+  .time-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--slate);
+    margin-bottom: 8px;
+  }
+
+  .step-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding-left: 0;
+  }
+
+  .step-list li {
+    display: flex;
+    gap: 10px;
+    font-size: 14px;
+    line-height: 1.5;
+    color: var(--ink);
+    padding: 6px 10px;
+    border-radius: 5px;
+    transition: background 0.15s;
+  }
+
+  .step-list li:hover { background: var(--paper); }
+
+  .step-list li::before {
+    content: '›';
+    color: var(--slate);
+    font-weight: 700;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+
+  /* ── TABLES ── */
+  .data-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+
+  .data-table thead tr {
+    background: var(--navy);
+    color: var(--sky);
+  }
+
+  .data-table th {
+    padding: 10px 14px;
+    text-align: left;
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .data-table td {
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--frost);
+    color: var(--ink);
+    vertical-align: top;
+    line-height: 1.4;
+  }
+
+  .data-table td code {
+    font-family: var(--mono);
+    font-size: 12px;
+    background: var(--navy);
+    color: var(--sky);
+    padding: 2px 7px;
+    border-radius: 4px;
+  }
+
+  .data-table tr:last-child td { border-bottom: none; }
+  .data-table tbody tr:hover td { background: var(--paper); }
+
   code {
     font-family: var(--mono);
-    font-size: 0.8rem;
-    color: var(--green);
-    background: rgba(32,192,112,0.07);
-    padding: 0.2rem 0.5rem;
-    border-radius: 3px;
-    display: inline-block;
+    font-size: 12px;
+    background: var(--navy);
+    color: var(--sky);
+    padding: 2px 7px;
+    border-radius: 4px;
   }
-  .cmd-note {
-    font-size: 0.78rem;
-    color: var(--dim);
-    padding-left: 0.25rem;
+
+  /* ── TERMINAL BLOCK ── */
+  .terminal-block {
+    font-family: var(--mono);
+    font-size: 13px;
+    background: var(--navy);
+    color: var(--sky);
+    padding: 14px 18px;
+    border-radius: 8px;
+    margin: 12px 0;
+    line-height: 1.8;
+    word-break: break-all;
+  }
+
+  .terminal-block .prompt { color: var(--frost); opacity: .6; }
+
+  /* ── NOTICE BOXES ── */
+  .notice {
+    display: flex;
+    gap: 14px;
+    padding: 14px 16px;
+    border-radius: 8px;
+    margin-bottom: 12px;
+    font-size: 14px;
     line-height: 1.5;
   }
 
-  /* ── WARNING ────────────────────────────────────────── */
-  .warning {
-    background: rgba(240,160,48,0.06);
-    border: 1px solid rgba(240,160,48,0.25);
-    border-left: 3px solid var(--amber);
-    border-radius: 0 var(--radius) var(--radius) 0;
-    padding: 1rem 1.25rem;
-    font-size: 0.875rem;
-    color: var(--amber);
+  .notice-warn  { background: #fff5e6; border-left: 4px solid var(--amber); }
+  .notice-info  { background: #e8f4fd; border-left: 4px solid var(--slate); }
+  .notice-ok    { background: #e8f8ee; border-left: 4px solid var(--green); }
+
+  html[data-theme="dark"] .notice-warn { background: rgba(232,160,32,0.08); }
+  html[data-theme="dark"] .notice-info { background: rgba(74,111,165,0.12); }
+  html[data-theme="dark"] .notice-ok   { background: rgba(42,157,80,0.10); }
+
+  .notice-icon {
+    font-size: 18px;
+    flex-shrink: 0;
+    line-height: 1.4;
   }
-  .warning strong {
+
+  .notice strong {
     display: block;
-    font-family: var(--mono);
-    font-size: 0.68rem;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    margin-bottom: 0.3rem;
-    opacity: 0.75;
+    font-size: 13px;
+    font-weight: 700;
+    margin-bottom: 3px;
+    color: var(--ink);
   }
 
-  /* ── CREDS TABLE ────────────────────────────────────── */
-  .creds-table {
-    width: 100%;
-    border-collapse: collapse;
-    font-family: var(--mono);
-  }
-  .creds-table th {
-    background: var(--navy);
-    font-size: 0.68rem;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    color: var(--sky);
-    padding: 0.6rem 1rem;
-    text-align: left;
-    border: 1px solid var(--border);
-  }
-  .creds-table td {
-    padding: 0.75rem 1rem;
-    border: 1px solid var(--border);
-    font-size: 1.2rem;
-    color: var(--green);
-    background: var(--card);
-    font-weight: 600;
-    letter-spacing: 0.04em;
-  }
+  .notice p { margin: 0; color: var(--steel); font-size: 13px; }
 
-  /* ── FLAG TABLE ─────────────────────────────────────── */
-  .flag-table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 0.875rem;
-  }
-  .flag-table th {
-    background: var(--navy);
-    font-family: var(--mono);
-    font-size: 0.68rem;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    color: var(--sky);
-    padding: 0.6rem 1rem;
-    text-align: left;
-    border: 1px solid var(--border);
-  }
-  .flag-table td {
-    padding: 0.6rem 1rem;
-    border: 1px solid var(--border);
-    color: var(--frost);
-    vertical-align: top;
-  }
-  .flag-table tbody tr:nth-child(odd) td { background: var(--surface); }
-  .flag-table tbody tr:nth-child(even) td { background: var(--card); }
-  .flag-table .flag-key {
-    font-family: var(--mono);
-    font-size: 0.8rem;
-    color: var(--green);
-    white-space: nowrap;
-  }
-  .flag-table .flag-note { font-size: 0.82rem; color: var(--dim); }
-  .flag-table .flag-warn { font-size: 0.82rem; color: var(--amber); font-weight: 600; }
-
-  /* ── QUESTION BLOCK ─────────────────────────────────── */
-  .question-block {
+  /* ── REFLECTION / DISCUSSION / SELF-CHECK ── */
+  .reflection-list {
     display: flex;
     flex-direction: column;
-    gap: 0.65rem;
+    gap: 10px;
   }
-  .question-item {
-    background: var(--surface);
+
+  .reflection-item {
+    background: var(--white);
     border: 1px solid var(--border);
-    border-radius: var(--radius);
-    overflow: hidden;
-    transition: border-color 0.2s;
-  }
-  .question-item:hover { border-color: rgba(58,176,222,0.35); }
-  .question-header {
-    display: grid;
-    grid-template-columns: 2.75rem 1fr;
-    gap: 1rem;
-    align-items: center;
-    padding: 0.85rem 1.1rem;
-    background: var(--card);
-    border-bottom: 1px solid var(--border);
-  }
-  .question-num {
-    font-family: var(--mono);
-    font-size: 1.1rem;
-    font-weight: 600;
-    color: var(--sky);
-  }
-  .question-text {
-    font-size: 0.88rem;
-    font-weight: 600;
-    color: var(--white);
+    border-radius: 8px;
+    padding: 14px 16px 14px 50px;
+    font-size: 14px;
+    color: var(--ink);
     line-height: 1.5;
+    position: relative;
   }
-  .question-lines {
-    padding: 0.5rem 1.1rem 0.75rem;
+
+  .reflection-item::before {
+    content: attr(data-q);
+    position: absolute;
+    left: 14px;
+    top: 14px;
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--slate);
+    background: var(--frost);
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
     display: flex;
-    flex-direction: column;
-    gap: 0.65rem;
+    align-items: center;
+    justify-content: center;
   }
-  .answer-line {
-    border-bottom: 1px solid var(--border);
-    padding-bottom: 2px;
-    min-height: 24px;
+
+  /* ── PRINT BUTTON ── */
+  .print-btn {
+    position: fixed;
+    bottom: 28px;
+    right: 28px;
+    background: var(--navy);
+    color: var(--sky);
+    border: none;
+    border-radius: 50px;
+    padding: 12px 22px;
+    font-family: var(--mono);
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    cursor: pointer;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.25);
+    transition: background 0.2s, transform 0.15s;
+    z-index: 200;
+  }
+
+  .print-btn:hover { background: var(--steel); transform: translateY(-2px); }
+
+  @media (max-width: 768px) {
+    .layout { grid-template-columns: 1fr; padding: 0 16px; }
+    .sidebar { display: none; }
+    main { border-left: none; padding-left: 0; }
+    .obj-list { grid-template-columns: 1fr; }
+    .header-meta { display: none; }
+  }
+
+  @media print {
+    header { position: static; }
+    .sidebar, .print-btn, .theme-toggle { display: none; }
+    .layout { grid-template-columns: 1fr; }
+    main { border-left: none; }
+    .section { opacity: 1; transform: none; }
+    .day-body { display: block !important; }
+    .day-card { break-inside: avoid; }
   }
 </style>
 </head>
 <body>
 
-<div id="progressBar"></div>
+<div class="progress-bar" id="progressBar"></div>
 
-<!-- ── HEADER ───────────────────────────────────────────── -->
 <header>
   <div class="header-inner">
-    <a href="index.html" class="header-back">← Home</a>
-    <span class="header-week">Week 5</span>
-    <span class="header-title">Hydra Reference &amp; Troubleshooting</span>
+    <a class="header-back" href="index.html">← Home</a>
+    <div class="header-week">Week 05</div>
+    <div class="header-title">Brute Force Hydra</div>
     <div class="header-meta">
-      <span class="meta-chip">Crack the Courier</span>
-      <span class="meta-chip">Hydra</span>
-      <span class="meta-chip">SSH</span>
-      <span class="meta-chip">Nmap</span>
+      <span class="meta-chip">Hydra · SSH · Nmap · Wordlists</span>
     </div>
-    <button class="theme-toggle" onclick="toggleTheme()" title="Toggle theme">☀</button>
+    <button class="theme-toggle" id="themeToggle" aria-label="Toggle light/dark mode">☀</button>
   </div>
 </header>
 
-<!-- ── MAIN ─────────────────────────────────────────────── -->
 <div class="layout">
 
-  <!-- Authorized Warning -->
-  <div class="warning" style="margin-bottom:1.5rem; background:rgba(232,64,64,0.06); border-color:rgba(232,64,64,0.25); border-left-color:var(--red); color:var(--red);">
-    <strong>// Authorized Lab Environment Only</strong>
-    All activities must be performed exclusively within the designated classroom lab network. Running these tools against any system without written permission is illegal.
-  </div>
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="nav-label">Contents</div>
+    <ul class="nav-list" id="navList">
+      <li><a href="index.html"><span class="nav-day">⌂</span> Home</a></li>
+      <div class="nav-divider"></div>
+      <li><a href="#tldr"><span class="nav-day">TL</span> Executive TL;DR</a></li>
+      <li><a href="#objectives"><span class="nav-day">OBJ</span> What This Page Is For</a></li>
+      <li><a href="#ethics"><span class="nav-day">00</span> Authorization</a></li>
+      <div class="nav-divider"></div>
+      <li><a href="#kali-creds"><span class="nav-day">01</span> Kali Live Credentials</a></li>
+      <li><a href="#command"><span class="nav-day">02</span> The Hydra Command</a></li>
+      <div class="nav-divider"></div>
+      <li><a href="#step1"><span class="nav-day">S1</span> Syntax Errors</a></li>
+      <li><a href="#step2"><span class="nav-day">S2</span> Wordlist Not Found</a></li>
+      <li><a href="#step3"><span class="nav-day">S3</span> Target Disabled</a></li>
+      <li><a href="#step4"><span class="nav-day">S4</span> Slow Progress</a></li>
+      <li><a href="#step5"><span class="nav-day">S5</span> Permission Denied</a></li>
+      <div class="nav-divider"></div>
+      <li><a href="#discuss"><span class="nav-day">DSC</span> While You Wait</a></li>
+      <li><a href="#reference"><span class="nav-day">REF</span> Field Reference</a></li>
+      <li><a href="#selfcheck"><span class="nav-day">CHK</span> Before You Finish</a></li>
+      <li><a href="#" onclick="window.print(); return false;"><span class="nav-day">PDF</span> Download PDF</a></li>
+    </ul>
+  </aside>
 
-  <!-- Stakes -->
-  <div class="stakes">
-    <div class="stakes-label">// Reference Sheet</div>
-    <p>Use this sheet if Hydra isn't behaving, if a Kali login dialog appeared, or while you wait for the password crack to complete. Ghost &bull; Shadow &bull; Fantom &bull; Cipher.</p>
-  </div>
+  <!-- MAIN -->
+  <main>
 
-  <!-- Section 1: Kali Creds -->
-  <section>
-    <div class="section-label">Kali Live Credentials</div>
-    <p>If a login dialog appears at any point during the lab, use these. Every session, every time.</p>
-    <table class="creds-table" style="margin-bottom:1rem;">
-      <thead>
-        <tr>
-          <th>Username</th>
-          <th>Password</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td>kali</td>
-          <td>kali</td>
-        </tr>
-      </tbody>
-    </table>
-    <div class="warning">
-      <strong>// Screen Appears Frozen?</strong>
-      Hit <strong>Escape</strong> or click <strong>Cancel</strong> on the dialog. Your terminal and running Hydra session will still be in the taskbar — do not close it.
-    </div>
-  </section>
+    <!-- EXECUTIVE TL;DR -->
+    <section class="section" id="tldr">
+      <div class="section-header">
+        <div class="section-icon">TL</div>
+        <div>
+          <div class="section-title">Executive TL;DR</div>
+          <div class="section-subtitle">The whole page, explained like you have thirty seconds</div>
+        </div>
+      </div>
 
-  <!-- Section 2: The Command -->
-  <section>
-    <div class="section-label">The Correct Hydra Command</div>
-    <p>Copy this exactly. The IP is already set for this lab. Do not modify anything.</p>
-    <div class="primer-card" style="margin-bottom:1rem;">
-      <h3>// Run This</h3>
-      <ul class="cmd-list">
-        <li>
-          <code>hydra -l jrogers -P /usr/share/wordlists/rockyou.txt ssh://192.168.1.115 -t 1 -W 3 -V</code>
-          <span class="cmd-note">Full command — all flags required for this hardware.</span>
-        </li>
+      <ul class="obj-list">
+        <li class="obj-item"><strong>What is this?</strong> A reference sheet for Crack the Courier, for when Hydra isn't behaving or while you wait for a crack to complete.</li>
+        <li class="obj-item"><strong>What's the target?</strong> A real Ubuntu machine on the classroom network, not a simulation.</li>
+        <li class="obj-item"><strong>Is it dangerous?</strong> No. Target IP is given to you by your teacher and belongs to this class only.</li>
+        <li class="obj-item"><strong>Why does this take days?</strong> The wordlist and throttle settings are deliberate — the crack is built to take multiple class periods, not minutes.</li>
+        <li class="obj-item"><strong>What do they need?</strong> Hydra, <code>classroom_wordlist.txt</code>, and the target IP.</li>
+        <li class="obj-item"><strong>What do they walk away with?</strong> The cracked <code>jrogers</code> password, SSH access, and answers to the discussion questions below.</li>
       </ul>
-    </div>
-    <table class="flag-table">
-      <thead>
-        <tr>
-          <th>Flag</th>
-          <th>What it does</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td class="flag-key">-l jrogers</td>
-          <td>Single username to attack <span class="flag-note">(lowercase L)</span></td>
-        </tr>
-        <tr>
-          <td class="flag-key">-P rockyou.txt</td>
-          <td>Wordlist of passwords — <span class="flag-warn">UPPERCASE P required</span></td>
-        </tr>
-        <tr>
-          <td class="flag-key">ssh://192.168.1.115</td>
-          <td>Target protocol and IP address</td>
-        </tr>
-        <tr>
-          <td class="flag-key">-t 1</td>
-          <td>1 thread — prevents the Pi from dropping the connection</td>
-        </tr>
-        <tr>
-          <td class="flag-key">-W 3</td>
-          <td>3 second wait between retries — keeps the session stable</td>
-        </tr>
-        <tr>
-          <td class="flag-key">-V</td>
-          <td>Verbose — shows each attempt so you know it's running</td>
-        </tr>
-      </tbody>
-    </table>
-  </section>
+    </section>
 
-  <!-- Section 3: Troubleshooting -->
-  <section>
-    <div class="section-label">Troubleshooting — Work Through In Order</div>
-    <div class="steps">
-
-      <div class="step">
-        <div class="step-num">01</div>
+    <!-- WHAT THIS PAGE IS FOR -->
+    <section class="section" id="objectives">
+      <div class="section-header">
+        <div class="section-icon">OBJ</div>
         <div>
-          <div class="step-title">Hydra printed a help menu / list of options</div>
-          <div class="step-desc">The command had a syntax error. Check: lowercase <code>-p</code> vs uppercase <code>-P</code> — they do different things and the wrong one breaks the command silently. Also confirm you replaced TARGET-IP with the actual address from your Nmap scan, and verify the wordlist path with <code>ls /usr/share/wordlists/rockyou.txt</code>.</div>
+          <div class="section-title">What This Page Is For</div>
+          <div class="section-subtitle">Use it in order — most problems are covered below</div>
         </div>
       </div>
+      <ul class="obj-list">
+        <li class="obj-item">Fix a broken Hydra command without waiting for help</li>
+        <li class="obj-item">Understand why the attack takes multiple class periods, not minutes</li>
+        <li class="obj-item">Know what to do if a Kali login dialog interrupts the lab</li>
+        <li class="obj-item">Work through the discussion questions as a team while Hydra runs</li>
+      </ul>
+    </section>
 
-      <div class="step">
-        <div class="step-num">02</div>
+    <!-- AUTHORIZATION -->
+    <section class="section" id="ethics">
+      <div class="section-header">
+        <div class="section-icon">00</div>
         <div>
-          <div class="step-title">rockyou.txt not found</div>
-          <div class="step-desc">Live USB does not persist files. Run <code>sudo gunzip /usr/share/wordlists/rockyou.txt.gz</code> at the start of every session. If it says the file already exists, skip it. Confirm with <code>ls -lh /usr/share/wordlists/rockyou.txt</code> — should show ~130MB.</div>
+          <div class="section-title">Authorization</div>
+          <div class="section-subtitle">Read this before you run anything</div>
         </div>
       </div>
 
-      <div class="step">
-        <div class="step-num">03</div>
+      <div class="notice notice-warn">
+        <div class="notice-icon">⚠</div>
         <div>
-          <div class="step-title">[ERROR] 1 target was disabled — too many errors</div>
-          <div class="step-desc">The Pi is dropping connections because Hydra is hitting it too fast. The <code>-t 1 -W 3</code> flags in the command above fix this. Make sure both flags are present. Do not run the default Hydra command without them on this hardware.</div>
+          <strong>Authorized Lab Environment Only</strong>
+          <p>All activities must be performed exclusively within the designated classroom lab network. Running these tools against any system without written permission is illegal.</p>
         </div>
       </div>
+    </section>
 
-      <div class="step">
-        <div class="step-num">04</div>
+    <!-- KALI LIVE CREDENTIALS -->
+    <section class="section" id="kali-creds">
+      <div class="section-header">
+        <div class="section-icon">01</div>
         <div>
-          <div class="step-title">Hydra is running but counting slowly</div>
-          <div class="step-desc">Normal. <code>letmein</code> is near the top of rockyou.txt but the exact position varies slightly by Kali version. If the counter passes 100 with no result, raise your hand.</div>
+          <div class="section-title">Kali Live Credentials</div>
+          <div class="section-subtitle">If a login dialog appears at any point during the lab</div>
         </div>
       </div>
 
-      <div class="step">
-        <div class="step-num">05</div>
+      <table class="data-table" style="margin-bottom:16px;">
+        <thead><tr><th>Username</th><th>Password</th></tr></thead>
+        <tbody><tr><td><code>kali</code></td><td><code>kali</code></td></tr></tbody>
+      </table>
+
+      <div class="notice notice-info">
+        <div class="notice-icon">ℹ</div>
         <div>
-          <div class="step-title">SSH says Permission denied</div>
-          <div class="step-desc">Write down the password Hydra prints exactly as shown. When entering it in SSH, nothing appears on screen while you type — this is standard Linux behavior. Type the password and press Enter.</div>
+          <strong>Screen appears frozen?</strong>
+          <p>Hit Escape or click Cancel on the dialog. Your terminal and running Hydra session will still be in the taskbar — do not close it.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- THE COMMAND -->
+    <section class="section" id="command">
+      <div class="section-header">
+        <div class="section-icon">02</div>
+        <div>
+          <div class="section-title">The Correct Hydra Command</div>
+          <div class="section-subtitle">Replace TARGET-IP with the address your teacher gave you</div>
         </div>
       </div>
 
-    </div>
-  </section>
+      <div class="terminal-block">
+        <span class="prompt">$ </span>hydra -l jrogers -P ~/classroom_wordlist.txt ssh://TARGET-IP -t 1 -W 3 -V
+      </div>
 
-  <!-- Section 4: While You Wait -->
-  <section>
-    <div class="section-label">While You Wait — Team Discussion</div>
-    <p>Hydra is running. Answer these as a team while it cracks. Write your answers below.</p>
-    <div class="question-block">
+      <table class="data-table">
+        <thead><tr><th>Flag</th><th>What it does</th></tr></thead>
+        <tbody>
+          <tr><td><code>-l jrogers</code></td><td>Single username to attack (lowercase L)</td></tr>
+          <tr><td><code>-P classroom_wordlist.txt</code></td><td>Wordlist of passwords — uppercase P required</td></tr>
+          <tr><td><code>ssh://TARGET-IP</code></td><td>Target protocol and IP address — a real Ubuntu machine on the classroom network</td></tr>
+          <tr><td><code>-t 1</code></td><td>1 thread — keeps the connection to the target stable</td></tr>
+          <tr><td><code>-W 3</code></td><td>3 second wait between retries — keeps the session stable</td></tr>
+          <tr><td><code>-V</code></td><td>Verbose — shows each attempt so you know it's running</td></tr>
+        </tbody>
+      </table>
+    </section>
 
-      <div class="question-item">
-        <div class="question-header">
-          <div class="question-num">Q1</div>
-          <div class="question-text">What is a dictionary attack? How is it different from a brute force attack that tries every possible character combination?</div>
+    <!-- STEP 1 -->
+    <section class="section" id="step1">
+      <div class="day-card open">
+        <div class="day-header" onclick="toggleDay(this)">
+          <div class="day-number">S1</div>
+          <div class="day-title-block">
+            <div class="day-title">Hydra printed a help menu / list of options</div>
+            <div class="day-focus">The command had a syntax error</div>
+          </div>
+          <div class="day-toggle">▾</div>
         </div>
-        <div class="question-lines">
-          <div class="answer-line"></div>
-          <div class="answer-line"></div>
-          <div class="answer-line"></div>
+        <div class="day-body">
+          <div class="time-block">
+            <ul class="step-list">
+              <li>Check lowercase <code>-p</code> vs uppercase <code>-P</code> — they do different things and the wrong one breaks the command silently.</li>
+              <li>Confirm you replaced <code>TARGET-IP</code> with the actual address from your Nmap scan.</li>
+              <li>Verify the wordlist path with <code>ls ~/classroom_wordlist.txt</code>.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- STEP 2 -->
+    <section class="section" id="step2">
+      <div class="day-card open">
+        <div class="day-header" onclick="toggleDay(this)">
+          <div class="day-number">S2</div>
+          <div class="day-title-block">
+            <div class="day-title">classroom_wordlist.txt not found</div>
+            <div class="day-focus">This wordlist is not pre-installed like rockyou.txt</div>
+          </div>
+          <div class="day-toggle">▾</div>
+        </div>
+        <div class="day-body">
+          <div class="time-block">
+            <p style="font-size:14px; line-height:1.7; color:var(--ink);">Your teacher provides this wordlist (USB stick or shared drive). A live USB does not persist files, so copy it into your home directory fresh at the start of every session.</p>
+            <div class="terminal-block"><span class="prompt">$ </span>ls -lh ~/classroom_wordlist.txt</div>
+          </div>
+          <div class="time-block">
+            <div class="notice notice-info">
+              <div class="notice-icon">ℹ</div>
+              <div>
+                <strong>Expected result</strong>
+                <p>A small file, about 2,000 lines. If it's missing, re-copy it before continuing.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- STEP 3 -->
+    <section class="section" id="step3">
+      <div class="day-card open">
+        <div class="day-header" onclick="toggleDay(this)">
+          <div class="day-number">S3</div>
+          <div class="day-title-block">
+            <div class="day-title">[ERROR] 1 target was disabled — too many errors</div>
+            <div class="day-focus">The target is dropping connections</div>
+          </div>
+          <div class="day-toggle">▾</div>
+        </div>
+        <div class="day-body">
+          <div class="time-block">
+            <p style="font-size:14px; line-height:1.7; color:var(--ink);">Hydra is hitting the target too fast. The <code>-t 1 -W 3</code> flags in the command above fix this — make sure both flags are present. Do not run the default Hydra command without them on this target.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- STEP 4 -->
+    <section class="section" id="step4">
+      <div class="day-card open">
+        <div class="day-header" onclick="toggleDay(this)">
+          <div class="day-number">S4</div>
+          <div class="day-title-block">
+            <div class="day-title">Hydra is running but counting slowly</div>
+            <div class="day-focus">This is normal — and expected</div>
+          </div>
+          <div class="day-toggle">▾</div>
+        </div>
+        <div class="day-body">
+          <div class="time-block">
+            <p style="font-size:14px; line-height:1.7; color:var(--ink);">This target's password is not at the top of the list, and at this lab's pace (one thread, 3 second wait) the crack is designed to take multiple class periods, not minutes. Let it keep running between classes if your setup allows, and pick up where it left off next period.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- STEP 5 -->
+    <section class="section" id="step5">
+      <div class="day-card open">
+        <div class="day-header" onclick="toggleDay(this)">
+          <div class="day-number">S5</div>
+          <div class="day-title-block">
+            <div class="day-title">SSH says Permission denied</div>
+            <div class="day-focus">Normal Linux behavior, not a bug</div>
+          </div>
+          <div class="day-toggle">▾</div>
+        </div>
+        <div class="day-body">
+          <div class="time-block">
+            <p style="font-size:14px; line-height:1.7; color:var(--ink);">Write down the password Hydra prints exactly as shown. When entering it in SSH, nothing appears on screen while you type — type the password and press Enter anyway.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- WHILE YOU WAIT -->
+    <section class="section" id="discuss">
+      <div class="section-header">
+        <div class="section-icon">DSC</div>
+        <div>
+          <div class="section-title">While You Wait — Team Discussion</div>
+          <div class="section-subtitle">Hydra is running. Answer these as a team while it cracks.</div>
         </div>
       </div>
 
-      <div class="question-item">
-        <div class="question-header">
-          <div class="question-num">Q2</div>
-          <div class="question-text">rockyou.txt contains over 14 million passwords. Where did this list originally come from, and why is it so widely used in security testing?</div>
-        </div>
-        <div class="question-lines">
-          <div class="answer-line"></div>
-          <div class="answer-line"></div>
-          <div class="answer-line"></div>
+      <div class="reflection-list">
+        <div class="reflection-item" data-q="1">What is a dictionary attack? How is it different from a brute force attack that tries every possible character combination?</div>
+        <div class="reflection-item" data-q="2">This lab's wordlist is built from real, frequency-ranked leaked passwords, not guesses. Why do security researchers build wordlists this way instead of trying random character combinations?</div>
+        <div class="reflection-item" data-q="3">Hydra is trying passwords one by one over SSH. What could a sysadmin configure on the server to stop or slow down this exact attack?</div>
+        <div class="reflection-item" data-q="4">We set <code>-t 1</code> for this lab. Why might a higher thread count against a live SSH service risk dropped connections, lockouts, or look like a denial-of-service attack?</div>
+        <div class="reflection-item" data-q="5">If jrogers had used a strong, random password like <code>X7$kP!2mQw9#rL</code> instead of a common dictionary word, how long would this attack realistically take? What does that tell you about password policy?</div>
+      </div>
+    </section>
+
+    <!-- FIELD REFERENCE -->
+    <section class="section" id="reference">
+      <div class="section-header">
+        <div class="section-icon">REF</div>
+        <div>
+          <div class="section-title">Field Reference</div>
+          <div class="section-subtitle">Quick recap of the command and flags</div>
         </div>
       </div>
 
-      <div class="question-item">
-        <div class="question-header">
-          <div class="question-num">Q3</div>
-          <div class="question-text">Hydra is trying passwords one by one over SSH. What could a sysadmin configure on the server to stop or slow down this exact attack?</div>
-        </div>
-        <div class="question-lines">
-          <div class="answer-line"></div>
-          <div class="answer-line"></div>
-          <div class="answer-line"></div>
+      <table class="data-table">
+        <thead><tr><th>Action</th><th>How</th></tr></thead>
+        <tbody>
+          <tr><td>Run the attack</td><td><code>hydra -l jrogers -P ~/classroom_wordlist.txt ssh://TARGET-IP -t 1 -W 3 -V</code></td></tr>
+          <tr><td>Confirm wordlist is present</td><td><code>ls -lh ~/classroom_wordlist.txt</code></td></tr>
+          <tr><td>Log in with cracked password</td><td><code>ssh jrogers@TARGET-IP</code></td></tr>
+          <tr><td>Kali live login (if prompted)</td><td><code>kali</code> / <code>kali</code></td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- BEFORE YOU FINISH -->
+    <section class="section" id="selfcheck">
+      <div class="section-header">
+        <div class="section-icon">CHK</div>
+        <div>
+          <div class="section-title">Before You Finish</div>
+          <div class="section-subtitle">Can you do each of these before you leave?</div>
         </div>
       </div>
 
-      <div class="question-item">
-        <div class="question-header">
-          <div class="question-num">Q4</div>
-          <div class="question-text">We set <code style="font-size:0.8rem;">-t 1</code> for this lab. Why might a higher thread count cause problems on a Raspberry Pi target?</div>
-        </div>
-        <div class="question-lines">
-          <div class="answer-line"></div>
-          <div class="answer-line"></div>
-          <div class="answer-line"></div>
-        </div>
+      <div class="reflection-list">
+        <div class="reflection-item" data-q="1">Record the exact password Hydra found</div>
+        <div class="reflection-item" data-q="2">SSH in as jrogers and confirm access</div>
+        <div class="reflection-item" data-q="3">Answer all five discussion questions with your team</div>
+        <div class="reflection-item" data-q="4">Explain why the attack took as long as it did</div>
       </div>
 
-      <div class="question-item">
-        <div class="question-header">
-          <div class="question-num">Q5</div>
-          <div class="question-text">If jrogers had used <code style="font-size:0.8rem;">X7$kP!2mQw9#rL</code> instead of <code style="font-size:0.8rem;">letmein</code>, how long would this attack realistically take? What does that tell you about password policy?</div>
-        </div>
-        <div class="question-lines">
-          <div class="answer-line"></div>
-          <div class="answer-line"></div>
-          <div class="answer-line"></div>
+      <div class="notice notice-warn" style="margin-top:20px;">
+        <div class="notice-icon">⚠</div>
+        <div>
+          <strong>Stay In Bounds</strong>
+          <p>This lab runs on an isolated classroom network. Running these tools against any system outside this environment without written permission is illegal. Stay ethical. Stay curious.</p>
         </div>
       </div>
+    </section>
 
-    </div>
-  </section>
-
-  <!-- Footer warning -->
-  <div class="warning">
-    <strong>// Stay In Bounds</strong>
-    This lab runs on an isolated classroom network. Running these tools against any system outside this environment without written permission is illegal. Stay ethical. Stay curious.
-  </div>
-
+  </main>
 </div>
 
+<button class="print-btn" onclick="window.print()">Print / PDF</button>
+
 <script>
+  // Toggle day cards
+  function toggleDay(header) {
+    const card = header.closest('.day-card');
+    card.classList.toggle('open');
+  }
+
+  // Scroll progress bar
   window.addEventListener('scroll', () => {
-    const scrolled = window.scrollY;
-    const total = document.body.scrollHeight - window.innerHeight;
-    document.getElementById('progressBar').style.width = (scrolled / total * 100) + '%';
+    const doc = document.documentElement;
+    const pct = (doc.scrollTop / (doc.scrollHeight - doc.clientHeight)) * 100;
+    document.getElementById('progressBar').style.width = pct + '%';
   });
 
-  function toggleTheme() {
-    const html = document.documentElement;
-    html.dataset.theme = html.dataset.theme === 'dark' ? 'light' : 'dark';
-  }
+  // Scroll reveal
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+  }, { threshold: 0.08 });
+  document.querySelectorAll('.section').forEach(el => observer.observe(el));
+
+  // Active nav link
+  const sections = document.querySelectorAll('section[id]');
+  const navLinks = document.querySelectorAll('.nav-list a[href^="#"]');
+  const navObserver = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        navLinks.forEach(a => a.classList.remove('active'));
+        const link = document.querySelector(`.nav-list a[href="#${e.target.id}"]`);
+        if (link) link.classList.add('active');
+      }
+    });
+  }, { rootMargin: '-30% 0px -60% 0px' });
+  sections.forEach(s => navObserver.observe(s));
+
+  // Expand all day-cards on print
+  window.addEventListener('beforeprint', () => {
+    document.querySelectorAll('.day-card').forEach(c => c.classList.add('open'));
+  });
+
+  // Theme toggle (shared key with index.html)
+  const toggle = document.getElementById('themeToggle');
+  const stored = localStorage.getItem('indexTheme') || 'dark';
+  document.documentElement.setAttribute('data-theme', stored);
+  toggle.textContent = stored === 'dark' ? '☀' : '☽';
+  toggle.addEventListener('click', () => {
+    const next = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', next);
+    localStorage.setItem('indexTheme', next);
+    toggle.textContent = next === 'dark' ? '☀' : '☽';
+  });
 </script>
 
 </body>
