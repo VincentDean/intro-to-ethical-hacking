@@ -702,14 +702,17 @@
       <li><a href="#ethics"><span class="nav-day">00</span> Authorization</a></li>
       <div class="nav-divider"></div>
       <li><a href="#kali-creds"><span class="nav-day">01</span> Kali Live Credentials</a></li>
-      <li><a href="#command"><span class="nav-day">02</span> The Hydra Command</a></li>
+      <li><a href="#confirm"><span class="nav-day">02</span> Confirm the Target</a></li>
+      <li><a href="#command"><span class="nav-day">03</span> The Hydra Command</a></li>
       <div class="nav-divider"></div>
       <li><a href="#step1"><span class="nav-day">S1</span> Syntax Errors</a></li>
       <li><a href="#step2"><span class="nav-day">S2</span> Wordlist Not Found</a></li>
       <li><a href="#step3"><span class="nav-day">S3</span> Target Disabled</a></li>
       <li><a href="#step4"><span class="nav-day">S4</span> Slow Progress</a></li>
       <li><a href="#step5"><span class="nav-day">S5</span> Permission Denied</a></li>
+      <li><a href="#step6"><span class="nav-day">S6</span> Host Key Warning</a></li>
       <div class="nav-divider"></div>
+      <li><a href="#discuss"><span class="nav-day">DSC</span> Team Discussion</a></li>
       <li><a href="#reference"><span class="nav-day">REF</span> Field Reference</a></li>
       <li><a href="#selfcheck"><span class="nav-day">CHK</span> Before You Finish</a></li>
       <li><a href="#" onclick="window.print(); return false;"><span class="nav-day">PDF</span> Download PDF</a></li>
@@ -799,10 +802,25 @@
       </div>
     </section>
 
+    <!-- CONFIRM THE TARGET -->
+    <section class="section" id="confirm">
+      <div class="section-header">
+        <div class="section-icon">02</div>
+        <div>
+          <div class="section-title">Confirm the Target</div>
+          <div class="section-subtitle">Check SSH is actually running before you attack</div>
+        </div>
+      </div>
+
+      <p style="font-size:14px; line-height:1.7; color:var(--ink); margin-bottom:12px;">Before running Hydra, confirm port 22 (SSH) is open on the target. Replace <code>TARGET-IP</code> with the address your teacher gave you.</p>
+      <div class="terminal-block"><span class="prompt">$ </span>nmap -p 22 TARGET-IP</div>
+      <p style="font-size:14px; line-height:1.7; color:var(--ink);">You're looking for <code>22/tcp open ssh</code> in the output. If it shows closed or filtered, raise your hand before continuing — do not run Hydra yet.</p>
+    </section>
+
     <!-- THE COMMAND -->
     <section class="section" id="command">
       <div class="section-header">
-        <div class="section-icon">02</div>
+        <div class="section-icon">03</div>
         <div>
           <div class="section-title">The Correct Hydra Command</div>
           <div class="section-subtitle">Replace TARGET-IP with the address your teacher gave you</div>
@@ -841,7 +859,7 @@
           <div class="time-block">
             <ul class="step-list">
               <li>Check lowercase <code>-p</code> vs uppercase <code>-P</code> — they do different things and the wrong one breaks the command silently.</li>
-              <li>Confirm you replaced <code>TARGET-IP</code> with the actual address from your Nmap scan.</li>
+              <li>Confirm you replaced <code>TARGET-IP</code> with the actual address your teacher gave you.</li>
               <li>Verify the wordlist path with <code>ls ~/classroom_wordlist.txt</code>.</li>
             </ul>
           </div>
@@ -933,6 +951,46 @@
           </div>
         </div>
       </div>
+    </section>
+
+    <!-- STEP 6 -->
+    <section class="section" id="step6">
+      <div class="day-card open">
+        <div class="day-header" onclick="toggleDay(this)">
+          <div class="day-number">S6</div>
+          <div class="day-title-block">
+            <div class="day-title">"The authenticity of host ... can't be established"</div>
+            <div class="day-focus">Normal — the first time you connect to any new host</div>
+          </div>
+          <div class="day-toggle">▾</div>
+        </div>
+        <div class="day-body">
+          <div class="time-block">
+            <p style="font-size:14px; line-height:1.7; color:var(--ink);">This is SSH asking you to trust the target's key the first time you connect — it is not an error. Type <code>yes</code> and press Enter, then enter the cracked password when prompted.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TEAM DISCUSSION -->
+    <section class="section" id="discuss">
+      <div class="section-header">
+        <div class="section-icon">DSC</div>
+        <div>
+          <div class="section-title">Team Discussion</div>
+          <div class="section-subtitle">Answer as a team while Hydra runs</div>
+        </div>
+      </div>
+
+      <div class="notice notice-info" style="margin-bottom:16px;">
+        <div class="notice-icon">ℹ</div>
+        <div>
+          <strong>While you wait</strong>
+          <p>This attack runs over multiple class periods. Use the time to work through the discussion questions as a team — don't just watch the terminal.</p>
+        </div>
+      </div>
+
+      <a class="header-back" href="FORM-LINK" style="display:inline-block;">Open Discussion Form →</a>
     </section>
 
     <!-- FIELD REFERENCE -->
