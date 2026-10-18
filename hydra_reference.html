@@ -700,6 +700,7 @@
       <li><a href="#tldr"><span class="nav-day">TL</span> Executive TL;DR</a></li>
       <li><a href="#objectives"><span class="nav-day">OBJ</span> What This Page Is For</a></li>
       <li><a href="#ethics"><span class="nav-day">00</span> Authorization</a></li>
+      <li><a href="#schedule"><span class="nav-day">WK</span> This Week's Schedule</a></li>
       <div class="nav-divider"></div>
       <li><a href="#kali-creds"><span class="nav-day">01</span> Kali Live Credentials</a></li>
       <li><a href="#confirm"><span class="nav-day">02</span> Confirm the Target</a></li>
@@ -736,9 +737,9 @@
         <li class="obj-item"><strong>What is this?</strong> A reference sheet for this lab's SSH brute force attack, for when Hydra isn't behaving or while you wait for a crack to complete.</li>
         <li class="obj-item"><strong>What's the target?</strong> A real Ubuntu machine on the classroom network, not a simulation.</li>
         <li class="obj-item"><strong>Is it dangerous?</strong> No. Target IP is given to you by your teacher and belongs to this class only.</li>
-        <li class="obj-item"><strong>Why does this take days?</strong> The wordlist and throttle settings are deliberate — the crack is built to take multiple class periods, not minutes.</li>
-        <li class="obj-item"><strong>What do they need?</strong> Hydra, <code>classroom_wordlist.txt</code>, and the target IP.</li>
-        <li class="obj-item"><strong>What do they walk away with?</strong> The cracked <code>jrogers</code> password, SSH access, and answers to the discussion questions below.</li>
+        <li class="obj-item"><strong>Why do I need to crack it again tomorrow?</strong> Your teacher rotates the account's password before each class — sometimes the IP too. Each day is a fresh attack, not a continuation of yesterday's.</li>
+        <li class="obj-item"><strong>What do they need?</strong> Hydra, <code>classroom_wordlist.txt</code>, and today's target IP.</li>
+        <li class="obj-item"><strong>What do they walk away with?</strong> The cracked <code>jrogers</code> password for today, SSH access, and progress toward this week's discussion form.</li>
       </ul>
     </section>
 
@@ -753,7 +754,7 @@
       </div>
       <ul class="obj-list">
         <li class="obj-item">Fix a broken Hydra command without waiting for help</li>
-        <li class="obj-item">Understand why the attack takes multiple class periods, not minutes</li>
+        <li class="obj-item">Understand why today's crack is a fresh attempt, not a continuation of a previous day</li>
         <li class="obj-item">Know what to do if a Kali login dialog interrupts the lab</li>
         <li class="obj-item">Work through the discussion questions as a team while Hydra runs</li>
       </ul>
@@ -774,6 +775,34 @@
         <div>
           <strong>Authorized Lab Environment Only</strong>
           <p>All activities must be performed exclusively within the designated classroom lab network. Running these tools against any system without written permission is illegal.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- THIS WEEK'S SCHEDULE -->
+    <section class="section" id="schedule">
+      <div class="section-header">
+        <div class="section-icon">WK</div>
+        <div>
+          <div class="section-title">This Week's Schedule</div>
+          <div class="section-subtitle">The target resets before every class — read this so today's result makes sense</div>
+        </div>
+      </div>
+
+      <table class="data-table">
+        <thead><tr><th>Day</th><th>What changes</th><th>What stays the same</th></tr></thead>
+        <tbody>
+          <tr><td>Day 1</td><td>Starting password</td><td>IP address, username</td></tr>
+          <tr><td>Day 2</td><td>Password is rotated again</td><td>IP address, username</td></tr>
+          <tr><td>Day 3</td><td>Password <strong>and</strong> IP address both change</td><td>Username, wordlist</td></tr>
+        </tbody>
+      </table>
+
+      <div class="notice notice-info" style="margin-top:12px;">
+        <div class="notice-icon">ℹ</div>
+        <div>
+          <strong>Same wordlist, new password every day</strong>
+          <p>Your teacher changes the <code>jrogers</code> account's password before each class — and on Day 3, moves it to a new IP. You'll use the exact same <code>classroom_wordlist.txt</code> and Hydra command each day; only today's TARGET-IP and the correct password are different. Machines are not left running between classes, so there's no progress to pick back up — each day starts clean.</p>
         </div>
       </div>
     </section>
@@ -928,7 +957,7 @@
         </div>
         <div class="day-body">
           <div class="time-block">
-            <p style="font-size:14px; line-height:1.7; color:var(--ink);">This target's password is not at the top of the list, and at this lab's pace (one thread, 3 second wait) the crack is designed to take multiple class periods, not minutes. Let it keep running between classes if your setup allows, and pick up where it left off next period.</p>
+            <p style="font-size:14px; line-height:1.7; color:var(--ink);">This target's password is not at the top of the list, and at this lab's pace (one thread, 3 second wait) the crack is designed to take most of the class period, not minutes. Machines are reset at the end of each session, so if you don't finish today, you don't resume where you left off tomorrow — you'll get a newly rotated password to crack fresh.</p>
           </div>
         </div>
       </div>
